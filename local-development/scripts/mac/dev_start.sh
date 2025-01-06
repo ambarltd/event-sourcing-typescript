@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+cd ../../
+
 docker compose down
 docker compose up -d --build --force-recreate
 
@@ -24,7 +26,9 @@ echo "======================================================================="
 echo ""
 
 echo "======================================================================="
-echo "|| You can navigate to localhost:8080 to view your backend.          ||"
+echo "|| You can now run the dev_demo.sh script!                           ||"
+echo "======================================================================="
+echo "|| You can navigate to localhost:8080 to hit your backend.           ||"
 echo "======================================================================="
 echo "|| You can navigate to localhost:8081 to view your event store.      ||"
 echo "======================================================================="

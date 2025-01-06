@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+cd ../../
+
 echo "Going into root mode to delete some docker volumes"
 sudo echo "Root mode: OK"
 docker compose down
@@ -29,7 +31,9 @@ echo "======================================================================="
 echo ""
 
 echo "======================================================================="
-echo "|| You can navigate to localhost:8080 to view your backend.          ||"
+echo "|| You can now run the dev_demo.sh script!                           ||"
+echo "======================================================================="
+echo "|| You can navigate to localhost:8080 to hit your backend.           ||"
 echo "======================================================================="
 echo "|| You can navigate to localhost:8081 to view your event store.      ||"
 echo "======================================================================="
