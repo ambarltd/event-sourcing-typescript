@@ -51,10 +51,7 @@ cd event-sourcing-typescript/local-development/scripts/mac # if you're on mac
 ## Deployment
 
 To deploy this application to a production environment, you will simply need to build the code into a docker image,
-and deploy it to your cloud provider. We have provided infrastructure starter packs for various clouds in  
-[this repository](ttps://github.com/ambarltd/event-sourcing-cloud-starter-packs).
-
-```bash
+and deploy it to your cloud provider. We have provided infrastructure starter packs for various clouds in [this repository](https://github.com/ambarltd/event-sourcing-cloud-starter-packs).
 
 ## Support
 
