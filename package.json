@@ -1,5 +1,5 @@
 {
-  "name": "backend-credit-card-enrollment",
+  "name": "event-sourcing-typescript",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
