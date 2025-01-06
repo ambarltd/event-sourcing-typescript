@@ -49,9 +49,6 @@ function registerEnvironmentVariables() {
     const mongoDatabaseName = getEnvVar("MONGODB_PROJECTION_DATABASE_NAME");
     container.register("mongoConnectionString", { useValue: mongoConnectionString });
     container.register("mongoDatabaseName", { useValue: mongoDatabaseName });
-
-    const sessionExpirationSeconds = parseInt(getEnvVar("SESSION_TOKENS_EXPIRE_AFTER_SECONDS"));
-    container.register("sessionExpirationSeconds", { useValue: sessionExpirationSeconds });
 }
 
 function registerSingletons() {
