@@ -21,7 +21,7 @@ export class SubmitApplicationCommandController extends CommandController {
         super(postgresTransactionalEventStore, mongoTransactionalProjectionOperator);
         this.submitApplicationCommandHandler = submitApplicationCommandHandler;
         this.router = Router();
-        this.router.post('/request-enrollment', this.requestEnrollment.bind(this));
+        this.router.post('/submit-application', this.requestEnrollment.bind(this));
     }
 
     async requestEnrollment(req: Request, res: Response): Promise<void> {

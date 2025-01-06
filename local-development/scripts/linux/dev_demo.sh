@@ -73,7 +73,7 @@ submit_application() {
     echo -e "  - Professional Experience: $experience years"
     echo -e "  - Cooking Books Read: $books"
     echo -e "Expected outcome: $([ $experience == 0 ] && [ $books -gt 0 ] && echo "${GREEN}Should be APPROVED${NC}" || echo "${RED}Should be REJECTED${NC}")"
-    make_post_request "/api/v1/cooking-club/membership/command/request-enrollment" "$data"
+    make_post_request "/api/v1/cooking-club/membership/command/submit-application" "$data"
     echo
 }
 
