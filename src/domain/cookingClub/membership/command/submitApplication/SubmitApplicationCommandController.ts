@@ -6,6 +6,7 @@ import {inject, injectable} from "tsyringe";
 import { SubmitApplicationCommandHandler } from "./SubmitApplicationCommandHandler";
 import { SubmitApplicationHttpRequest } from "./SubmitApplicationHttpRequest";
 import { SubmitApplicationCommand } from "./SubmitApplicationCommand";
+import {typeSafeCoercion} from "../../../../../common/util/TypeSafeCoercion";
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {
@@ -31,7 +32,7 @@ export class SubmitApplicationCommandController extends CommandController {
             return;
         }
 
-        const requestBody: SubmitApplicationHttpRequest = req.body;
+        const requestBody = typeSafeCoercion<SubmitApplicationHttpRequest>(req.body);
         const command = new SubmitApplicationCommand(
             requestBody.firstName,
             requestBody.lastName,
