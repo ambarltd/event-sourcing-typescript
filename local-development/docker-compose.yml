@@ -20,7 +20,6 @@ services:
       MONGODB_PROJECTION_DATABASE_NAME: "projections"
       MONGODB_PROJECTION_DATABASE_USERNAME: "my_mongo_username"
       MONGODB_PROJECTION_DATABASE_PASSWORD: "my_mongo_password"
-      SESSION_TOKENS_EXPIRE_AFTER_SECONDS: 2592000
       AMBAR_HTTP_USERNAME: "username"
       AMBAR_HTTP_PASSWORD: "password"
     depends_on:

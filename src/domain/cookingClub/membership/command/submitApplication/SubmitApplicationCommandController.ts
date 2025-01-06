@@ -21,10 +21,10 @@ export class SubmitApplicationCommandController extends CommandController {
         super(postgresTransactionalEventStore, mongoTransactionalProjectionOperator);
         this.submitApplicationCommandHandler = submitApplicationCommandHandler;
         this.router = Router();
-        this.router.post('/submit-application', this.requestEnrollment.bind(this));
+        this.router.post('/submit-application', this.submitApplication.bind(this));
     }
 
-    async requestEnrollment(req: Request, res: Response): Promise<void> {
+    async submitApplication(req: Request, res: Response): Promise<void> {
         const sessionToken = req.header('X-With-Session-Token');
         if (!sessionToken) {
             res.status(400).send({ error: 'Session token is required' });

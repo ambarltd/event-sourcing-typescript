@@ -18,10 +18,10 @@ export class MembersByCuisineQueryController extends QueryController {
         super(mongoTransactionalProjectionOperator);
         this.membersByCuisineQueryHandler = membersByCuisineQueryHandler;
         this.router = Router();
-        this.router.post('/members-by-cuisine', this.listEnrollments.bind(this));
+        this.router.post('/members-by-cuisine', this.membersByCuisine.bind(this));
     }
 
-    async listEnrollments(req: Request, res: Response): Promise<void> {
+    async membersByCuisine(req: Request, res: Response): Promise<void> {
         const query = new MembersByCuisineQuery();
 
         const result = await this.processQuery(query, this.membersByCuisineQueryHandler);

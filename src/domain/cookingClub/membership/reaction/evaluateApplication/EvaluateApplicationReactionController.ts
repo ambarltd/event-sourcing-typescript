@@ -19,10 +19,10 @@ export class EvaluateApplicationReactionController extends ReactionController {
     ) {
         super(eventStore, mongoOperator, deserializer);
         this.router = Router();
-        this.router.post('/evaluate-application', this.reactWithReviewEnrollment.bind(this));
+        this.router.post('/evaluate-application', this.reactWithEvaluateApplication.bind(this));
     }
 
-    async reactWithReviewEnrollment(req: Request, res: Response): Promise<void> {
+    async reactWithEvaluateApplication(req: Request, res: Response): Promise<void> {
         const response = await this.processReactionHttpRequest(
             req.body as AmbarHttpRequest,
             this.evaluateApplicationReactionHandler,

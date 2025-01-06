@@ -26,6 +26,7 @@ export class MongoInitializer {
             await Promise.all([
                 this.ensureCollection(db, 'CookingClub_MembersByCuisine_MembershipApplication'),
                 this.ensureCollection(db, 'CookingClub_MembersByCuisine_Cuisine'),
+                this.ensureCollection(db, 'ProjectionIdempotency_ProjectedEvent'),
             ]);
             log.info('Collections created successfully');
 
@@ -66,6 +67,18 @@ export class MongoInitializer {
                     name: 'favoriteCuisine_asc'
                 }
             );
+
+            const projectionIdempotencyCollection = db.collection('ProjectionIdempotency_ProjectedEvent');
+
+            await projectionIdempotencyCollection.createIndex(
+                { eventId: 1, projectionName: 1 },
+                {
+                    unique: true,
+                    background: true,
+                    name: 'eventId_ProjectionName_unique'
+                }
+            );
+
             log.debug('Indexes created');
         } catch (error) {
             log.error('Error creating indexes:', error as Error);

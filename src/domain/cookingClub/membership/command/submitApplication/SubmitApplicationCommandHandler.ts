@@ -17,7 +17,7 @@ export class SubmitApplicationCommandHandler extends CommandHandler {
         const eventId = IdGenerator.generateRandomId();
         const aggregateId = IdGenerator.generateRandomId();
 
-        const enrollmentRequested = new ApplicationSubmitted(
+        const applicationSubmitted = new ApplicationSubmitted(
             eventId,
             aggregateId,
             1,
@@ -31,6 +31,6 @@ export class SubmitApplicationCommandHandler extends CommandHandler {
             command.numberOfCookingBooksRead
         );
 
-        await this.postgresTransactionalEventStore.saveEvent(enrollmentRequested);
+        await this.postgresTransactionalEventStore.saveEvent(applicationSubmitted);
     }
 }
