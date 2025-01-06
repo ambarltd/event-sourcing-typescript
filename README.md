@@ -10,7 +10,7 @@ with your own application.
 ## Getting Started
 
 To run this application you need Docker. Once you have Docker installed, please clone the code,
-navigate to the `local-developments/scripts` folder.
+navigate to the `local-development/scripts` folder.
 
 ```bash
 git clone git@github.com:ambarltd/event-sourcing-typescript.git
