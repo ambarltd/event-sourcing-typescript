@@ -1,0 +1,46 @@
+data_sources:
+
+  - id: postgres_source
+    description: Events Table in Postgres
+    type: postgres
+    host: 172.95.0.111
+    port: 5432
+    username: my_es_username
+    password: my_es_password
+    database: my_es_database
+    table: event_store
+    columns:
+      - id
+      - event_id
+      - event_name
+      - aggregate_id
+      - aggregate_version
+      - json_payload
+      - json_metadata
+      - recorded_on
+      - causation_id
+      - correlation_id
+    serialColumn: id
+    partitioningColumn: correlation_id
+
+##########################
+
+data_destinations:
+
+  - id: CookingClub_Membership_Projection_MembersByCuisine
+    description: CookingClub_Membership_Projection_MembersByCuisine
+    type: http-push
+    endpoint: http://172.95.0.11:8080/api/v1/cooking-club/membership/projection/members-by-cuisine
+    username: username
+    password: password
+    sources:
+      - postgres_source
+
+  - id: CookingClub_Membership_Reaction_ReviewApplication
+    description: CookingClub_Membership_Reaction_ReviewApplication
+    type: http-push
+    endpoint: http://172.95.0.11:8080/api/v1/cooking-club/membership/reaction/review-application
+    username: username
+    password: password
+    sources:
+      - postgres_source

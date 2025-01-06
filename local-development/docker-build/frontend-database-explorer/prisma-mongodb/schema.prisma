@@ -1,0 +1,18 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Enable MongoDB introspection
+generator dbml {
+  provider = "prisma-dbml-generator"
+  output   = "./dbml"
+}
+
+// This will make Prisma introspect your MongoDB database
+// This is automatically done by a script in the Dockerfile
