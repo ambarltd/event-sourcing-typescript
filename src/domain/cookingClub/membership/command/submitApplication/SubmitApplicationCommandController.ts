@@ -4,9 +4,8 @@ import { PostgresTransactionalEventStore } from '../../../../../common/eventStor
 import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
 import {inject, injectable} from "tsyringe";
 import { SubmitApplicationCommandHandler } from "./SubmitApplicationCommandHandler";
-import {SubmitApplicationHttpRequest, submitApplicationHttpRequestSchema} from "./SubmitApplicationHttpRequest";
 import { SubmitApplicationCommand } from "./SubmitApplicationCommand";
-import {parseWithValidation} from "../../../../../common/util/ParseWithValidation";
+import { z } from 'zod';
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {
@@ -32,10 +31,7 @@ export class SubmitApplicationCommandController extends CommandController {
             return;
         }
 
-        const requestBody: SubmitApplicationHttpRequest = parseWithValidation(
-            req.body,
-            submitApplicationHttpRequestSchema
-        );
+        const requestBody = requestSchema.parse(req.body);
         const command = new SubmitApplicationCommand(
             requestBody.firstName,
             requestBody.lastName,
@@ -48,3 +44,15 @@ export class SubmitApplicationCommandController extends CommandController {
         res.status(200).json({});
     }
 }
+
+const requestSchema = z.object({
+    firstName: z.string().min(1, "First name is required").max(100),
+    lastName: z.string().min(1, "Last name is required").max(100),
+    favoriteCuisine: z.string().min(1, "Favorite cuisine is required").max(100),
+    yearsOfProfessionalExperience: z.number()
+        .min(0, "Years of experience cannot be negative")
+        .max(100, "Please enter a valid number of years"),
+    numberOfCookingBooksRead: z.number()
+        .int("Must be a whole number")
+        .min(0, "Number of books cannot be negative")
+});
