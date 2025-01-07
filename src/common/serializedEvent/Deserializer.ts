@@ -3,7 +3,6 @@ import { SerializedEvent } from './SerializedEvent';
 import { injectable } from "tsyringe";
 import { ApplicationEvaluated } from "../../domain/cookingClub/membership/event/applicationEvaluated";
 import { ApplicationSubmitted } from "../../domain/cookingClub/membership/event/applicationSubmitted";
-import { typeSafeCoercion } from "../util/TypeSafeCoercion";
 import {MembershipStatus} from "../../domain/cookingClub/membership/aggregate/membership";
 
 @injectable()
@@ -14,7 +13,7 @@ export class Deserializer {
 
         switch (serializedEvent.event_name) {
             case 'CookingClub_Membership_ApplicationSubmitted':
-                return typeSafeCoercion<ApplicationSubmitted>(new ApplicationSubmitted(
+                return new ApplicationSubmitted(
                     this.parseString(serializedEvent.event_id),
                     this.parseString(serializedEvent.aggregate_id),
                     this.parseNumber(serializedEvent.aggregate_version),
@@ -26,18 +25,18 @@ export class Deserializer {
                     this.parseString(payload.favoriteCuisine),
                     this.parseNumber(payload.yearsOfProfessionalExperience),
                     this.parseNumber(payload.numberOfCookingBooksRead)
-                ));
+                );
 
             case 'CookingClub_Membership_ApplicationEvaluated':
-                return typeSafeCoercion<ApplicationEvaluated>(new ApplicationEvaluated(
+                return new ApplicationEvaluated(
                     this.parseString(serializedEvent.event_id),
                     this.parseString(serializedEvent.aggregate_id),
                     this.parseNumber(serializedEvent.aggregate_version),
                     this.parseString(serializedEvent.correlation_id),
                     this.parseString(serializedEvent.causation_id),
                     recordedOn,
-                    this.parseString(payload.evaluationOutcome) as MembershipStatus
-                ));
+                    this.parseEnum(payload.evaluationOutcome, MembershipStatus, 'evaluationOutcome')
+                );
 
             default:
                 throw new Error(`Unknown event type: ${serializedEvent.event_name}`);
@@ -68,5 +67,23 @@ export class Deserializer {
             throw new Error(`Expected number but got ${typeof value}`);
         }
         return parsed;
+    }
+
+    private parseEnum<T extends { [key: string]: string }>(
+        value: any,
+        enumType: T,
+        fieldName: string
+    ): T[keyof T] {
+        if (typeof value !== 'string') {
+            throw new Error(`Expected string for ${fieldName} but got ${typeof value}`);
+        }
+
+        if (!Object.values(enumType).includes(value)) {
+            throw new Error(
+                `Invalid ${fieldName}: ${value}. Expected one of: ${Object.values(enumType).join(', ')}`
+            );
+        }
+
+        return value as T[keyof T];
     }
 }

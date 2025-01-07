@@ -4,9 +4,9 @@ import { PostgresTransactionalEventStore } from '../../../../../common/eventStor
 import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
 import {inject, injectable} from "tsyringe";
 import { SubmitApplicationCommandHandler } from "./SubmitApplicationCommandHandler";
-import { SubmitApplicationHttpRequest } from "./SubmitApplicationHttpRequest";
+import {SubmitApplicationHttpRequest, submitApplicationHttpRequestSchema} from "./SubmitApplicationHttpRequest";
 import { SubmitApplicationCommand } from "./SubmitApplicationCommand";
-import {typeSafeCoercion} from "../../../../../common/util/TypeSafeCoercion";
+import {parseWithValidation} from "../../../../../common/util/ParseWithValidation";
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {
@@ -32,7 +32,10 @@ export class SubmitApplicationCommandController extends CommandController {
             return;
         }
 
-        const requestBody = typeSafeCoercion<SubmitApplicationHttpRequest>(req.body);
+        const requestBody: SubmitApplicationHttpRequest = parseWithValidation(
+            req.body,
+            submitApplicationHttpRequestSchema
+        );
         const command = new SubmitApplicationCommand(
             requestBody.firstName,
             requestBody.lastName,
