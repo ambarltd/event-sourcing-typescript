@@ -1,10 +1,10 @@
 import {ProjectionHandler} from '../../../../../common/projection/ProjectionHandler';
 import {inject, injectable} from "tsyringe";
 import {CuisineRepository} from "./CuisineRepository";
-import {ApplicationSubmitted} from "../../event/applicationSubmitted";
+import {ApplicationSubmitted} from "../../event/ApplicationSubmitted";
 import {MembershipApplicationRepository} from "./MembershipApplicationRepository";
 import {MembershipApplication} from "./MembershipApplication";
-import {ApplicationEvaluated} from "../../event/applicationEvaluated";
+import {ApplicationEvaluated} from "../../event/ApplicationEvaluated";
 import {MembershipStatus} from "../../aggregate/membership";
 import {Cuisine} from "./Cuisine";
 

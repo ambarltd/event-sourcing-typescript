@@ -3,9 +3,9 @@ import {PostgresTransactionalEventStore} from '../../../../../common/eventStore/
 import {IdGenerator} from '../../../../../common/util/IdGenerator';
 import {Event} from "../../../../../common/event/Event";
 import {inject, injectable} from "tsyringe";
-import {ApplicationSubmitted} from "../../event/applicationSubmitted";
+import {ApplicationSubmitted} from "../../event/ApplicationSubmitted";
 import {Membership, MembershipStatus} from "../../aggregate/membership";
-import {ApplicationEvaluated} from "../../event/applicationEvaluated";
+import {ApplicationEvaluated} from "../../event/ApplicationEvaluated";
 
 @injectable()
 export class EvaluateApplicationReactionHandler extends ReactionHandler {

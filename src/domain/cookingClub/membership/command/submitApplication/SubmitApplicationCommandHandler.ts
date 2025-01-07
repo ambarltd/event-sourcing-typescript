@@ -2,7 +2,7 @@ import { CommandHandler } from '../../../../../common/command/CommandHandler';
 import { PostgresTransactionalEventStore } from '../../../../../common/eventStore/PostgresTransactionalEventStore';
 import { IdGenerator } from '../../../../../common/util/IdGenerator';
 import {inject, injectable} from "tsyringe";
-import { ApplicationSubmitted } from "../../event/applicationSubmitted";
+import { ApplicationSubmitted } from "../../event/ApplicationSubmitted";
 import { SubmitApplicationCommand } from "./SubmitApplicationCommand";
 
 @injectable()

@@ -1,8 +1,8 @@
 import { Event } from '../event/Event';
 import { SerializedEvent } from './SerializedEvent';
 import { injectable } from "tsyringe";
-import { ApplicationEvaluated } from "../../domain/cookingClub/membership/event/applicationEvaluated";
-import { ApplicationSubmitted } from "../../domain/cookingClub/membership/event/applicationSubmitted";
+import { ApplicationEvaluated } from "../../domain/cookingClub/membership/event/ApplicationEvaluated";
+import { ApplicationSubmitted } from "../../domain/cookingClub/membership/event/ApplicationSubmitted";
 import {MembershipStatus} from "../../domain/cookingClub/membership/aggregate/membership";
 
 @injectable()
