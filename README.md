@@ -9,15 +9,41 @@ with your own application.
 
 ## Getting Started
 
-To run this application you need Docker. Once you have Docker installed, please clone the code,
-navigate to the `local-development/scripts` folder.
+To run this application you need to install Docker or Podman as a containerization tool. 
+Once you have Docker or Podman installed, please open your Terminal (linux or mac) or 
+Powershell (windows), clone this repository, and navigate to the scripts folder for 
+your operating system and containerization tool. 
 
-```bash
+```
 git clone git@github.com:ambarltd/event-sourcing-typescript.git
-cd event-sourcing-typescript/local-development/scripts/linux # if you're on linux
-cd event-sourcing-typescript/local-development/scripts/mac # if you're on mac
-./dev_start.sh # start docker containers
-./dev_demo.sh # run demo
+
+cd event-sourcing-typescript/local-development/docker-scripts/linux # linux + docker
+cd event-sourcing-typescript/local-development/docker-scripts/mac # mac + docker
+cd event-sourcing-typescript\local-development\docker-scripts\windows  # windows + docker
+
+cd event-sourcing-typescript/local-development/podman-scripts/linux # linux + podman
+cd event-sourcing-typescript/local-development/podman-scripts/mac # mac + podman
+cd event-sourcing-typescript\local-development\podman-scripts\windows  # windows + podman
+
+# If you're using docker, make sure docker is up and running.
+# If you're using podman, make sure podman is up and running. Also make sure there's an active podman machine.
+
+# If you are using podman on windows, modify your podman machine to support linux directory permissions metadata translation.
+wsl -u root -d podman-machine-default # or whatever your podman machine is called
+echo [automount] >> wsl.conf
+echo 'options = "metadata"' >> wsl.conf
+```
+
+Then start the application and run the demo.
+
+```
+# linux or mac
+./dev_start.sh 
+./dev_demo.sh
+
+# windows
+.\dev_start.ps1
+.\dev_demo.ps1
 ```
 
 You can then open your browser to:
@@ -43,12 +69,16 @@ When developing your application for the fist time, we recommend you keep the Co
 Whenever you build a new feature, you might want to restart the application, or even delete the event store and projection
 store. We have provided scripts to help you with that.
 
-```bash
-cd event-sourcing-typescript/local-development/scripts/linux # if you're on linux
-cd event-sourcing-typescript/local-development/scripts/mac # if you're on mac
+```
+# linux or mac
 ./dev_start.sh # starts / restarts the application.
 ./dev_start_with_data_deletion.sh # use this if you want to delete your existing event store, and projection db, and restart fresh.
 ./dev_shutdown.sh # stops the application
+
+# windows
+.\dev_start.ps1 # starts / restarts the application.
+.\dev_start_with_data_deletion.ps1 # use this if you want to delete your existing event store, and projection db, and restart fresh.
+.\dev_shutdown.ps1 # stops the application
 ```
 
 ## Deployment

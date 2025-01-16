@@ -30,10 +30,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget --spider --server-response --timeout=5 http://localhost:8080/docker_healthcheck 2>&1 | grep 'HTTP/1.1 200'"]
       timeout: 2s
-      interval: 60s
+      interval: 15s
       retries: 10
-      start_period: 40s
-      start_interval: 5s
+      start_period: 60s
     expose:
       - 8080
     ports:
@@ -43,7 +42,7 @@ services:
         ipv4_address: 172.95.0.11
 
   event-sourcing-event-store:
-    image: postgres:16.4
+    image: docker.io/postgres:16.4
     container_name: event-sourcing-event-store
     restart: always
     volumes:
@@ -56,10 +55,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "PGPASSWORD=my_es_password psql -U my_es_username -d my_es_database -h localhost -c 'SELECT 1;'" ]
       timeout: 2s
-      interval: 60s
+      interval: 5s
       retries: 10
       start_period: 20s
-      start_interval: 5s
     expose:
       - 5432
     networks:
@@ -67,7 +65,7 @@ services:
         ipv4_address: 172.95.0.111
 
   event-sourcing-projection-store:
-    image: mongo:7.0.14
+    image: docker.io/mongo:7.0.14
     container_name: event-sourcing-projection-store
     restart: always
     environment:
@@ -81,10 +79,9 @@ services:
         'mongosh --username my_mongo_username --password my_mongo_password --authenticationDatabase admin --host 172.95.0.112 --eval "try { rs.status() } catch (err) { rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"172.95.0.112:27017\"}]})}" | grep "votingMembersCount: 1"'
       ]
       timeout: 2s
-      interval: 60s
+      interval: 5s
       retries: 10
       start_period: 70s
-      start_interval: 3s
     entrypoint:
       - "sh"
       - "-c"
@@ -101,7 +98,7 @@ services:
           mongod --replSet rs0 --bind_ip 172.95.0.112 --keyFile /data/configdb/mongo.key --auth
         )"
     volumes:
-      - ./docker-build/mongo/mongo.key:/keyfile/mongo.key:ro
+      - ./build-files/mongo/mongo.key:/keyfile/mongo.key:ro
       - ./data/event-sourcing-projection-store/db-data:/data/db
       - ./data/event-sourcing-projection-store/db-config:/data/configdb
     expose:
@@ -111,16 +108,15 @@ services:
         ipv4_address: 172.95.0.112
 
   event-sourcing-event-bus:
-    image: ambarltd/emulator:v1.8
+    image: docker.io/ambarltd/emulator:v1.8
     container_name: event-sourcing-event-bus
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "ls", "/root/.local/share/ambar-emulator/state.json" ]
       timeout: 5s
-      interval: 60s
+      interval: 5s
       retries: 10
       start_period: 20s
-      start_interval: 5s
     volumes:
       - ./ambar-config.yaml:/opt/emulator/config/config.yaml
       - ./data/event-sourcing-event-bus:/root/.local/share/ambar-emulator
@@ -136,7 +132,7 @@ services:
   event-sourcing-event-explorer:
     container_name: event-sourcing-event-explorer
     build:
-      context: docker-build/frontend-database-explorer
+      context: build-files//frontend-database-explorer
       args:
         - DB_TYPE=postgres
         - STUDIO_PORT=5555
@@ -148,10 +144,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "wget --spider --server-response --timeout=5 http://localhost:8081 2>&1 | grep '200 OK'" ]
       timeout: 2s
-      interval: 60s
+      interval: 5s
       retries: 10
       start_period: 20s
-      start_interval: 3s
     depends_on:
       event-sourcing-event-store:
         condition: service_healthy
@@ -164,7 +159,7 @@ services:
   event-sourcing-projection-explorer:
     container_name: event-sourcing-projection-explorer
     build:
-      context: docker-build/frontend-database-explorer
+      context: build-files//frontend-database-explorer
       args:
         - DB_TYPE=mongo
         - STUDIO_PORT=5556
@@ -179,10 +174,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "wget --spider --server-response --timeout=5 http://localhost:8082 2>&1 | grep '200 OK'" ]
       timeout: 2s
-      interval: 60s
+      interval: 5s
       retries: 10
       start_period: 20s
-      start_interval: 3s
     networks:
       event-sourcing:
         ipv4_address: 172.95.0.212

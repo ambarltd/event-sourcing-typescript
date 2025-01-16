@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -124,16 +125,14 @@ echo "but also no theoretical knowledge (0 books read)."
 submit_application "$(get_random_name "${FIRST_NAMES[@]}")" "$(get_random_name "${LAST_NAMES[@]}")" "Mexican" 0 0
 show_progress 1
 
-# Wait for async processing
-echo -e "\n${BLUE}Waiting for projections...${NC}"
-echo "Allowing time for the system to process applications and update projections..."
-sleep 1
-
-# Get final results
-echo -e "\n${YELLOW}Final Results:${NC}"
-echo "Displaying current members grouped by their preferred cuisine."
+# Final Test: Display current members
+echo -e "\n${YELLOW}Outcome:${NC}"
+echo "Current members grouped by their preferred cuisine."
 echo "Only approved applications should appear in these results."
+sleep 1
 get_members
+echo " "
+echo " "
 
 echo -e "\n${GREEN}Demo Completed${NC}"
 echo "=================================================="

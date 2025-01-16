@@ -1,4 +1,4 @@
-FROM node:20.11.1
+FROM docker.io/node:20.11.1
 
 # Define build arguments
 ARG DB_TYPE=postgres
