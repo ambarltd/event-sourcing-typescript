@@ -50,8 +50,16 @@ app.use('/api/v1/cooking-club/membership/reaction', AmbarAuthMiddleware, (req, r
     const controller = req.container.resolve(EvaluateApplicationReactionController);
     return controller.router(req, res, next);
 });
+
 app.get('/docker_healthcheck', (req, res) => res.send('OK'));
 app.get('/', (req, res) => res.send('OK'));
+
+
+// refund form - workshop
+app.use('api/v1/refund/refund-form/command', (req, res, next) => {
+    const controller = req.container.resolve(SubmitApplicationCommandController);
+    return controller.router(req, res, next);
+});
 
 
 // Error handling middleware

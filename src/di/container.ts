@@ -28,6 +28,12 @@ import {
     MembershipApplicationRepository
 } from "../domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository";
 import {CuisineRepository} from "../domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository";
+import {
+    SubmitRefundFormCommandController
+} from "../domain/refund/refund-form/command/submitRefundForm/SubmitRefundFormCommandController";
+import {
+    SubmitRefundFormCommandHandler
+} from "../domain/refund/refund-form/command/submitRefundForm/SubmitRefundFormCommandHandler";
 
 function registerEnvironmentVariables() {
     const postgresConnectionString =
@@ -86,6 +92,10 @@ function registerScopedServices() {
     // domain/cookingClub/reaction/evaluateApplication
     registerScoped(EvaluateApplicationReactionController);
     registerScoped(EvaluateApplicationReactionHandler);
+
+    // domain/refund/refund-form/command
+    registerScoped(SubmitRefundFormCommandHandler);
+    registerScoped(SubmitRefundFormCommandController);
 }
 
 export function configureDependencies() {
