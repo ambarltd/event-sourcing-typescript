@@ -22,6 +22,9 @@ import {
 import {
     SubmitRefundFormCommandController
 } from "./domain/refund/refund-form/command/submitRefundForm/SubmitRefundFormCommandController";
+import {
+    RefundFormSubmissionCountProjectionController
+} from "./domain/refund/refund-form/projection/refundFormSubmissionCount/RefundFormSubmissionCountProjectionController";
 
 
 // Configure dependency injection
@@ -39,6 +42,10 @@ app.use(scopedContainer);
 // refund form - workshop
 app.use('/api/v1/refund/refund-form/command', (req, res, next) => {
     const controller = req.container.resolve(SubmitRefundFormCommandController);
+    return controller.router(req, res, next);
+});
+app.use('/api/v1/refund/refund-form/projection', AmbarAuthMiddleware, (req, res, next) => {
+    const controller = req.container.resolve(RefundFormSubmissionCountProjectionController);
     return controller.router(req, res, next);
 });
 

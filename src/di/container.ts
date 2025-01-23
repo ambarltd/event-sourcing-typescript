@@ -34,6 +34,12 @@ import {
 import {
     SubmitRefundFormCommandHandler
 } from "../domain/refund/refund-form/command/submitRefundForm/SubmitRefundFormCommandHandler";
+import {
+    RefundFormSubmissionCountProjectionHandler
+} from "../domain/refund/refund-form/projection/refundFormSubmissionCount/RefundFormSubmissionCountProjectionHandler";
+import {
+    RefundFormSubmissionCountProjectionController
+} from "../domain/refund/refund-form/projection/refundFormSubmissionCount/RefundFormSubmissionCountProjectionController";
 
 function registerEnvironmentVariables() {
     const postgresConnectionString =
@@ -96,6 +102,10 @@ function registerScopedServices() {
     // domain/refund/refund-form/command
     registerScoped(SubmitRefundFormCommandHandler);
     registerScoped(SubmitRefundFormCommandController);
+
+    // domain/refund/refund-form/projection
+    registerScoped(RefundFormSubmissionCountProjectionHandler);
+    registerScoped(RefundFormSubmissionCountProjectionController);
 }
 
 export function configureDependencies() {
