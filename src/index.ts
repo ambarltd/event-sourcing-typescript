@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(scopedContainer);
 
 // refund form - workshop
-app.use('api/v1/refund/refund-form/command', (req, res, next) => {
+app.use('/api/v1/refund/refund-form/command', (req, res, next) => {
     const controller = req.container.resolve(SubmitRefundFormCommandController);
     return controller.router(req, res, next);
 });
