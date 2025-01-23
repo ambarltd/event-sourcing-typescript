@@ -6,7 +6,7 @@ import { RefundFormSubmitted } from "../../event/RefundFormSubmitted";
 import { SubmitRefundFormCommand } from "./SubmitRefundFormCommand";
 
 @injectable()
-export class SubmitApplicationCommandHandler extends CommandHandler {
+export class SubmitRefundFormCommandHandler extends CommandHandler {
     constructor(
         @inject(PostgresTransactionalEventStore) postgresTransactionalEventStore: PostgresTransactionalEventStore,
     ) {
