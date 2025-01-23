@@ -4,6 +4,7 @@ import { injectable } from "tsyringe";
 import { ApplicationEvaluated } from "../../domain/cookingClub/membership/event/ApplicationEvaluated";
 import { ApplicationSubmitted } from "../../domain/cookingClub/membership/event/ApplicationSubmitted";
 import {MembershipStatus} from "../../domain/cookingClub/membership/aggregate/membership";
+import {RefundFormSubmitted} from "../../domain/refund/refund-form/event/RefundFormSubmitted";
 
 @injectable()
 export class Deserializer {
@@ -36,6 +37,19 @@ export class Deserializer {
                     this.parseString(serializedEvent.causation_id),
                     recordedOn,
                     this.parseEnum(payload.evaluationOutcome, MembershipStatus, 'evaluationOutcome')
+                );
+
+            case 'Refund_RefundForm_RefundFormSubmitted':
+                return new RefundFormSubmitted(
+                    this.parseString(serializedEvent.event_id),
+                    this.parseString(serializedEvent.aggregate_id),
+                    this.parseNumber(serializedEvent.aggregate_version),
+                    this.parseString(serializedEvent.correlation_id),
+                    this.parseString(serializedEvent.causation_id),
+                    recordedOn,
+                    this.parseString(payload.orderId),
+                    this.parseString(payload.email),
+                    this.parseString(payload.comment)
                 );
 
             default:

@@ -3,6 +3,7 @@ import { SerializedEvent } from './SerializedEvent';
 import {injectable} from "tsyringe";
 import {ApplicationSubmitted} from "../../domain/cookingClub/membership/event/ApplicationSubmitted";
 import {ApplicationEvaluated} from "../../domain/cookingClub/membership/event/ApplicationEvaluated";
+import {RefundFormSubmitted} from "../../domain/refund/refund-form/event/RefundFormSubmitted";
 
 @injectable()
 export class Serializer {
@@ -27,6 +28,9 @@ export class Serializer {
         if (event instanceof ApplicationEvaluated) {
             return 'CookingClub_Membership_ApplicationEvaluated';
         }
+        if (event instanceof RefundFormSubmitted) {
+            return 'Refund_RefundForm_RefundFormSubmitted';
+        }
         throw new Error(`Unknown event type: ${event.constructor.name}`);
     }
 
@@ -41,6 +45,10 @@ export class Serializer {
             payload.numberOfCookingBooksRead = event.numberOfCookingBooksRead;
         } else if (event instanceof ApplicationEvaluated) {
             payload.evaluationOutcome = event.evaluationOutcome;
+        } else if (event instanceof RefundFormSubmitted) {
+            payload.orderId = event.orderId;
+            payload.email = event.email;
+            payload.comment = event.comment;
         }
 
         return JSON.stringify(payload);
