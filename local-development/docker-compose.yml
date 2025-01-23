@@ -3,7 +3,11 @@ services:
     container_name: event-sourcing-backend
     build:
       context: ./../
+      target: development
     restart: always
+    volumes:
+      - ./../:/app
+      - /app/node_modules
     environment:
       EVENT_STORE_HOST: "172.95.0.111"
       EVENT_STORE_PORT: 5432
