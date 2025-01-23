@@ -8,29 +8,23 @@ import { SubmitRefundFormCommand } from "./SubmitRefundFormCommand";
 import { z } from 'zod';
 
 @injectable()
-export class SubmitApplicationCommandController extends CommandController {
+export class SubmitRefundFormCommandController extends CommandController {
     public readonly router: Router;
 
-    private readonly submitApplicationCommandHandler: SubmitRefundFormCommandHandler;
+    private readonly submitRefundFormCommandHandler: SubmitRefundFormCommandHandler;
 
     constructor(
         @inject(PostgresTransactionalEventStore) postgresTransactionalEventStore: PostgresTransactionalEventStore,
         @inject(MongoTransactionalProjectionOperator) mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
-        @inject(SubmitRefundFormCommandHandler) submitApplicationCommandHandler: SubmitRefundFormCommandHandler
+        @inject(SubmitRefundFormCommandHandler) submitRefundFormCommandHandler: SubmitRefundFormCommandHandler
     ) {
         super(postgresTransactionalEventStore, mongoTransactionalProjectionOperator);
-        this.submitApplicationCommandHandler = submitApplicationCommandHandler;
+        this.submitRefundFormCommandHandler = submitRefundFormCommandHandler;
         this.router = Router();
-        this.router.post('/submit-application', this.submitApplication.bind(this));
+        this.router.post('/submit-refund-form', this.submitRefundForm.bind(this));
     }
 
-    async submitApplication(req: Request, res: Response): Promise<void> {
-        const sessionToken = req.header('X-With-Session-Token');
-        if (!sessionToken) {
-            res.status(400).send({ error: 'Session token is required' });
-            return;
-        }
-
+    async submitRefundForm(req: Request, res: Response): Promise<void> {
         const requestBody = requestSchema.parse(req.body);
         const command = new SubmitRefundFormCommand(
             requestBody.orderId,
@@ -38,7 +32,7 @@ export class SubmitApplicationCommandController extends CommandController {
             requestBody.comments,
         );
 
-        await this.processCommand(command, this.submitApplicationCommandHandler);
+        await this.processCommand(command, this.submitRefundFormCommandHandler);
         res.status(200).json({});
     }
 }
