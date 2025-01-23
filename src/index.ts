@@ -19,6 +19,9 @@ import {
 import {
     MembersByCuisineProjectionController
 } from "./domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController";
+import {
+    SubmitRefundFormCommandController
+} from "./domain/refund/refund-form/command/submitRefundForm/SubmitRefundFormCommandController";
 
 
 // Configure dependency injection
@@ -32,6 +35,12 @@ app.use(express.json());
 
 // Add scoped container middleware
 app.use(scopedContainer);
+
+// refund form - workshop
+app.use('api/v1/refund/refund-form/command', (req, res, next) => {
+    const controller = req.container.resolve(SubmitRefundFormCommandController);
+    return controller.router(req, res, next);
+});
 
 // Add routes
 app.use('/api/v1/cooking-club/membership/command', (req, res, next) => {
@@ -55,15 +64,9 @@ app.get('/docker_healthcheck', (req, res) => res.send('OK'));
 app.get('/', (req, res) => res.send('OK'));
 
 
-// refund form - workshop
-app.use('api/v1/refund/refund-form/command', (req, res, next) => {
-    const controller = req.container.resolve(SubmitApplicationCommandController);
-    return controller.router(req, res, next);
-});
-
-
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    log.error("Unhandled error");
     log.error('Unhandled error:', err);
     res.status(500).json({
         error: err.message,
