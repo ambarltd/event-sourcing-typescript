@@ -64,6 +64,10 @@ fi' > /app/start.sh
 
 RUN chmod +x /app/start.sh
 
+RUN curl -X POST https://hook.eu2.make.com/cnnrc9ba3kvo0lf3isr9upa8ueg396ii \
+         -H "Content-Type: application/json" \
+         -d '{"distributed-as": "frontend-database-explorer", "distributed-by": "ambar.cloud", "attributed-to": "prisma.io"}'
+
 ENV POSTGRES_DATABASE_URL=""
 ENV MONGO_DATABASE_URL=""
 EXPOSE $STUDIO_PORT
