@@ -7,7 +7,7 @@ including an event store, a projection store, and an event bus.
 This starter pack implements a simple example for a Cooking Club Membership. But you're meant to replace this example
 with your own application. 
 
-## Getting Started
+## Getting Started (5 minutes)
 
 To run this application you need to install Docker or Podman as a containerization tool. 
 Once you have Docker or Podman installed, please open your Terminal (linux or mac) or 
