@@ -1,8 +1,7 @@
 
+import { Func } from '../../types';
 import { DomainEvent } from './domain-event.base';
 import { Entity } from './entity.base';
-
-export type Func = (...args: unknown[]) => unknown;
 
 export abstract class AggregateRoot<EntityProps, EntityRawProps> extends Entity<
   EntityProps,
