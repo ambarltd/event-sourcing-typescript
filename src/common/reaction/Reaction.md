@@ -21,4 +21,3 @@ The Ambar configuration is located in the `local-development/ambar-config.yml`.
 ### In ambar-config.yml, why are events ordered per correlation id, instead of aggregate id?
 
 Ordering events per correlation id retains the order of events per aggregate, but also retains the order of events across related aggregates. E.g., if you have an aggregate for November, and an aggregate for December, and the aggregate for December directly follows the aggregate for November (using the same correlation id), Ambar will give you the events in order per aggregate, but will also retain order across aggregates (Ambar will send November first, and December second, so you can react in order).
-

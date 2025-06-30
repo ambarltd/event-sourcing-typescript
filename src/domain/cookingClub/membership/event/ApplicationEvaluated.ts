@@ -1,26 +1,27 @@
 import { TransformationEvent } from '../../../../common/event/TransformationEvent';
-import {Membership, MembershipStatus} from "../aggregate/membership";
+import { EventProps } from '../../../../common/event';
+import { EventType } from '../../../../common/serialization';
+import { Membership, MembershipStatus } from '../aggregate/membership';
 
+export type ApplicationEvaluatedProps = EventProps<{
+  evaluationOutcome: MembershipStatus;
+}>;
+
+@EventType('CookingClub_Membership_ApplicationEvaluated')
 export class ApplicationEvaluated extends TransformationEvent<Membership> {
-    constructor(
-        eventId: string,
-        aggregateId: string,
-        aggregateVersion: number,
-        correlationId: string,
-        causationId: string,
-        recordedOn: Date,
-        public readonly evaluationOutcome: MembershipStatus,
-    ) {
-        super(eventId, aggregateId, aggregateVersion, correlationId, causationId, recordedOn);
-    }
+  public readonly evaluationOutcome!: MembershipStatus;
 
-    transformAggregate(aggregate: Membership): Membership {
-        return new Membership(
-            this.aggregateId,
-            this.aggregateVersion,
-            aggregate.firstName,
-            aggregate.lastName,
-            this.evaluationOutcome,
-        );
-    }
+  constructor(props: ApplicationEvaluatedProps) {
+    super(props);
+  }
+
+  transformAggregate(aggregate: Membership): Membership {
+    return new Membership(
+      this.aggregateId,
+      this.aggregateVersion,
+      aggregate.firstName,
+      aggregate.lastName,
+      this.evaluationOutcome,
+    );
+  }
 }

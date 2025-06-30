@@ -1,6 +1,6 @@
 # Event Store
 
-The Event Store is responsible for saving new Events and fetching existing Events to hydrate / reconstitute Aggregates. 
+The Event Store is responsible for saving new Events and fetching existing Events to hydrate / reconstitute Aggregates.
 
 The Event Store saves Events, but it does not save them directly, it first converts them to a SerializedEvent. The SerializedEvent is a representation of the Event that can be stored in a database.
 

@@ -2,7 +2,7 @@
 
 A projection is a read model that is derived from the events in the system. Projections are used to query the current state of the system. For example, in an ecommerce website users will need to know which items are available, before they add an item to their cart. This allows the read side of a system to often be decoupled from the write side.
 
-When an Event is emitted (e.g., OrderPlaced, ProductUpdated), a projection listens to the stream of events and filters the relevant events it needs to process. For example, a projection that builds a list of user orders would only listen for OrderPlaced and OrderCanceled events. It updates the read model by applying the Event data, ensuring the model reflects the latest state. 
+When an Event is emitted (e.g., OrderPlaced, ProductUpdated), a projection listens to the stream of events and filters the relevant events it needs to process. For example, a projection that builds a list of user orders would only listen for OrderPlaced and OrderCanceled events. It updates the read model by applying the Event data, ensuring the model reflects the latest state.
 
 Projections continuously update the projection database as new events arrive, keeping the read model in sync with the most recent state changes. This enables high-performance queries and ensures that the read side remains highly available and scalable.
 
@@ -22,7 +22,7 @@ Ambar takes care of this out of the box. All you have to take care of is making 
 
 ### Where can I find the Ambar configuration?
 
-The Ambar configuration is located in the `local-development/ambar-config.yml`. 
+The Ambar configuration is located in the `local-development/ambar-config.yml`.
 
 ### In ambar-config.yml, why are events ordered per correlation id, instead of aggregate id?
 

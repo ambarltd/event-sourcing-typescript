@@ -2,9 +2,9 @@ import { MongoTransactionalProjectionOperator } from '../projection/MongoTransac
 import { Query } from './Query';
 
 export abstract class QueryHandler {
-    constructor(
-        protected readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator
-    ) {}
+  constructor(
+    protected readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
+  ) {}
 
-    abstract handleQuery(query: Query): Promise<unknown>;
+  abstract handleQuery(query: Query): Promise<unknown>;
 }

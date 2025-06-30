@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Package files
+package-lock.json
+*.tgz
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+
+# Database files
+*.db
+*.sqlite
+
+# Generated files
+coverage/
+
+# Docker files
+Dockerfile
+.dockerignore 
