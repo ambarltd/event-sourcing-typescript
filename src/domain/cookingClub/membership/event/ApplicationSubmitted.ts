@@ -1,30 +1,41 @@
 import { CreationEvent } from '../../../../common/event/CreationEvent';
-import {Membership, MembershipStatus} from "../aggregate/membership";
+import { BaseEventOptions } from '../../../../common/event/EventOptions';
+import { EventType } from '../../../../common/serialization';
+import { Membership, MembershipStatus } from '../aggregate/membership';
 
+export interface ApplicationSubmittedOptions extends BaseEventOptions {
+  firstName: string;
+  lastName: string;
+  favoriteCuisine: string;
+  yearsOfProfessionalExperience: number;
+  numberOfCookingBooksRead: number;
+}
+
+@EventType('CookingClub_Membership_ApplicationSubmitted')
 export class ApplicationSubmitted extends CreationEvent<Membership> {
-    constructor(
-        eventId: string,
-        aggregateId: string,
-        aggregateVersion: number,
-        correlationId: string,
-        causationId: string,
-        recordedOn: Date,
-        public readonly firstName: string,
-        public readonly lastName: string,
-        public readonly favoriteCuisine: string,
-        public readonly yearsOfProfessionalExperience: number,
-        public readonly numberOfCookingBooksRead: number,
-    ) {
-        super(eventId, aggregateId, aggregateVersion, correlationId, causationId, recordedOn);
-    }
+  public readonly firstName: string;
+  public readonly lastName: string;
+  public readonly favoriteCuisine: string;
+  public readonly yearsOfProfessionalExperience: number;
+  public readonly numberOfCookingBooksRead: number;
 
-    createAggregate(): Membership {
-        return new Membership(
-            this.aggregateId,
-            this.aggregateVersion,
-            this.firstName,
-            this.lastName,
-            MembershipStatus.Requested
-        );
-    }
+  constructor(options: ApplicationSubmittedOptions) {
+    super(options);
+
+    this.firstName = options.firstName;
+    this.lastName = options.lastName;
+    this.favoriteCuisine = options.favoriteCuisine;
+    this.yearsOfProfessionalExperience = options.yearsOfProfessionalExperience;
+    this.numberOfCookingBooksRead = options.numberOfCookingBooksRead;
+  }
+
+  createAggregate(): Membership {
+    return new Membership(
+      this.aggregateId,
+      this.aggregateVersion,
+      this.firstName,
+      this.lastName,
+      MembershipStatus.Requested,
+    );
+  }
 }
