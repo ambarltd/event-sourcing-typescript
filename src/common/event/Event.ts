@@ -1,4 +1,11 @@
-import { BaseEventOptions } from './EventOptions';
+export type EventProps<T> = T & {
+  eventId: string;
+  aggregateId: string;
+  aggregateVersion: number;
+  correlationId: string;
+  causationId: string;
+  recordedOn: Date;
+};
 
 export abstract class Event {
   public readonly eventId: string;
@@ -8,12 +15,14 @@ export abstract class Event {
   public readonly causationId: string;
   public readonly recordedOn: Date;
 
-  constructor(options: BaseEventOptions) {
-    this.eventId = options.eventId;
-    this.aggregateId = options.aggregateId;
-    this.aggregateVersion = options.aggregateVersion;
-    this.correlationId = options.correlationId;
-    this.causationId = options.causationId;
-    this.recordedOn = options.recordedOn;
+  constructor(props: EventProps<unknown>) {
+    this.eventId = props.eventId;
+    this.aggregateId = props.aggregateId;
+    this.aggregateVersion = props.aggregateVersion;
+    this.correlationId = props.correlationId;
+    this.causationId = props.causationId;
+    this.recordedOn = props.recordedOn;
+
+    Object.assign(this, props);
   }
 }

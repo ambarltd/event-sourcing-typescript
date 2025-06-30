@@ -4,11 +4,10 @@ import { injectable } from 'tsyringe';
 import {
   MembershipStatus,
   ApplicationEvaluated,
-  ApplicationEvaluatedOptions,
-  ApplicationSubmittedOptions,
   ApplicationSubmitted,
+  ApplicationSubmittedProps,
+  ApplicationEvaluatedProps,
 } from '../../domain/cookingClub/membership';
-
 @injectable()
 export class Deserializer {
   deserialize(serializedEvent: SerializedEvent): Event {
@@ -17,7 +16,7 @@ export class Deserializer {
 
     switch (serializedEvent.event_name) {
       case 'CookingClub_Membership_ApplicationSubmitted':
-        const applicationSubmittedOptions: ApplicationSubmittedOptions = {
+        const applicationSubmittedProps: ApplicationSubmittedProps = {
           eventId: this.parseString(serializedEvent.event_id),
           aggregateId: this.parseString(serializedEvent.aggregate_id),
           aggregateVersion: this.parseNumber(serializedEvent.aggregate_version),
@@ -34,10 +33,10 @@ export class Deserializer {
             payload.numberOfCookingBooksRead,
           ),
         };
-        return new ApplicationSubmitted(applicationSubmittedOptions);
+        return new ApplicationSubmitted(applicationSubmittedProps);
 
       case 'CookingClub_Membership_ApplicationEvaluated':
-        const applicationEvaluatedOptions: ApplicationEvaluatedOptions = {
+        const applicationEvaluatedProps: ApplicationEvaluatedProps = {
           eventId: this.parseString(serializedEvent.event_id),
           aggregateId: this.parseString(serializedEvent.aggregate_id),
           aggregateVersion: this.parseNumber(serializedEvent.aggregate_version),
@@ -50,7 +49,7 @@ export class Deserializer {
             'evaluationOutcome',
           ),
         };
-        return new ApplicationEvaluated(applicationEvaluatedOptions);
+        return new ApplicationEvaluated(applicationEvaluatedProps);
 
       default:
         throw new Error(`Unknown event type: ${serializedEvent.event_name}`);
