@@ -4,6 +4,7 @@ import { PostgresConnectionPool } from "../common/util/PostgresConnectionPool";
 import { MongoSessionPool } from "../common/util/MongoSessionPool";
 import { Deserializer } from "../common/serializedEvent/Deserializer";
 import { Serializer } from "../common/serializedEvent/Serializer";
+import { MetadataAutoSerializer } from "../common/serialization";
 import { PostgresTransactionalEventStore } from "../common/eventStore/PostgresTransactionalEventStore";
 import { MongoTransactionalProjectionOperator } from "../common/projection/MongoTransactionalProjectionOperator";
 import { constructor } from "tsyringe/dist/typings/types";
@@ -55,6 +56,7 @@ function registerSingletons() {
     // common/serializedEvent
     container.registerSingleton(Serializer);
     container.registerSingleton(Deserializer);
+    container.registerSingleton(MetadataAutoSerializer);
 
     // common/util
     container.registerSingleton(PostgresConnectionPool);
