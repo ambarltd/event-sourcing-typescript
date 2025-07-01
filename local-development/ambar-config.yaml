@@ -1,4 +1,5 @@
 data_sources:
+
   - id: postgres_source
     description: Events Table in Postgres
     type: postgres
@@ -25,6 +26,7 @@ data_sources:
 ##########################
 
 data_destinations:
+
   - id: CookingClub_Membership_Projection_MembersByCuisine
     description: CookingClub_Membership_Projection_MembersByCuisine
     type: http-push
