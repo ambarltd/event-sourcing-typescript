@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { CommandController } from '../../../../../common/command/CommandController';
-import { PostgresTransactionalEventStore } from '../../../../../common/eventStore/PostgresTransactionalEventStore';
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
+import {
+  CommandController,
+  PostgresTransactionalEventStore,
+  MongoTransactionalProjectionOperator,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
 import { SubmitApplicationCommand } from './SubmitApplicationCommand';

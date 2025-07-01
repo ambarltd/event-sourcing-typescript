@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 import { container, Lifecycle } from 'tsyringe';
-import { PostgresConnectionPool } from '../common/util/PostgresConnectionPool';
-import { MongoSessionPool } from '../common/util/MongoSessionPool';
-import { Deserializer } from '../common/serializedEvent/Deserializer';
-import { Serializer } from '../common/serializedEvent/Serializer';
-import { PostgresTransactionalEventStore } from '../common/eventStore/PostgresTransactionalEventStore';
-import { MongoTransactionalProjectionOperator } from '../common/projection/MongoTransactionalProjectionOperator';
+import {
+  Serializer,
+  Deserializer,
+  PostgresConnectionPool,
+  MongoSessionPool,
+  PostgresTransactionalEventStore,
+  MongoTransactionalProjectionOperator,
+  MongoInitializer,
+  PostgresInitializer,
+} from '../common';
 import { constructor } from 'tsyringe/dist/typings/types';
-import { MongoInitializer } from '../common/util/MongoInitializer';
-import { PostgresInitializer } from '../common/util/PostgresInitializer';
 import { SubmitApplicationCommandController } from '../domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
 import { SubmitApplicationCommandHandler } from '../domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandHandler';
 import { EvaluateApplicationReactionHandler } from '../domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';

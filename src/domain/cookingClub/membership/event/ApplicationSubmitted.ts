@@ -1,4 +1,4 @@
-import { CreationEvent } from '../../../../common/event/CreationEvent';
+import { CreationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
 
 export class ApplicationSubmitted extends CreationEvent<Membership> {
