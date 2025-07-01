@@ -1,4 +1,4 @@
-import { Command } from '../../../../../common/command/Command';
+import { Command } from '../../../../../common';
 
 export class SubmitApplicationCommand extends Command {
   constructor(

@@ -1,6 +1,8 @@
 import { Request, Response, Router } from 'express';
-import { QueryController } from '../../../../../common/query/QueryController';
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
+import {
+  QueryController,
+  MongoTransactionalProjectionOperator,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineQueryHandler } from './MembersByCuisineQueryHandler';
 import { MembersByCuisineQuery } from './MembersByCuisineQuery';

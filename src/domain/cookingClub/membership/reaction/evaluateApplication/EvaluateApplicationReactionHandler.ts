@@ -1,7 +1,9 @@
-import { ReactionHandler } from '../../../../../common/reaction/ReactionHandler';
-import { PostgresTransactionalEventStore } from '../../../../../common/eventStore/PostgresTransactionalEventStore';
-import { IdGenerator } from '../../../../../common/util/IdGenerator';
-import { Event } from '../../../../../common/event/Event';
+import {
+  ReactionHandler,
+  PostgresTransactionalEventStore,
+  IdGenerator,
+  Event,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
 import { Membership, MembershipStatus } from '../../aggregate/membership';

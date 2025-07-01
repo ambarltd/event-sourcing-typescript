@@ -1,6 +1,8 @@
-import { CommandHandler } from '../../../../../common/command/CommandHandler';
-import { PostgresTransactionalEventStore } from '../../../../../common/eventStore/PostgresTransactionalEventStore';
-import { IdGenerator } from '../../../../../common/util/IdGenerator';
+import {
+  CommandHandler,
+  PostgresTransactionalEventStore,
+  IdGenerator,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
 import { SubmitApplicationCommand } from './SubmitApplicationCommand';
