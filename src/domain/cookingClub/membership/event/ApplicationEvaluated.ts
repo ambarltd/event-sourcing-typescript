@@ -1,4 +1,4 @@
-import { TransformationEvent } from '../../../../common/event/TransformationEvent';
+import { TransformationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
 
 export class ApplicationEvaluated extends TransformationEvent<Membership> {

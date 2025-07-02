@@ -1,3 +1,3 @@
-import { Query } from '../../../../../common/query/Query';
+import { Query } from '../../../../../common';
 
 export class MembersByCuisineQuery extends Query {}

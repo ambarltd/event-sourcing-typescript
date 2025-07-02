@@ -1,4 +1,4 @@
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
+import { MongoTransactionalProjectionOperator } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { Cuisine } from './Cuisine';
 

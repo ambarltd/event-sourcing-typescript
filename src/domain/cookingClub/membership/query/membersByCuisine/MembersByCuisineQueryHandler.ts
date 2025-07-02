@@ -1,5 +1,7 @@
-import { QueryHandler } from '../../../../../common/query/QueryHandler';
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
+import {
+  QueryHandler,
+  MongoTransactionalProjectionOperator,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { CuisineRepository } from '../../projection/membersByCuisine/CuisineRepository';
 import { MembersByCuisineQuery } from './MembersByCuisineQuery';

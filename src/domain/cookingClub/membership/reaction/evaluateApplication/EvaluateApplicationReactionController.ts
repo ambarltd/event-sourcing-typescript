@@ -1,8 +1,10 @@
-import { ReactionController } from '../../../../../common/reaction/ReactionController';
-import { AmbarHttpRequest } from '../../../../../common/ambar/AmbarHttpRequest';
-import { PostgresTransactionalEventStore } from '../../../../../common/eventStore/PostgresTransactionalEventStore';
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
-import { Deserializer } from '../../../../../common/serializedEvent/Deserializer';
+import {
+  ReactionController,
+  AmbarHttpRequest,
+  PostgresTransactionalEventStore,
+  MongoTransactionalProjectionOperator,
+  Deserializer,
+} from '../../../../../common';
 import { Request, Response, Router } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { EvaluateApplicationReactionHandler } from './EvaluateApplicationReactionHandler';

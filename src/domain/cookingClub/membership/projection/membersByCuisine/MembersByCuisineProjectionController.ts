@@ -1,8 +1,10 @@
 import { Request, Response, Router } from 'express';
-import { MongoTransactionalProjectionOperator } from '../../../../../common/projection/MongoTransactionalProjectionOperator';
-import { Deserializer } from '../../../../../common/serializedEvent/Deserializer';
-import { AmbarHttpRequest } from '../../../../../common/ambar/AmbarHttpRequest';
-import { ProjectionController } from '../../../../../common/projection/ProjectionController';
+import {
+  MongoTransactionalProjectionOperator,
+  Deserializer,
+  AmbarHttpRequest,
+  ProjectionController,
+} from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineProjectionHandler } from './MembersByCuisineProjectionHandler';
 

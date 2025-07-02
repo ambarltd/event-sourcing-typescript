@@ -1,4 +1,4 @@
-import { ProjectionHandler } from '../../../../../common/projection/ProjectionHandler';
+import { ProjectionHandler } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { CuisineRepository } from './CuisineRepository';
 import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
