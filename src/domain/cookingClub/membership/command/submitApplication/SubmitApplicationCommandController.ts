@@ -3,11 +3,11 @@ import {
   CommandController,
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
+  ValidationPipe,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
 import { SubmitApplicationCommand } from './SubmitApplicationCommand';
-import { z } from 'zod';
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {
@@ -29,7 +29,13 @@ export class SubmitApplicationCommandController extends CommandController {
     );
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
     this.router = Router();
-    this.router.post('/submit-application', this.submitApplication.bind(this));
+
+
+    this.router.post(
+      '/submit-application',
+      ValidationPipe(SubmitApplicationCommand),
+      this.submitApplication.bind(this),
+    );
   }
 
   async submitApplication(req: Request, res: Response): Promise<void> {
@@ -39,30 +45,25 @@ export class SubmitApplicationCommandController extends CommandController {
       return;
     }
 
-    const requestBody = requestSchema.parse(req.body);
+    console.log(
+      'req.validatedBody',
+      req.validatedBody,
+      req.validatedBody.name,
+      req.body,
+      req.body.name,
+    );
+
+    const requestDto = req.validatedBody as SubmitApplicationCommand;
+
     const command = new SubmitApplicationCommand(
-      requestBody.firstName,
-      requestBody.lastName,
-      requestBody.favoriteCuisine,
-      requestBody.yearsOfProfessionalExperience,
-      requestBody.numberOfCookingBooksRead,
+      requestDto.firstName,
+      requestDto.lastName,
+      requestDto.favoriteCuisine,
+      requestDto.yearsOfProfessionalExperience,
+      requestDto.numberOfCookingBooksRead,
     );
 
     await this.processCommand(command, this.submitApplicationCommandHandler);
     res.status(200).json({});
   }
 }
-
-const requestSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(100),
-  lastName: z.string().min(1, 'Last name is required').max(100),
-  favoriteCuisine: z.string().min(1, 'Favorite cuisine is required').max(100),
-  yearsOfProfessionalExperience: z
-    .number()
-    .min(0, 'Years of experience cannot be negative')
-    .max(100, 'Please enter a valid number of years'),
-  numberOfCookingBooksRead: z
-    .number()
-    .int('Must be a whole number')
-    .min(0, 'Number of books cannot be negative'),
-});
