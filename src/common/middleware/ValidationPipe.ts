@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request } from 'express';
 import { plainToClass, ClassConstructor } from 'class-transformer';
-import { validate } from 'class-validator';
+import { validate, ValidationError } from 'class-validator';
+import { ValidationPipeException } from './ValidationPipeException';
 
 export interface ValidationPipeOptions {
   transform?: boolean;
@@ -15,7 +16,6 @@ export interface ValidationPipeOptions {
 export async function ValidationPipe<T extends object>(
   targetClass: ClassConstructor<T>,
   req: Request,
-  res: Response,
 ): Promise<T> {
   try {
     const dto = plainToClass(targetClass, req.body);
@@ -28,26 +28,25 @@ export async function ValidationPipe<T extends object>(
       transformOptions: {
         exposeDefaultValues: true,
       },
-    });
+    } as ValidationPipeOptions);
 
     if (errors.length > 0) {
-      const errorMessages = errors.map((error) => ({
+      const validationErrors = errors.map((error) => ({
         field: error.property,
         constraints: Object.values(error.constraints || {}),
         value: error.value,
       }));
 
-      res.status(400).json({
-        error: 'Validation failed',
-        details: errorMessages,
-      });
+      throw ValidationPipeException.validationFailed(validationErrors);
     }
 
     return dto;
   } catch (error) {
-    console.error('ValidationPipe error:', error);
-    res.status(500).json({ error: 'Internal validation error' });
-    throw error;
+    if (error instanceof ValidationPipeException) {
+      throw error;
+    }
+
+    throw ValidationPipeException.internalError(error as Error);
   }
 }
 
