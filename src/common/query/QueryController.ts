@@ -2,11 +2,14 @@ import { MongoTransactionalProjectionOperator } from '../projection/MongoTransac
 import { log } from '../util/Logger';
 import { QueryHandler } from './QueryHandler';
 import { Query } from './Query';
+import { BaseController } from '../base/BaseController';
 
-export class QueryController {
+export class QueryController extends BaseController {
   constructor(
     private readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
-  ) {}
+  ) {
+    super();
+  }
 
   protected async processQuery(
     query: Query,

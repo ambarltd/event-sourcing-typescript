@@ -5,13 +5,16 @@ import { MongoTransactionalProjectionOperator } from '../projection/MongoTransac
 import { Deserializer } from '../serializedEvent/Deserializer';
 import { log } from '../util/Logger';
 import { ReactionHandler } from './ReactionHandler';
+import { BaseController } from '../base/BaseController';
 
-export abstract class ReactionController {
+export abstract class ReactionController extends BaseController {
   constructor(
     private readonly postgresTransactionalEventStore: PostgresTransactionalEventStore,
     private readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
     private readonly deserializer: Deserializer,
-  ) {}
+  ) {
+    super();
+  }
 
   protected async processReactionHttpRequest(
     ambarHttpRequest: AmbarHttpRequest,

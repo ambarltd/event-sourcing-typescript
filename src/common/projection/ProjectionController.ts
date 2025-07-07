@@ -4,12 +4,15 @@ import { AmbarHttpRequest } from '../ambar/AmbarHttpRequest';
 import { AmbarResponseFactory } from '../ambar/AmbarResponseFactory';
 import { ProjectionHandler } from './ProjectionHandler';
 import { log } from '../util/Logger';
+import { BaseController } from '../base/BaseController';
 
-export abstract class ProjectionController {
+export abstract class ProjectionController extends BaseController {
   protected constructor(
     private readonly mongoOperator: MongoTransactionalProjectionOperator,
     private readonly deserializer: Deserializer,
-  ) {}
+  ) {
+    super();
+  }
 
   protected async processProjectionHttpRequest(
     ambarHttpRequest: AmbarHttpRequest,

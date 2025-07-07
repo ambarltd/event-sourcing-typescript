@@ -1,17 +1,16 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response } from 'express';
 import {
   MongoTransactionalProjectionOperator,
   Deserializer,
   AmbarHttpRequest,
   ProjectionController,
+  Post,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineProjectionHandler } from './MembersByCuisineProjectionHandler';
 
 @injectable()
 export class MembersByCuisineProjectionController extends ProjectionController {
-  public readonly router: Router;
-
   constructor(
     @inject(MongoTransactionalProjectionOperator)
     mongoOperator: MongoTransactionalProjectionOperator,
@@ -20,17 +19,10 @@ export class MembersByCuisineProjectionController extends ProjectionController {
     private readonly membersByCuisineProjectionHandler: MembersByCuisineProjectionHandler,
   ) {
     super(mongoOperator, deserializer);
-    this.router = Router();
-    this.router.post(
-      '/members-by-cuisine',
-      this.projectIsCardProductActive.bind(this),
-    );
   }
 
-  private async projectIsCardProductActive(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  @Post('/members-by-cuisine')
+  async projectIsCardProductActive(req: Request, res: Response): Promise<void> {
     const response = await this.processProjectionHttpRequest(
       req.body as AmbarHttpRequest,
       this.membersByCuisineProjectionHandler,
