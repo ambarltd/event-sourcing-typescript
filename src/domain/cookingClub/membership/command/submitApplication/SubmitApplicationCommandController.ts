@@ -30,10 +30,12 @@ export class SubmitApplicationCommandController extends CommandController {
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
     this.router = Router();
 
+    //TODO: abstract this next
     this.router.post('/submit-application', this.submitApplication.bind(this));
   }
 
   async submitApplication(req: Request, res: Response): Promise<void> {
+    // TODO: abstract this next
     const sessionToken = req.header('X-With-Session-Token');
     if (!sessionToken) {
       res.status(400).send({ error: 'Session token is required' });
