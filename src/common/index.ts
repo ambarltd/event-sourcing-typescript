@@ -9,3 +9,4 @@ export * from './query';
 export * from './reaction';
 export * from './serializedEvent';
 export * from './util';
+export * from './route';

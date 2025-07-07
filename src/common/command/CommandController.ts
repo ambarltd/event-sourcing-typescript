@@ -3,12 +3,32 @@ import { MongoTransactionalProjectionOperator } from '../projection/MongoTransac
 import { log } from '../util/Logger';
 import { Command } from './Command';
 import { CommandHandler } from './CommandHandler';
+import { Router } from 'express';
+import { RouteMetadata, ROUTE_METADATA_KEY } from '../route/RouteMetadata';
+import 'reflect-metadata';
 
 export class CommandController {
+  public readonly router: Router;
+
   constructor(
     private readonly postgresTransactionalEventStore: PostgresTransactionalEventStore,
     private readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
-  ) {}
+  ) {
+    this.router = Router();
+    this.registerRoutes();
+  }
+
+  private registerRoutes(): void {
+    const routes: RouteMetadata[] =
+      Reflect.getMetadata(ROUTE_METADATA_KEY, this.constructor) || [];
+
+    for (const route of routes) {
+      const handler = (this as any)[route.methodName];
+      if (handler && typeof handler === 'function') {
+        this.router[route.method](route.path, handler.bind(this));
+      }
+    }
+  }
 
   protected async processCommand(
     command: Command,

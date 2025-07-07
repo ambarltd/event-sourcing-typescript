@@ -5,14 +5,13 @@ import {
   MongoTransactionalProjectionOperator,
   ValidationPipe,
 } from '../../../../../common';
+import { Route } from '../../../../../common/route/Route';
 import { inject, injectable } from 'tsyringe';
 import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
 import { SubmitApplicationCommand } from './SubmitApplicationCommand';
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {
-  public readonly router: Router;
-
   private readonly submitApplicationCommandHandler: SubmitApplicationCommandHandler;
 
   constructor(
@@ -28,12 +27,9 @@ export class SubmitApplicationCommandController extends CommandController {
       mongoTransactionalProjectionOperator,
     );
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
-    this.router = Router();
-
-    //TODO: abstract this next
-    this.router.post('/submit-application', this.submitApplication.bind(this));
   }
 
+  @Route('/submit-application')
   async submitApplication(req: Request, res: Response): Promise<void> {
     // TODO: abstract this next
     const sessionToken = req.header('X-With-Session-Token');
