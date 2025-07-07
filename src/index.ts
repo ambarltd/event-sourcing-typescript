@@ -17,6 +17,7 @@ import { MembersByCuisineProjectionController } from './domain/cookingClub/membe
 // Configure dependency injection
 configureDependencies();
 
+// Create express app
 const app = express();
 app.use(express.json());
 
