@@ -31,15 +31,7 @@ export class SubmitApplicationCommandController extends CommandController {
 
   @Route('/submit-application')
   async submitApplication(req: Request, res: Response): Promise<void> {
-    const requestDto = await ValidationPipe(SubmitApplicationCommand, req, res);
-
-    const command = new SubmitApplicationCommand(
-      requestDto.firstName,
-      requestDto.lastName,
-      requestDto.favoriteCuisine,
-      requestDto.yearsOfProfessionalExperience,
-      requestDto.numberOfCookingBooksRead,
-    );
+    const command = await ValidationPipe(SubmitApplicationCommand, req);
 
     await this.processCommand(command, this.submitApplicationCommandHandler);
     res.status(200).json({});
