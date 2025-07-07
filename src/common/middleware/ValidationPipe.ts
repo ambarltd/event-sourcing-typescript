@@ -16,21 +16,18 @@ export async function ValidationPipe<T extends object>(
   targetClass: ClassConstructor<T>,
   req: Request,
   res: Response,
-  options: ValidationPipeOptions = {
-    forbidNonWhitelisted: true,
-    forbidUnknownValues: true,
-    whitelist: true,
-    transform: true,
-    transformOptions: {
-      exposeDefaultValues: true,
-    },
-  },
 ): Promise<T> {
   try {
     const dto = plainToClass(targetClass, req.body);
 
     const errors = await validate(dto, {
-      ...options,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
+      whitelist: true,
+      transform: true,
+      transformOptions: {
+        exposeDefaultValues: true,
+      },
     });
 
     if (errors.length > 0) {
