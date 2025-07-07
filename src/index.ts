@@ -6,7 +6,9 @@ import { scopedContainer } from './di/scopedContainer';
 import { MongoInitializer } from './common/util/MongoInitializer';
 import { PostgresInitializer } from './common/util/PostgresInitializer';
 import { log } from './common/util/Logger';
-import { AmbarAuthMiddleware } from './common/ambar/AmbarAuthMiddleware';
+import { ControllerRegistry } from './common/registry/ControllerRegistry';
+
+// Import controllers to ensure they are loaded
 import { SubmitApplicationCommandController } from './domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
 import { MembersByCuisineQueryController } from './domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryController';
 import { EvaluateApplicationReactionController } from './domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
@@ -15,42 +17,24 @@ import { MembersByCuisineProjectionController } from './domain/cookingClub/membe
 // Configure dependency injection
 configureDependencies();
 
-// Create express app
 const app = express();
 app.use(express.json());
 
 // Add scoped container middleware
 app.use(scopedContainer);
 
-// Add routes
-app.use('/api/v1/cooking-club/membership/command', (req, res, next) => {
-  const controller = req.container.resolve(SubmitApplicationCommandController);
-  return controller.router(req, res, next);
-});
-app.use(
-  '/api/v1/cooking-club/membership/projection',
-  AmbarAuthMiddleware,
-  (req, res, next) => {
-    const controller = req.container.resolve(
-      MembersByCuisineProjectionController,
-    );
-    return controller.router(req, res, next);
-  },
-);
-app.use('/api/v1/cooking-club/membership/query', (req, res, next) => {
-  const controller = req.container.resolve(MembersByCuisineQueryController);
-  return controller.router(req, res, next);
-});
-app.use(
-  '/api/v1/cooking-club/membership/reaction',
-  AmbarAuthMiddleware,
-  (req, res, next) => {
-    const controller = req.container.resolve(
-      EvaluateApplicationReactionController,
-    );
-    return controller.router(req, res, next);
-  },
-);
+// Register controllers
+const controllerRegistry = ControllerRegistry.getInstance();
+controllerRegistry.registerController(SubmitApplicationCommandController);
+controllerRegistry.registerController(MembersByCuisineQueryController);
+controllerRegistry.registerController(EvaluateApplicationReactionController);
+controllerRegistry.registerController(MembersByCuisineProjectionController);
+
+// Create and use routes from registry
+const routes = controllerRegistry.createRoutes();
+app.use(routes);
+
+// Add health check routes
 app.get('/docker_healthcheck', (req, res) => res.send('OK'));
 app.get('/', (req, res) => res.send('OK'));
 
@@ -70,18 +54,32 @@ app.use(
   },
 );
 
-// Initialize databases and start server
+const PORT = process.env.PORT || 8080;
 
-const mongoInitializer = container.resolve(MongoInitializer);
-const postgresInitializer = container.resolve(PostgresInitializer);
+async function startServer() {
+  try {
+    const mongoInitializer = container.resolve(MongoInitializer);
+    const postgresInitializer = container.resolve(PostgresInitializer);
 
-Promise.all([postgresInitializer.initialize(), mongoInitializer.initialize()])
-  .then(() => {
-    app.listen(8080, () => {
-      console.log('Server is running on port 8080');
+    await Promise.all([
+      postgresInitializer.initialize(),
+      mongoInitializer.initialize(),
+    ]);
+
+    app.listen(PORT, () => {
+      log.info(`🚀 Server running on port ${PORT}`);
+      log.info('📋 Registered controllers:');
+      for (const [
+        path,
+        controllerClass,
+      ] of controllerRegistry.getControllers()) {
+        log.info(`  - ${controllerClass.name} at ${path}`);
+      }
     });
-  })
-  .catch((error) => {
-    console.error('Failed to initialize databases:', error);
+  } catch (error) {
+    log.error('Failed to start server:', error as Error);
     process.exit(1);
-  });
+  }
+}
+
+startServer();

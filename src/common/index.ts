@@ -9,5 +9,6 @@ export * from './middleware';
 export * from './projection';
 export * from './query';
 export * from './reaction';
+export * from './registry';
 export * from './serializedEvent';
 export * from './util';

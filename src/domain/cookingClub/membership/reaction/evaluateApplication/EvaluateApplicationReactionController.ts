@@ -5,12 +5,14 @@ import {
   MongoTransactionalProjectionOperator,
   Deserializer,
   Post,
+  Controller,
 } from '../../../../../common';
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { EvaluateApplicationReactionHandler } from './EvaluateApplicationReactionHandler';
 
 @injectable()
+@Controller('/api/v1/cooking-club/membership/reaction')
 export class EvaluateApplicationReactionController extends ReactionController {
   constructor(
     @inject(PostgresTransactionalEventStore)

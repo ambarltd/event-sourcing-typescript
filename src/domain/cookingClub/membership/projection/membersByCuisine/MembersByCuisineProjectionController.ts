@@ -5,11 +5,13 @@ import {
   AmbarHttpRequest,
   ProjectionController,
   Post,
+  Controller,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineProjectionHandler } from './MembersByCuisineProjectionHandler';
 
 @injectable()
+@Controller('/api/v1/cooking-club/membership/projection')
 export class MembersByCuisineProjectionController extends ProjectionController {
   constructor(
     @inject(MongoTransactionalProjectionOperator)

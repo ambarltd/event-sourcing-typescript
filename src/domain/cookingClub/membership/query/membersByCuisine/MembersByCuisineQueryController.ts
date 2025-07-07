@@ -3,12 +3,14 @@ import {
   QueryController,
   MongoTransactionalProjectionOperator,
   Get,
+  Controller,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineQueryHandler } from './MembersByCuisineQueryHandler';
 import { MembersByCuisineQuery } from './MembersByCuisineQuery';
 
 @injectable()
+@Controller('/api/v1/cooking-club/membership/query')
 export class MembersByCuisineQueryController extends QueryController {
   private readonly membersByCuisineQueryHandler: MembersByCuisineQueryHandler;
 
