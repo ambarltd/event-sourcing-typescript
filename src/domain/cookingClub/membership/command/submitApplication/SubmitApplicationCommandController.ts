@@ -30,12 +30,7 @@ export class SubmitApplicationCommandController extends CommandController {
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
     this.router = Router();
 
-
-    this.router.post(
-      '/submit-application',
-      ValidationPipe(SubmitApplicationCommand),
-      this.submitApplication.bind(this),
-    );
+    this.router.post('/submit-application', this.submitApplication.bind(this));
   }
 
   async submitApplication(req: Request, res: Response): Promise<void> {
@@ -45,15 +40,7 @@ export class SubmitApplicationCommandController extends CommandController {
       return;
     }
 
-    console.log(
-      'req.validatedBody',
-      req.validatedBody,
-      req.validatedBody.name,
-      req.body,
-      req.body.name,
-    );
-
-    const requestDto = req.validatedBody as SubmitApplicationCommand;
+    const requestDto = await ValidationPipe(SubmitApplicationCommand, req, res);
 
     const command = new SubmitApplicationCommand(
       requestDto.firstName,
