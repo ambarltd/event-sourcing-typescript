@@ -35,13 +35,6 @@ export class SubmitApplicationCommandController extends CommandController {
   }
 
   async submitApplication(req: Request, res: Response): Promise<void> {
-    // TODO: abstract this next
-    const sessionToken = req.header('X-With-Session-Token');
-    if (!sessionToken) {
-      res.status(400).send({ error: 'Session token is required' });
-      return;
-    }
-
     const requestDto = await ValidationPipe(SubmitApplicationCommand, req, res);
 
     const command = new SubmitApplicationCommand(
