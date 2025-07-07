@@ -1,17 +1,7 @@
 import { Request } from 'express';
 import { plainToClass, ClassConstructor } from 'class-transformer';
-import { validate, ValidationError } from 'class-validator';
+import { validate, ValidatorOptions } from 'class-validator';
 import { ValidationPipeException } from './ValidationPipeException';
-
-export interface ValidationPipeOptions {
-  transform?: boolean;
-  whitelist?: boolean;
-  forbidNonWhitelisted?: boolean;
-  forbidUnknownValues?: boolean;
-  transformOptions?: {
-    exposeDefaultValues?: boolean;
-  };
-}
 
 export async function ValidationPipe<T extends object>(
   targetClass: ClassConstructor<T>,
@@ -28,7 +18,7 @@ export async function ValidationPipe<T extends object>(
       transformOptions: {
         exposeDefaultValues: true,
       },
-    } as ValidationPipeOptions);
+    } as ValidatorOptions);
 
     if (errors.length > 0) {
       const validationErrors = errors.map((error) => ({
@@ -47,13 +37,5 @@ export async function ValidationPipe<T extends object>(
     }
 
     throw ValidationPipeException.internalError(error as Error);
-  }
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      validatedBody?: any;
-    }
   }
 }
