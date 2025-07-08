@@ -3,7 +3,6 @@ import {
   RouteMetadata,
   ROUTE_METADATA_KEY,
 } from '../decorators/route/RouteMetadata';
-import { AuthenticationMiddleware } from '../middleware/AuthenticationMiddleware';
 import { AmbarAuthMiddleware } from '../ambar/AmbarAuthMiddleware';
 import 'reflect-metadata';
 
@@ -24,18 +23,18 @@ export abstract class BaseController {
       if (handler && typeof handler === 'function') {
         const middlewares = [];
 
-        const isAnonymousAllowed = AuthenticationMiddleware.isAnonymousAllowed(
-          this.constructor,
-          route.methodName,
-        );
+        const controllerName = this.constructor.name;
+        const requiresAuth =
+          controllerName.includes('Reaction') ||
+          controllerName.includes('Projection');
 
-        if (!isAnonymousAllowed) {
+        if (requiresAuth) {
           middlewares.push(AmbarAuthMiddleware);
         }
 
         middlewares.push(handler.bind(this));
 
-        this.router[route.method](route.path, ...middlewares);
+        this.router.post(route.path, ...middlewares);
       }
     }
   }

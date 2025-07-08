@@ -4,7 +4,7 @@ import {
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   Deserializer,
-  Post,
+  Route,
   Controller,
 } from '../../../../../common';
 import { Request, Response } from 'express';
@@ -26,7 +26,7 @@ export class EvaluateApplicationReactionController extends ReactionController {
     super(eventStore, mongoOperator, deserializer);
   }
 
-  @Post('/evaluate-application')
+  @Route('/evaluate-application')
   async reactWithEvaluateApplication(
     req: Request,
     res: Response,

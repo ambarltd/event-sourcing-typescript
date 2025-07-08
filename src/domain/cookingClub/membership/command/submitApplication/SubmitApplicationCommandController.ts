@@ -4,9 +4,8 @@ import {
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   ValidationPipe,
-  Post,
+  Route,
   Controller,
-  AllowAnonymous,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
@@ -32,8 +31,7 @@ export class SubmitApplicationCommandController extends CommandController {
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
   }
 
-  @AllowAnonymous
-  @Post('/submit-application')
+  @Route('/submit-application')
   async submitApplication(req: Request, res: Response): Promise<void> {
     const command = await ValidationPipe(SubmitApplicationCommand, req);
 

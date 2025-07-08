@@ -1,2 +1,2 @@
-export * from './HttpMethodDecorators';
+export * from './Route';
 export * from './RouteMetadata';

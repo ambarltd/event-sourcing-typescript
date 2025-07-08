@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import {
   QueryController,
   MongoTransactionalProjectionOperator,
-  Get,
+  Route,
   Controller,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
@@ -24,7 +24,7 @@ export class MembersByCuisineQueryController extends QueryController {
     this.membersByCuisineQueryHandler = membersByCuisineQueryHandler;
   }
 
-  @Get('/members-by-cuisine')
+  @Route('/members-by-cuisine')
   async membersByCuisine(req: Request, res: Response): Promise<void> {
     const query = new MembersByCuisineQuery();
 

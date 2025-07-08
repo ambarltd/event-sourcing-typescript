@@ -4,7 +4,7 @@ import {
   Deserializer,
   AmbarHttpRequest,
   ProjectionController,
-  Post,
+  Route,
   Controller,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
@@ -23,7 +23,7 @@ export class MembersByCuisineProjectionController extends ProjectionController {
     super(mongoOperator, deserializer);
   }
 
-  @Post('/members-by-cuisine')
+  @Route('/members-by-cuisine')
   async projectIsCardProductActive(req: Request, res: Response): Promise<void> {
     const response = await this.processProjectionHttpRequest(
       req.body as AmbarHttpRequest,
