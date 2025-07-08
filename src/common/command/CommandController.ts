@@ -3,12 +3,15 @@ import { MongoTransactionalProjectionOperator } from '../projection/MongoTransac
 import { log } from '../util/Logger';
 import { Command } from './Command';
 import { CommandHandler } from './CommandHandler';
+import { BaseController } from '../base/BaseController';
 
-export class CommandController {
+export class CommandController extends BaseController {
   constructor(
     private readonly postgresTransactionalEventStore: PostgresTransactionalEventStore,
     private readonly mongoTransactionalProjectionOperator: MongoTransactionalProjectionOperator,
-  ) {}
+  ) {
+    super();
+  }
 
   protected async processCommand(
     command: Command,
