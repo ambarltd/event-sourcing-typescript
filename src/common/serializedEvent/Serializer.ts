@@ -1,8 +1,7 @@
 import { Event } from '../event/Event';
 import { SerializedEvent } from './SerializedEvent';
 import { injectable } from 'tsyringe';
-import { ApplicationSubmitted } from '../../domain/cookingClub/membership/event/ApplicationSubmitted';
-import { ApplicationEvaluated } from '../../domain/cookingClub/membership/event/ApplicationEvaluated';
+import { EventRegistry } from './EventRegistry';
 
 @injectable()
 export class Serializer {
@@ -14,34 +13,22 @@ export class Serializer {
       correlation_id: event.correlationId,
       causation_id: event.causationId,
       recorded_on: this.formatDateTime(event.recordedOn),
-      event_name: this.determineEventName(event),
+      event_name: EventRegistry.getEventName(event),
       json_payload: this.createJsonPayload(event),
       json_metadata: '{}',
     };
   }
 
-  private determineEventName(event: Event): string {
-    if (event instanceof ApplicationSubmitted) {
-      return 'CookingClub_Membership_ApplicationSubmitted';
-    }
-    if (event instanceof ApplicationEvaluated) {
-      return 'CookingClub_Membership_ApplicationEvaluated';
-    }
-    throw new Error(`Unknown event type: ${event.constructor.name}`);
-  }
-
   private createJsonPayload(event: Event): string {
-    const payload: Record<string, any> = {};
+    const metadata = EventRegistry.getByConstructor(event.constructor as any);
+    if (!metadata) {
+      throw new Error(`Event type not registered: ${event.constructor.name}`);
+    }
 
-    if (event instanceof ApplicationSubmitted) {
-      payload.firstName = event.firstName;
-      payload.lastName = event.lastName;
-      payload.favoriteCuisine = event.favoriteCuisine;
-      payload.yearsOfProfessionalExperience =
-        event.yearsOfProfessionalExperience;
-      payload.numberOfCookingBooksRead = event.numberOfCookingBooksRead;
-    } else if (event instanceof ApplicationEvaluated) {
-      payload.evaluationOutcome = event.evaluationOutcome;
+    const payload: Record<string, any> = {};
+    
+    for (const propertyKey of metadata.serializableProperties) {
+      payload[propertyKey] = (event as any)[propertyKey];
     }
 
     return JSON.stringify(payload);

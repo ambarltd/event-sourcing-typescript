@@ -1,50 +1,33 @@
 import { Event } from '../event/Event';
 import { SerializedEvent } from './SerializedEvent';
 import { injectable } from 'tsyringe';
-import { ApplicationEvaluated } from '../../domain/cookingClub/membership/event/ApplicationEvaluated';
-import { ApplicationSubmitted } from '../../domain/cookingClub/membership/event/ApplicationSubmitted';
-import { MembershipStatus } from '../../domain/cookingClub/membership/aggregate/membership';
+import { EventRegistry } from './EventRegistry';
 
 @injectable()
 export class Deserializer {
   deserialize(serializedEvent: SerializedEvent): Event {
+    const metadata = EventRegistry.getByName(serializedEvent.event_name);
+    if (!metadata) {
+      throw new Error(`Unknown event type: ${serializedEvent.event_name}`);
+    }
+
     const recordedOn = this.parseDateTime(serializedEvent.recorded_on);
     const payload = JSON.parse(serializedEvent.json_payload);
 
-    switch (serializedEvent.event_name) {
-      case 'CookingClub_Membership_ApplicationSubmitted':
-        return new ApplicationSubmitted(
-          this.parseString(serializedEvent.event_id),
-          this.parseString(serializedEvent.aggregate_id),
-          this.parseNumber(serializedEvent.aggregate_version),
-          this.parseString(serializedEvent.correlation_id),
-          this.parseString(serializedEvent.causation_id),
-          recordedOn,
-          this.parseString(payload.firstName),
-          this.parseString(payload.lastName),
-          this.parseString(payload.favoriteCuisine),
-          this.parseNumber(payload.yearsOfProfessionalExperience),
-          this.parseNumber(payload.numberOfCookingBooksRead),
-        );
+    const baseArgs = [
+      this.parseString(serializedEvent.event_id),
+      this.parseString(serializedEvent.aggregate_id),
+      this.parseNumber(serializedEvent.aggregate_version),
+      this.parseString(serializedEvent.correlation_id),
+      this.parseString(serializedEvent.causation_id),
+      recordedOn,
+    ];
 
-      case 'CookingClub_Membership_ApplicationEvaluated':
-        return new ApplicationEvaluated(
-          this.parseString(serializedEvent.event_id),
-          this.parseString(serializedEvent.aggregate_id),
-          this.parseNumber(serializedEvent.aggregate_version),
-          this.parseString(serializedEvent.correlation_id),
-          this.parseString(serializedEvent.causation_id),
-          recordedOn,
-          this.parseEnum(
-            payload.evaluationOutcome,
-            MembershipStatus,
-            'evaluationOutcome',
-          ),
-        );
+    const payloadArgs = Array.from(metadata.serializableProperties).map(
+      (propertyKey) => payload[propertyKey]
+    );
 
-      default:
-        throw new Error(`Unknown event type: ${serializedEvent.event_name}`);
-    }
+    return new metadata.constructor(...baseArgs, ...payloadArgs);
   }
 
   private parseDateTime(dateStr: string): Date {
