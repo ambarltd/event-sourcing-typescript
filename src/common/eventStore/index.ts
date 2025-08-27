@@ -1,2 +1,2 @@
-export * from "./AggregateAndEventIdsInLastEvent";
-export * from "./PostgresTransactionalEventStore";
+export * from './AggregateAndEventIdsInLastEvent';
+export * from './PostgresTransactionalEventStore';

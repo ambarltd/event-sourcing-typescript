@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
   push:
-    branches: [ main, prod ]
+    branches: [main, prod]
 
 run-name: ${{ github.workflow }} | ${{ github.event.pull_request.number }} ${{ github.event.pull_request.title || github.event.head_commit.message }}
 

@@ -1,3 +1,3 @@
-export * from "./MongoTransactionalProjectionOperator";
-export * from "./ProjectionController";
-export * from "./ProjectionHandler";
+export * from './MongoTransactionalProjectionOperator';
+export * from './ProjectionController';
+export * from './ProjectionHandler';
