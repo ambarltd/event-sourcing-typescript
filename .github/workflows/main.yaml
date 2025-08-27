@@ -1,0 +1,25 @@
+name: Quality check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [ main, prod ]
+
+run-name: ${{ github.workflow }} | ${{ github.event.pull_request.number }} ${{ github.event.pull_request.title || github.event.head_commit.message }}
+
+jobs:
+  backend:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run format:check
