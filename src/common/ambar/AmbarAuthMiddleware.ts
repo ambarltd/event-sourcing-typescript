@@ -32,11 +32,11 @@ export const AmbarAuthMiddleware = (
     const [username, password] = credentials.split(':');
 
     if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-      next();
+      return next();
     } else {
-      res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (error) {
-    res.status(401).json({ error: 'Invalid authentication format' });
+    return res.status(401).json({ error: 'Invalid authentication format' });
   }
 };
