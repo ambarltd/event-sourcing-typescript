@@ -1,6 +1,5 @@
 import {
   ClientSession,
-  MongoClient,
   Filter,
   FindOptions,
   Document,
