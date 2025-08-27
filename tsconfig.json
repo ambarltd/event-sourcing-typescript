@@ -15,6 +15,7 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "noImplicitAny": true,
+    "noUnusedLocals": true,
   },
   "include": ["src"]
 }
