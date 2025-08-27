@@ -26,6 +26,6 @@ export class MembershipApplicationRepository {
       this.collectionName,
       { _id },
     );
-    return results.length > 0 ? results[0] : null;
+    return results[0] || null;
   }
 }
