@@ -183,6 +183,69 @@ services:
     ports:
       - "8082:8082"
 
+  event-sourcing-email-server:
+    image: docker.io/maildev/maildev:latest
+    container_name: event-sourcing-email-server
+    restart: always
+    user: "0:0"  # Run as root (UID 0, GID 0) to avoid permission issues with the volume on Linux
+    environment:
+      - MAILDEV_SMTP_PORT=1025
+      - MAILDEV_WEB_PORT=8025
+      - MAILDEV_MAIL_DIRECTORY=/data
+      - MAILDEV_INCOMING_USER=smtp_username
+      - MAILDEV_INCOMING_PASS=smtp_password
+      # Using 0.0.0.0 allows the email server to be addressed on 127.0.0.1 and 172.95.0.213 (of course,
+      # this requires 127.0.0.1 or 172.95.0.213 to actually resolve to the email server).
+      - MAILDEV_IP=0.0.0.0
+      - MAILDEV_WEB_IP=0.0.0.0
+    volumes:
+      - ./data/event-sourcing-email-server:/data
+    entrypoint:
+      "bin/maildev"
+    command:
+      - "--verbose"
+      - "--log-mail-contents"
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:8025/email" ]
+      timeout: 2s
+      interval: 5s
+      retries: 100
+      start_period: 20s
+      start_interval: 0.2s
+    networks:
+      event-sourcing:
+        ipv4_address: 172.95.0.213
+    expose:
+      - 1025  # SMTP
+      - 8025  # HTTP Server / Web UI
+    ports:
+      - "8083:8025"  # HTTP Server / Web UI, via docker host
+
+  event-sourcing-file-storage:
+    image: docker.io/minio/minio:RELEASE.2023-12-09T18-17-51Z
+    container_name: event-sourcing-file-storage
+    restart: always
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./data/event-sourcing-file-storage:/data
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      event-sourcing:
+        ipv4_address: 172.95.0.214
+    expose:
+      - 9000  # API (default = 9000)
+      - 9001  # Web Console
+    ports:
+      - "7999:9000"  # Web Console on Docker host
+      - "8084:9001"  # Web Console on Docker host
 
 networks:
     event-sourcing:
