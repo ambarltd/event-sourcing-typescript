@@ -12,7 +12,9 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "express": "^4.18.2",
+    "minio": "^8.0.5",
     "mongodb": "^5.4.0",
+    "nodemailer": "^7.0.5",
     "pg": "^8.8.0",
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.8.0",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/nodemailer": "^7.0.1",
     "@types/pg": "^8.6.6",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6"

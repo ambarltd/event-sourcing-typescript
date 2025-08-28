@@ -22,6 +22,16 @@ services:
       MONGODB_PROJECTION_DATABASE_PASSWORD: "my_mongo_password"
       AMBAR_HTTP_USERNAME: "username"
       AMBAR_HTTP_PASSWORD: "password"
+      SMTP_HOST: "172.95.0.213"
+      SMTP_PORT: "1025"
+      SMTP_USERNAME: "smtp_username"
+      SMTP_PASSWORD: "smtp_password"
+      SMTP_FROM_EMAIL: "no-reply@example.localdevelopment"
+      S3_ENDPOINT_URL: "http://172.95.0.214:9000"
+      S3_ACCESS_KEY: "user"
+      S3_SECRET_KEY: "password"
+      S3_BUCKET_NAME: "administrator-files"
+      S3_REGION: "us-east-1"
     depends_on:
       event-sourcing-event-store:
         condition: service_healthy
