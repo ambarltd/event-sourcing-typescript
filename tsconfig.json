@@ -3,11 +3,6 @@
     "target": "ES2020",
     "module": "nodenext",
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-    },
-
     "strict": true,                               // a bunch of stronger type guarantees.
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -25,6 +20,7 @@
     "allowUnusedLabels": false,                   // declared labels must be used.
     "allowUnreachableCode": false,                // unreachable code is an error.
     "checkJs": true,                              // type-check JS files.
+    "sourceMap": true,
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }
