@@ -6,7 +6,10 @@ import {
 } from '@/common';
 import { inject, injectable } from 'tsyringe';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership/event/ApplicationSubmitted';
-import { Membership, MembershipStatus } from '@/domain/cookingClub/membership/aggregate/membership';
+import {
+  Membership,
+  MembershipStatus,
+} from '@/domain/cookingClub/membership/aggregate/membership';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership/event/ApplicationEvaluated';
 
 @injectable()

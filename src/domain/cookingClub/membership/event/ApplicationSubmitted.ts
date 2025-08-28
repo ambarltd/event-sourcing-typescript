@@ -1,5 +1,8 @@
 import { CreationEvent } from '@/common';
-import { Membership, MembershipStatus } from '@/domain/cookingClub/membership/aggregate/membership';
+import {
+  Membership,
+  MembershipStatus,
+} from '@/domain/cookingClub/membership/aggregate/membership';
 
 export class ApplicationSubmitted extends CreationEvent<Membership> {
   constructor(
