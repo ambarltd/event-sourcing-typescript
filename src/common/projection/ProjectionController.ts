@@ -1,9 +1,9 @@
-import { MongoTransactionalProjectionOperator } from './MongoTransactionalProjectionOperator';
-import { Deserializer } from '../serializedEvent/Deserializer';
-import { AmbarHttpRequest } from '../ambar/AmbarHttpRequest';
-import { AmbarResponseFactory } from '../ambar/AmbarResponseFactory';
-import { ProjectionHandler } from './ProjectionHandler';
-import { log } from '../util/Logger';
+import { MongoTransactionalProjectionOperator } from '@/common/projection/MongoTransactionalProjectionOperator';
+import { Deserializer } from '@/common/serializedEvent/Deserializer';
+import { AmbarHttpRequest } from '@/common/ambar/AmbarHttpRequest';
+import { AmbarResponseFactory } from '@/common/ambar/AmbarResponseFactory';
+import { ProjectionHandler } from '@/common/projection/ProjectionHandler';
+import { log } from '@/common/util/Logger';
 
 export abstract class ProjectionController {
   protected constructor(

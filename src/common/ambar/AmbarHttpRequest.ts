@@ -1,4 +1,4 @@
-import { SerializedEvent } from '../serializedEvent/SerializedEvent';
+import { SerializedEvent } from '@/common/serializedEvent/SerializedEvent';
 
 export interface AmbarHttpRequest {
   data_source_id: string;

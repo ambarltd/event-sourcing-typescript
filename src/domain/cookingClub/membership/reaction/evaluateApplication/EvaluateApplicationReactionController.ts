@@ -4,10 +4,10 @@ import {
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   Deserializer,
-} from '../../../../../common';
+} from '@/common';
 import { Request, Response, Router } from 'express';
 import { inject, injectable } from 'tsyringe';
-import { EvaluateApplicationReactionHandler } from './EvaluateApplicationReactionHandler';
+import { EvaluateApplicationReactionHandler } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
 
 @injectable()
 export class EvaluateApplicationReactionController extends ReactionController {

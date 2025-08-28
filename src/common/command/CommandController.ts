@@ -1,8 +1,8 @@
-import { PostgresTransactionalEventStore } from '../eventStore/PostgresTransactionalEventStore';
-import { MongoTransactionalProjectionOperator } from '../projection/MongoTransactionalProjectionOperator';
-import { log } from '../util/Logger';
-import { Command } from './Command';
-import { CommandHandler } from './CommandHandler';
+import { PostgresTransactionalEventStore } from '@/common/eventStore/PostgresTransactionalEventStore';
+import { MongoTransactionalProjectionOperator } from '@/common/projection/MongoTransactionalProjectionOperator';
+import { log } from '@/common/util/Logger';
+import { Command } from '@/common/command/Command';
+import { CommandHandler } from '@/common/command/CommandHandler';
 
 export class CommandController {
   constructor(

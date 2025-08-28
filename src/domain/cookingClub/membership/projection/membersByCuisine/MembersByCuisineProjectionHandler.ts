@@ -1,12 +1,12 @@
-import { ProjectionHandler } from '../../../../../common';
+import { ProjectionHandler } from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { CuisineRepository } from './CuisineRepository';
-import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
-import { MembershipApplicationRepository } from './MembershipApplicationRepository';
-import { MembershipApplication } from './MembershipApplication';
-import { ApplicationEvaluated } from '../../event/ApplicationEvaluated';
-import { MembershipStatus } from '../../aggregate/membership';
-import { Cuisine } from './Cuisine';
+import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/event/ApplicationSubmitted';
+import { MembershipApplicationRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
+import { MembershipApplication } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplication';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/event/ApplicationEvaluated';
+import { MembershipStatus } from '@/domain/cookingClub/membership/aggregate/membership';
+import { Cuisine } from '@/domain/cookingClub/membership/projection/membersByCuisine/Cuisine';
 
 @injectable()
 export class MembersByCuisineProjectionHandler extends ProjectionHandler {

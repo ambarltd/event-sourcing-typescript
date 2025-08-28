@@ -1,7 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import { MongoClient } from 'mongodb';
-import { MongoSessionPool } from './MongoSessionPool';
-import { log } from './Logger';
+import { MongoSessionPool } from '@/common/util/MongoSessionPool';
+import { log } from '@/common/util/Logger';
 
 @injectable()
 export class MongoInitializer {

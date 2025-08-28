@@ -3,11 +3,14 @@ import {
   PostgresTransactionalEventStore,
   IdGenerator,
   Event,
-} from '../../../../../common';
+} from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
-import { Membership, MembershipStatus } from '../../aggregate/membership';
-import { ApplicationEvaluated } from '../../event/ApplicationEvaluated';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/event/ApplicationSubmitted';
+import {
+  Membership,
+  MembershipStatus,
+} from '@/domain/cookingClub/membership/aggregate/membership';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/event/ApplicationEvaluated';
 
 @injectable()
 export class EvaluateApplicationReactionHandler extends ReactionHandler {

@@ -1,11 +1,8 @@
-import {
-  QueryHandler,
-  MongoTransactionalProjectionOperator,
-} from '../../../../../common';
+import { QueryHandler, MongoTransactionalProjectionOperator } from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { CuisineRepository } from '../../projection/membersByCuisine/CuisineRepository';
-import { MembersByCuisineQuery } from './MembersByCuisineQuery';
-import { Cuisine } from '../../projection/membersByCuisine/Cuisine';
+import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
+import { MembersByCuisineQuery } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQuery';
+import { Cuisine } from '@/domain/cookingClub/membership/projection/membersByCuisine/Cuisine';
 
 @injectable()
 export class MembersByCuisineQueryHandler extends QueryHandler {

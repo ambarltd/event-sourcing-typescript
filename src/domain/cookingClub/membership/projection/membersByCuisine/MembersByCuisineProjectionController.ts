@@ -4,9 +4,9 @@ import {
   Deserializer,
   AmbarHttpRequest,
   ProjectionController,
-} from '../../../../../common';
+} from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { MembersByCuisineProjectionHandler } from './MembersByCuisineProjectionHandler';
+import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
 
 @injectable()
 export class MembersByCuisineProjectionController extends ProjectionController {

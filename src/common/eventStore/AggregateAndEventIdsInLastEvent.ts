@@ -1,4 +1,4 @@
-import { Aggregate } from '../aggregate/Aggregate';
+import { Aggregate } from '@/common/aggregate/Aggregate';
 
 export interface AggregateAndEventIdsInLastEvent<T extends Aggregate> {
   aggregate: T;

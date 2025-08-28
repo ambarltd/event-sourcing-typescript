@@ -1,10 +1,10 @@
-import { AmbarHttpRequest } from '../ambar/AmbarHttpRequest';
-import { AmbarResponseFactory } from '../ambar/AmbarResponseFactory';
-import { PostgresTransactionalEventStore } from '../eventStore/PostgresTransactionalEventStore';
-import { MongoTransactionalProjectionOperator } from '../projection/MongoTransactionalProjectionOperator';
-import { Deserializer } from '../serializedEvent/Deserializer';
-import { log } from '../util/Logger';
-import { ReactionHandler } from './ReactionHandler';
+import { AmbarHttpRequest } from '@/common/ambar/AmbarHttpRequest';
+import { AmbarResponseFactory } from '@/common/ambar/AmbarResponseFactory';
+import { PostgresTransactionalEventStore } from '@/common/eventStore/PostgresTransactionalEventStore';
+import { MongoTransactionalProjectionOperator } from '@/common/projection/MongoTransactionalProjectionOperator';
+import { Deserializer } from '@/common/serializedEvent/Deserializer';
+import { log } from '@/common/util/Logger';
+import { ReactionHandler } from '@/common/reaction/ReactionHandler';
 
 export abstract class ReactionController {
   constructor(

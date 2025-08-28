@@ -1,5 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
-import { Command } from '../../../../../common';
+import { Command } from '@/common';
 
 export class SubmitApplicationCommand extends Command {
   @IsString()

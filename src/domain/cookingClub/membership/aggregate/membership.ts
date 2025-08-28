@@ -1,4 +1,4 @@
-import { Aggregate } from '../../../../common';
+import { Aggregate } from '@/common';
 
 export enum MembershipStatus {
   Requested = 'Requested',

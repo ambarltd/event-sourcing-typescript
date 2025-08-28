@@ -1,6 +1,6 @@
-import { MongoTransactionalProjectionOperator } from '../../../../../common';
+import { MongoTransactionalProjectionOperator } from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { Cuisine } from './Cuisine';
+import { Cuisine } from '@/domain/cookingClub/membership/projection/membersByCuisine/Cuisine';
 
 @injectable()
 export class CuisineRepository {

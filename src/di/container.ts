@@ -11,15 +11,15 @@ import {
   PostgresInitializer,
   EmailService,
   FileStorageService,
-} from '../common';
+} from '@/common';
 import { constructor } from 'tsyringe/dist/typings/types';
-import { SubmitApplicationCommandController } from '../domain/cookingClub/membership/command/submitApplication';
-import { SubmitApplicationCommandHandler } from '../domain/cookingClub/membership/command/submitApplication';
-import { EvaluateApplicationReactionHandler } from '../domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
-import { EvaluateApplicationReactionController } from '../domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
-import { MembersByCuisineProjectionHandler } from '../domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
-import { MembershipApplicationRepository } from '../domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
-import { CuisineRepository } from '../domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
+import { SubmitApplicationCommandController } from '@/domain/cookingClub/membership/command/submitApplication';
+import { SubmitApplicationCommandHandler } from '@/domain/cookingClub/membership/command/submitApplication';
+import { EvaluateApplicationReactionHandler } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
+import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
+import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
+import { MembershipApplicationRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
+import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =

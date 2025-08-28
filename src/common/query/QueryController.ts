@@ -1,7 +1,7 @@
-import { MongoTransactionalProjectionOperator } from '../projection/MongoTransactionalProjectionOperator';
-import { log } from '../util/Logger';
-import { QueryHandler } from './QueryHandler';
-import { Query } from './Query';
+import { MongoTransactionalProjectionOperator } from '@/common/projection/MongoTransactionalProjectionOperator';
+import { log } from '@/common/util/Logger';
+import { QueryHandler } from '@/common/query/QueryHandler';
+import { Query } from '@/common/query/Query';
 
 export class QueryController {
   constructor(
