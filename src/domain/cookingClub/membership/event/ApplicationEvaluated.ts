@@ -23,7 +23,7 @@ export class ApplicationEvaluated extends TransformationEvent<Membership> {
       causationId,
       recordedOn,
     );
-    
+
     this.evaluationOutcome = evaluationOutcome;
   }
 

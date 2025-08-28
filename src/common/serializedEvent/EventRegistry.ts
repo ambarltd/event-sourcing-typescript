@@ -25,7 +25,10 @@ class EventRegistryClass {
     this.eventsByConstructor.set(constructor, metadata);
   }
 
-  addSerializableProperty(constructor: EventConstructor, propertyKey: string): void {
+  addSerializableProperty(
+    constructor: EventConstructor,
+    propertyKey: string,
+  ): void {
     const metadata = this.eventsByConstructor.get(constructor);
     if (metadata) {
       metadata.serializableProperties.add(propertyKey);
@@ -41,7 +44,9 @@ class EventRegistryClass {
   }
 
   getEventName(event: Event): string {
-    const metadata = this.eventsByConstructor.get(event.constructor as EventConstructor);
+    const metadata = this.eventsByConstructor.get(
+      event.constructor as EventConstructor,
+    );
     if (!metadata) {
       throw new Error(`Event type not registered: ${event.constructor.name}`);
     }

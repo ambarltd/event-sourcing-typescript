@@ -24,7 +24,7 @@ export class Deserializer {
     ];
 
     const payloadArgs = Array.from(metadata.serializableProperties).map(
-      (propertyKey) => payload[propertyKey]
+      (propertyKey) => payload[propertyKey],
     );
 
     return new metadata.constructor(...baseArgs, ...payloadArgs);

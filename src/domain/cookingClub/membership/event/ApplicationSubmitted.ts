@@ -36,7 +36,7 @@ export class ApplicationSubmitted extends CreationEvent<Membership> {
       causationId,
       recordedOn,
     );
-    
+
     this.firstName = firstName;
     this.lastName = lastName;
     this.favoriteCuisine = favoriteCuisine;

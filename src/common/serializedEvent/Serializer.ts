@@ -26,7 +26,7 @@ export class Serializer {
     }
 
     const payload: Record<string, any> = {};
-    
+
     for (const propertyKey of metadata.serializableProperties) {
       payload[propertyKey] = (event as any)[propertyKey];
     }
