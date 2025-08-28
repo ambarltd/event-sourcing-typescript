@@ -1,3 +1,3 @@
-export * from "./Query";
-export * from "./QueryController";
-export * from "./QueryHandler";
+export * from './Query';
+export * from './QueryController';
+export * from './QueryHandler';
