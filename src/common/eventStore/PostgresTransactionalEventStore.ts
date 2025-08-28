@@ -60,16 +60,15 @@ export class PostgresTransactionalEventStore {
       this.deserializer.deserialize(e),
     );
 
-    if (events.length === 0) {
+    const firstEvent: Event | undefined = events[0];
+    if (firstEvent == undefined) {
       throw new Error(`No events found for aggregateId: ${aggregateId}`);
     }
-
-    const creationEvent = events[0];
-    const transformationEvents = events.slice(1);
-
+    const creationEvent: Event = firstEvent;
     if (!this.isCreationEventForAggregate<T>(creationEvent)) {
       throw new Error('First event is not a creation event');
     }
+    const transformationEvents = events.slice(1);
 
     let aggregate = creationEvent.createAggregate();
     let eventIdOfLastEvent = creationEvent.eventId;
@@ -147,10 +146,10 @@ export class PostgresTransactionalEventStore {
     if (!this.connection) throw new Error('No active connection');
 
     const sql = `
-            SELECT id, event_id, aggregate_id, causation_id, correlation_id, 
+            SELECT id, event_id, aggregate_id, causation_id, correlation_id,
                    aggregate_version, json_payload, json_metadata, recorded_on, event_name
             FROM ${this.eventStoreTable}
-            WHERE aggregate_id = $1 
+            WHERE aggregate_id = $1
             ORDER BY aggregate_version ASC
         `;
 
@@ -171,7 +170,7 @@ export class PostgresTransactionalEventStore {
 
     const sql = `
             INSERT INTO ${this.eventStoreTable} (
-                event_id, aggregate_id, causation_id, correlation_id, 
+                event_id, aggregate_id, causation_id, correlation_id,
                 aggregate_version, json_payload, json_metadata, recorded_on, event_name
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `;
@@ -203,7 +202,7 @@ export class PostgresTransactionalEventStore {
     if (!this.connection) throw new Error('No active connection');
 
     const sql = `
-            SELECT id, event_id, aggregate_id, causation_id, correlation_id, 
+            SELECT id, event_id, aggregate_id, causation_id, correlation_id,
                    aggregate_version, json_payload, json_metadata, recorded_on, event_name
             FROM ${this.eventStoreTable}
             WHERE event_id = $1

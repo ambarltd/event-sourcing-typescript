@@ -25,7 +25,7 @@ export class MembersByCuisineQueryController extends QueryController {
     this.router.post('/members-by-cuisine', this.membersByCuisine.bind(this));
   }
 
-  async membersByCuisine(req: Request, res: Response): Promise<void> {
+  async membersByCuisine(_req: Request, res: Response): Promise<void> {
     const query = new MembersByCuisineQuery();
 
     const result = await this.processQuery(

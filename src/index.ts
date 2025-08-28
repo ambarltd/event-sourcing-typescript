@@ -51,16 +51,16 @@ app.use(
     return controller.router(req, res, next);
   },
 );
-app.get('/docker_healthcheck', (req, res) => res.send('OK'));
-app.get('/', (req, res) => res.send('OK'));
+app.get('/docker_healthcheck', (_req, res) => res.send('OK'));
+app.get('/', (_req, res) => res.send('OK'));
 
 // Error handling middleware
 app.use(
   (
     err: Error,
-    req: express.Request,
+    _req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    _next: express.NextFunction,
   ) => {
     log.error('Unhandled error:', err);
     res.status(500).json({

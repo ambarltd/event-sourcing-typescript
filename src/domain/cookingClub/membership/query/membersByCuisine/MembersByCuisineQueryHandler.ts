@@ -20,7 +20,7 @@ export class MembersByCuisineQueryHandler extends QueryHandler {
     this.cuisineRepository = cuisineRepository;
   }
 
-  async handleQuery(query: MembersByCuisineQuery): Promise<Cuisine[]> {
+  async handleQuery(_query: MembersByCuisineQuery): Promise<Cuisine[]> {
     return await this.cuisineRepository.findAll();
   }
 }

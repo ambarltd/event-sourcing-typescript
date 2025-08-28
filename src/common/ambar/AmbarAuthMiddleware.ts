@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
-const VALID_USERNAME = process.env.AMBAR_HTTP_USERNAME;
-const VALID_PASSWORD = process.env.AMBAR_HTTP_PASSWORD;
+const VALID_USERNAME = process.env['AMBAR_HTTP_USERNAME'];
+const VALID_PASSWORD = process.env['AMBAR_HTTP_PASSWORD'];
 
 if (!VALID_USERNAME || !VALID_PASSWORD) {
   throw new Error(
@@ -25,18 +25,18 @@ export const AmbarAuthMiddleware = (
   }
 
   try {
-    const base64Credentials = authHeader.split(' ')[1];
+    const base64Credentials = authHeader.split(' ')[1] || '';
     const credentials = Buffer.from(base64Credentials, 'base64').toString(
       'utf8',
     );
     const [username, password] = credentials.split(':');
 
     if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-      next();
+      return next();
     } else {
-      res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (error) {
-    res.status(401).json({ error: 'Invalid authentication format' });
+    return res.status(401).json({ error: 'Invalid authentication format' });
   }
 };

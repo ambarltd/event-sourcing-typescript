@@ -26,12 +26,20 @@ export class IdGenerator {
     const chars = new Array(this.ID_LENGTH);
 
     for (let i = 0; i < this.ID_LENGTH; i++) {
-      const randomByte = randomBytes(1)[0];
+      const byte = randomByte();
       chars[i] = this.ALPHANUMERIC_CHARACTERS.charAt(
-        randomByte % this.ALPHANUMERIC_CHARACTERS.length,
+        byte % this.ALPHANUMERIC_CHARACTERS.length,
       );
     }
 
     return chars.join('');
   }
+}
+
+function randomByte(): number {
+  const byte = randomBytes(1)[0];
+  if (byte == undefined) {
+    throw new Error('No byte returned by randomBytes');
+  }
+  return byte;
 }
