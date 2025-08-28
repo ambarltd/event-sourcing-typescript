@@ -12,7 +12,7 @@ export interface FileStorageOptions {
 
 export interface FileStorageServiceConfig {
   endPoint: string;
-  port?: number;
+  port: number;
   useSSL: boolean;
   accessKey: string;
   secretKey: string;
@@ -66,7 +66,7 @@ export class FileStorageService {
       useSSL: url.protocol === 'https:',
       accessKey: this.getEnvVar('S3_ACCESS_KEY'),
       secretKey: this.getEnvVar('S3_SECRET_KEY'),
-      region: process.env.S3_REGION || 'us-east-1',
+      region: this.getEnvVar('S3_REGION'),
     };
   }
 

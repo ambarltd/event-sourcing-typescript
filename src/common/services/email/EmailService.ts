@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { log } from '../../util';
+import { log } from '@/common';
 
 export interface EmailOptions {
   to: string | string[];
@@ -44,12 +44,12 @@ export class EmailService {
     return {
       host: this.getEnvVar('SMTP_HOST'),
       port: parseInt(this.getEnvVar('SMTP_PORT')),
-      secure: process.env.SMTP_SECURE === 'true',
+      secure: true,
       auth: {
         user: this.getEnvVar('SMTP_USERNAME'),
         pass: this.getEnvVar('SMTP_PASSWORD'),
       },
-      defaultFrom: process.env.SMTP_FROM_EMAIL,
+      defaultFrom: this.getEnvVar('SMTP_FROM_EMAIL'),
     };
   }
 
