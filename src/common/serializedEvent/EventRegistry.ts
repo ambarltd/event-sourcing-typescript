@@ -25,6 +25,21 @@ class EventRegistryClass {
     this.eventsByConstructor.set(constructor, metadata);
   }
 
+  registerEvent<T extends EventConstructor>(
+    eventName: string,
+    constructor: T,
+    serializableProps: string[],
+  ): void {
+    const metadata: EventMetadata = {
+      constructor,
+      eventName,
+      serializableProperties: new Set(serializableProps),
+    };
+
+    this.eventsByName.set(eventName, metadata);
+    this.eventsByConstructor.set(constructor, metadata);
+  }
+
   addSerializableProperty(
     constructor: EventConstructor,
     propertyKey: string,
@@ -55,14 +70,3 @@ class EventRegistryClass {
 }
 
 export const EventRegistry = new EventRegistryClass();
-
-export function RegisterEvent(eventName: string) {
-  return function <T extends EventConstructor>(constructor: T): T {
-    EventRegistry.register(eventName, constructor);
-    return constructor;
-  };
-}
-
-export function Serializable(target: any, propertyKey: string): void {
-  EventRegistry.addSerializableProperty(target.constructor, propertyKey);
-}

@@ -1,11 +1,18 @@
 import { TransformationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
-import { RegisterEvent, Serializable } from '../../../../common';
+import { EventRegistry } from '../../../../common';
 
-@RegisterEvent('CookingClub_Membership_ApplicationEvaluated')
 export class ApplicationEvaluated extends TransformationEvent<Membership> {
-  @Serializable
   public readonly evaluationOutcome: MembershipStatus;
+
+  static {
+    EventRegistry.registerEvent(
+      'CookingClub_Membership_ApplicationEvaluated',
+      this,
+      ['evaluationOutcome'],
+    );
+  }
+
   constructor(
     eventId: string,
     aggregateId: string,

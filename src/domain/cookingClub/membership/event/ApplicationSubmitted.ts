@@ -1,19 +1,27 @@
 import { CreationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
-import { RegisterEvent, Serializable } from '../../../../common';
+import { EventRegistry } from '../../../../common';
 
-@RegisterEvent('CookingClub_Membership_ApplicationSubmitted')
 export class ApplicationSubmitted extends CreationEvent<Membership> {
-  @Serializable
   public readonly firstName: string;
-  @Serializable
   public readonly lastName: string;
-  @Serializable
   public readonly favoriteCuisine: string;
-  @Serializable
   public readonly yearsOfProfessionalExperience: number;
-  @Serializable
   public readonly numberOfCookingBooksRead: number;
+
+  static {
+    EventRegistry.registerEvent(
+      'CookingClub_Membership_ApplicationSubmitted',
+      this,
+      [
+        'firstName',
+        'lastName',
+        'favoriteCuisine',
+        'yearsOfProfessionalExperience',
+        'numberOfCookingBooksRead',
+      ],
+    );
+  }
 
   constructor(
     eventId: string,
