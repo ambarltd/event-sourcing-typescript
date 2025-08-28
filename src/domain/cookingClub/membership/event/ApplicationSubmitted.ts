@@ -1,7 +1,28 @@
 import { CreationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
+import { EventRegistry } from '../../../../common';
 
 export class ApplicationSubmitted extends CreationEvent<Membership> {
+  public readonly firstName: string;
+  public readonly lastName: string;
+  public readonly favoriteCuisine: string;
+  public readonly yearsOfProfessionalExperience: number;
+  public readonly numberOfCookingBooksRead: number;
+
+  static {
+    EventRegistry.registerEvent(
+      'CookingClub_Membership_ApplicationSubmitted',
+      this,
+      [
+        'firstName',
+        'lastName',
+        'favoriteCuisine',
+        'yearsOfProfessionalExperience',
+        'numberOfCookingBooksRead',
+      ],
+    );
+  }
+
   constructor(
     eventId: string,
     aggregateId: string,
@@ -9,11 +30,11 @@ export class ApplicationSubmitted extends CreationEvent<Membership> {
     correlationId: string,
     causationId: string,
     recordedOn: Date,
-    public readonly firstName: string,
-    public readonly lastName: string,
-    public readonly favoriteCuisine: string,
-    public readonly yearsOfProfessionalExperience: number,
-    public readonly numberOfCookingBooksRead: number,
+    firstName: string,
+    lastName: string,
+    favoriteCuisine: string,
+    yearsOfProfessionalExperience: number,
+    numberOfCookingBooksRead: number,
   ) {
     super(
       eventId,
@@ -23,6 +44,12 @@ export class ApplicationSubmitted extends CreationEvent<Membership> {
       causationId,
       recordedOn,
     );
+
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.favoriteCuisine = favoriteCuisine;
+    this.yearsOfProfessionalExperience = yearsOfProfessionalExperience;
+    this.numberOfCookingBooksRead = numberOfCookingBooksRead;
   }
 
   createAggregate(): Membership {

@@ -1,7 +1,18 @@
 import { TransformationEvent } from '../../../../common';
 import { Membership, MembershipStatus } from '../aggregate/membership';
+import { EventRegistry } from '../../../../common';
 
 export class ApplicationEvaluated extends TransformationEvent<Membership> {
+  public readonly evaluationOutcome: MembershipStatus;
+
+  static {
+    EventRegistry.registerEvent(
+      'CookingClub_Membership_ApplicationEvaluated',
+      this,
+      ['evaluationOutcome'],
+    );
+  }
+
   constructor(
     eventId: string,
     aggregateId: string,
@@ -9,7 +20,7 @@ export class ApplicationEvaluated extends TransformationEvent<Membership> {
     correlationId: string,
     causationId: string,
     recordedOn: Date,
-    public readonly evaluationOutcome: MembershipStatus,
+    evaluationOutcome: MembershipStatus,
   ) {
     super(
       eventId,
@@ -19,6 +30,8 @@ export class ApplicationEvaluated extends TransformationEvent<Membership> {
       causationId,
       recordedOn,
     );
+
+    this.evaluationOutcome = evaluationOutcome;
   }
 
   transformAggregate(aggregate: Membership): Membership {
