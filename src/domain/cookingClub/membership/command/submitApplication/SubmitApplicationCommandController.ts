@@ -1,18 +1,19 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import {
   CommandController,
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   ValidationPipe,
+  Route,
+  Controller,
 } from '../../../../../common';
 import { inject, injectable } from 'tsyringe';
 import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
 import { SubmitApplicationCommand } from './SubmitApplicationCommand';
 
 @injectable()
+@Controller('/api/v1/cooking-club/membership/command')
 export class SubmitApplicationCommandController extends CommandController {
-  public readonly router: Router;
-
   private readonly submitApplicationCommandHandler: SubmitApplicationCommandHandler;
 
   constructor(
@@ -28,12 +29,9 @@ export class SubmitApplicationCommandController extends CommandController {
       mongoTransactionalProjectionOperator,
     );
     this.submitApplicationCommandHandler = submitApplicationCommandHandler;
-    this.router = Router();
-
-    //TODO: abstract this next
-    this.router.post('/submit-application', this.submitApplication.bind(this));
   }
 
+  @Route('/submit-application')
   async submitApplication(req: Request, res: Response): Promise<void> {
     const command = await ValidationPipe(SubmitApplicationCommand, req);
 

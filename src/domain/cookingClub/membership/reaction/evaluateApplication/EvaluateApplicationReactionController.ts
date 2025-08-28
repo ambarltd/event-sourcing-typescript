@@ -4,15 +4,16 @@ import {
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   Deserializer,
+  Route,
+  Controller,
 } from '../../../../../common';
-import { Request, Response, Router } from 'express';
+import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { EvaluateApplicationReactionHandler } from './EvaluateApplicationReactionHandler';
 
 @injectable()
+@Controller('/api/v1/cooking-club/membership/reaction')
 export class EvaluateApplicationReactionController extends ReactionController {
-  public readonly router: Router;
-
   constructor(
     @inject(PostgresTransactionalEventStore)
     eventStore: PostgresTransactionalEventStore,
@@ -23,13 +24,9 @@ export class EvaluateApplicationReactionController extends ReactionController {
     private readonly evaluateApplicationReactionHandler: EvaluateApplicationReactionHandler,
   ) {
     super(eventStore, mongoOperator, deserializer);
-    this.router = Router();
-    this.router.post(
-      '/evaluate-application',
-      this.reactWithEvaluateApplication.bind(this),
-    );
   }
 
+  @Route('/evaluate-application')
   async reactWithEvaluateApplication(
     req: Request,
     res: Response,
