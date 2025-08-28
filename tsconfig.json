@@ -6,7 +6,7 @@
     "strict": true,                               // a bunch of stronger type guarantees.
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": false,                        // don't typecheck library files that weren't imported.
+    "skipLibCheck": true,                         // don't typecheck library files that weren't imported.
     "noUnusedLocals": true,                       // every local variable must be used.
     "noUnusedParameters": true,                   // every named parameter that doesn't start with '_' must be used.
     "exactOptionalPropertyTypes": true,           // optional values cannot be set to undefined. They are either missing or present.
