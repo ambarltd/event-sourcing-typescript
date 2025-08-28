@@ -1,8 +1,8 @@
-import { Event } from '../event/Event';
-import { SerializedEvent } from './SerializedEvent';
+import { Event } from '@/common/event/Event';
+import { SerializedEvent } from '@/common/serializedEvent/SerializedEvent';
 import { injectable } from 'tsyringe';
-import { ApplicationSubmitted } from '../../domain/cookingClub/membership/event/ApplicationSubmitted';
-import { ApplicationEvaluated } from '../../domain/cookingClub/membership/event/ApplicationEvaluated';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/event/ApplicationSubmitted';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/event/ApplicationEvaluated';
 
 @injectable()
 export class Serializer {

@@ -1,5 +1,5 @@
-import { TransformationEvent } from '../../../../common';
-import { Membership, MembershipStatus } from '../aggregate/membership';
+import { TransformationEvent } from '@/common';
+import { Membership, MembershipStatus } from '@/domain/cookingClub/membership/aggregate/membership';
 
 export class ApplicationEvaluated extends TransformationEvent<Membership> {
   constructor(

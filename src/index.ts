@@ -1,16 +1,17 @@
+import 'tsconfig-paths/register'; // enable absolute paths
 import 'reflect-metadata';
 import express from 'express';
 import { container } from 'tsyringe';
-import { configureDependencies } from './di/container';
-import { scopedContainer } from './di/scopedContainer';
-import { MongoInitializer } from './common/util/MongoInitializer';
-import { PostgresInitializer } from './common/util/PostgresInitializer';
-import { log } from './common/util/Logger';
-import { AmbarAuthMiddleware } from './common/ambar/AmbarAuthMiddleware';
-import { SubmitApplicationCommandController } from './domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
-import { MembersByCuisineQueryController } from './domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryController';
-import { EvaluateApplicationReactionController } from './domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
-import { MembersByCuisineProjectionController } from './domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
+import { configureDependencies } from '@/di/container';
+import { scopedContainer } from '@/di/scopedContainer';
+import { MongoInitializer } from '@/common/util/MongoInitializer';
+import { PostgresInitializer } from '@/common/util/PostgresInitializer';
+import { log } from '@/common/util/Logger';
+import { AmbarAuthMiddleware } from '@/common/ambar/AmbarAuthMiddleware';
+import { SubmitApplicationCommandController } from '@/domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
+import { MembersByCuisineQueryController } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryController';
+import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
+import { MembersByCuisineProjectionController } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
 
 // Configure dependency injection
 configureDependencies();

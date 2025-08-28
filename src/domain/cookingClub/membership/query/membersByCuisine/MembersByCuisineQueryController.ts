@@ -2,10 +2,10 @@ import { Request, Response, Router } from 'express';
 import {
   QueryController,
   MongoTransactionalProjectionOperator,
-} from '../../../../../common';
+} from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { MembersByCuisineQueryHandler } from './MembersByCuisineQueryHandler';
-import { MembersByCuisineQuery } from './MembersByCuisineQuery';
+import { MembersByCuisineQueryHandler } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryHandler';
+import { MembersByCuisineQuery } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQuery';
 
 @injectable()
 export class MembersByCuisineQueryController extends QueryController {

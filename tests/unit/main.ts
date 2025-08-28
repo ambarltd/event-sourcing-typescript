@@ -1,6 +1,8 @@
-import { run } from './lib/test';
+import 'tsconfig-paths/register'; // enable absolute paths
 
-import * as example from './suites/example';
+import { run } from '/tests/unit/lib/test';
+
+import * as example from '/tests/unit/suites/example';
 
 console.log('Running tests');
 run([example.tests]);

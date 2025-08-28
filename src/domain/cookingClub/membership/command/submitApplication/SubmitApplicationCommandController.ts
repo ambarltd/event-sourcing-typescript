@@ -4,10 +4,10 @@ import {
   PostgresTransactionalEventStore,
   MongoTransactionalProjectionOperator,
   ValidationPipe,
-} from '../../../../../common';
+} from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { SubmitApplicationCommandHandler } from './SubmitApplicationCommandHandler';
-import { SubmitApplicationCommand } from './SubmitApplicationCommand';
+import { SubmitApplicationCommandHandler } from '@/domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandHandler';
+import { SubmitApplicationCommand } from '@/domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommand';
 
 @injectable()
 export class SubmitApplicationCommandController extends CommandController {

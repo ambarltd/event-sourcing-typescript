@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { plainToClass, ClassConstructor } from 'class-transformer';
 import { validate, ValidatorOptions } from 'class-validator';
-import { ValidationPipeException } from './ValidationPipeException';
+import { ValidationPipeException } from '@/common/middleware/ValidationPipeException';
 
 export async function ValidationPipe<T extends object>(
   targetClass: ClassConstructor<T>,

@@ -1,5 +1,5 @@
-import { Command } from './Command';
-import { PostgresTransactionalEventStore } from '../eventStore/PostgresTransactionalEventStore';
+import { Command } from '@/common/command/Command';
+import { PostgresTransactionalEventStore } from '@/common/eventStore/PostgresTransactionalEventStore';
 
 export abstract class CommandHandler {
   constructor(

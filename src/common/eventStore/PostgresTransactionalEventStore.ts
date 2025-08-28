@@ -1,14 +1,14 @@
 import { PoolClient } from 'pg';
-import { PostgresConnectionPool } from '../util/PostgresConnectionPool';
-import { Serializer } from '../serializedEvent/Serializer';
-import { Deserializer } from '../serializedEvent/Deserializer';
-import { SerializedEvent } from '../serializedEvent/SerializedEvent';
-import { Event } from '../event/Event';
-import { CreationEvent } from '../event/CreationEvent';
-import { TransformationEvent } from '../event/TransformationEvent';
-import { Aggregate } from '../aggregate/Aggregate';
-import { log } from '../util/Logger';
-import { AggregateAndEventIdsInLastEvent } from './AggregateAndEventIdsInLastEvent';
+import { PostgresConnectionPool } from '@/common/util/PostgresConnectionPool';
+import { Serializer } from '@/common/serializedEvent/Serializer';
+import { Deserializer } from '@/common/serializedEvent/Deserializer';
+import { SerializedEvent } from '@/common/serializedEvent/SerializedEvent';
+import { Event } from '@/common/event/Event';
+import { CreationEvent } from '@/common/event/CreationEvent';
+import { TransformationEvent } from '@/common/event/TransformationEvent';
+import { Aggregate } from '@/common/aggregate/Aggregate';
+import { log } from '@/common/util/Logger';
+import { AggregateAndEventIdsInLastEvent } from '@/common/eventStore/AggregateAndEventIdsInLastEvent';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()

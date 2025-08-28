@@ -1,5 +1,5 @@
-import { MongoTransactionalProjectionOperator } from '../projection/MongoTransactionalProjectionOperator';
-import { Query } from './Query';
+import { MongoTransactionalProjectionOperator } from '@/common/projection/MongoTransactionalProjectionOperator';
+import { Query } from '@/common/query/Query';
 
 export abstract class QueryHandler {
   constructor(

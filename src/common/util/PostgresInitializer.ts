@@ -1,6 +1,6 @@
 import { injectable, inject } from 'tsyringe';
-import { PostgresConnectionPool } from './PostgresConnectionPool';
-import { log } from './Logger';
+import { PostgresConnectionPool } from '@/common/util/PostgresConnectionPool';
+import { log } from '@/common/util/Logger';
 
 @injectable()
 export class PostgresInitializer {

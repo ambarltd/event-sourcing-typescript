@@ -1,6 +1,6 @@
-import { MongoTransactionalProjectionOperator } from '../../../../../common';
+import { MongoTransactionalProjectionOperator } from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { MembershipApplication } from './MembershipApplication';
+import { MembershipApplication } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplication';
 
 @injectable()
 export class MembershipApplicationRepository {

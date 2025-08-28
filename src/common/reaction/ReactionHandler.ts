@@ -1,5 +1,5 @@
-import { Event } from '../event/Event';
-import { PostgresTransactionalEventStore } from '../eventStore/PostgresTransactionalEventStore';
+import { Event } from '@/common/event/Event';
+import { PostgresTransactionalEventStore } from '@/common/eventStore/PostgresTransactionalEventStore';
 
 export abstract class ReactionHandler {
   constructor(

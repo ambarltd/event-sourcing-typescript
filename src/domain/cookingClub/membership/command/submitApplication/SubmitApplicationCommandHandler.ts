@@ -2,10 +2,10 @@ import {
   CommandHandler,
   PostgresTransactionalEventStore,
   IdGenerator,
-} from '../../../../../common';
+} from '@/common';
 import { inject, injectable } from 'tsyringe';
-import { ApplicationSubmitted } from '../../event/ApplicationSubmitted';
-import { SubmitApplicationCommand } from './SubmitApplicationCommand';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/event/ApplicationSubmitted';
+import { SubmitApplicationCommand } from '@/domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommand';
 
 @injectable()
 export class SubmitApplicationCommandHandler extends CommandHandler {

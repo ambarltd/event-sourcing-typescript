@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { log } from '../../util/Logger';
+import { log } from '@/common/util/Logger';
 
 export interface EmailOptions {
   to: string | string[];

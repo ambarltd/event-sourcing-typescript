@@ -14,8 +14,8 @@ import {
   OptionalUnlessRequiredId,
   WithId,
 } from 'mongodb';
-import { MongoSessionPool } from '../util/MongoSessionPool';
-import { log } from '../util/Logger';
+import { MongoSessionPool } from '@/common/util/MongoSessionPool';
+import { log } from '@/common/util/Logger';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()

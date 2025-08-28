@@ -1,6 +1,6 @@
 export { tests };
 
-import { test, group, expect } from '../lib/test';
+import { test, group, expect } from '/tests/unit/lib/test';
 
 const tests = group('Example test group', [
   group('subgroup', [

@@ -1,6 +1,6 @@
 import * as Minio from 'minio';
 import { Readable } from 'stream';
-import { log } from '../../util';
+import { log } from '@/common/util';
 
 export interface FileStorageOptions {
   bucketName: string;
