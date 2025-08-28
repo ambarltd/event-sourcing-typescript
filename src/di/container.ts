@@ -9,10 +9,12 @@ import {
   MongoTransactionalProjectionOperator,
   MongoInitializer,
   PostgresInitializer,
+  EmailService,
+  FileStorageService,
 } from '../common';
 import { constructor } from 'tsyringe/dist/typings/types';
-import { SubmitApplicationCommandController } from '../domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
-import { SubmitApplicationCommandHandler } from '../domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandHandler';
+import { SubmitApplicationCommandController } from '../domain/cookingClub/membership/command/submitApplication';
+import { SubmitApplicationCommandHandler } from '../domain/cookingClub/membership/command/submitApplication';
 import { EvaluateApplicationReactionHandler } from '../domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
 import { EvaluateApplicationReactionController } from '../domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionHandler } from '../domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
@@ -65,6 +67,10 @@ function registerSingletons() {
   container.registerSingleton(MongoSessionPool);
   container.registerSingleton(MongoInitializer);
   container.registerSingleton(PostgresInitializer);
+
+  // common/services
+  container.registerSingleton(EmailService);
+  container.registerSingleton(FileStorageService);
 }
 
 function registerScoped<T>(token: constructor<T>) {

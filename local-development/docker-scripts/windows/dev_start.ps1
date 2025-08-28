@@ -36,6 +36,10 @@ try {
     Write-Host "======================================================================="
     Write-Host "|| You can navigate to localhost:8082 to view your projection store.  ||"
     Write-Host "======================================================================="
+    Write-Host "|| You can navigate to localhost:8083 to view the email server.      ||"
+    Write-Host "======================================================================="
+    Write-Host "|| You can navigate to localhost:8084 to view the storage server.    ||"
+    Write-Host "======================================================================="
 
 } finally {
     Set-Location -Path $originalLocation

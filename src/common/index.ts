@@ -8,4 +8,5 @@ export * from './projection';
 export * from './query';
 export * from './reaction';
 export * from './serializedEvent';
+export * from './services';
 export * from './util';
