@@ -1,5 +1,5 @@
-export {
-  FileStorageService,
+export { FileStorageService } from './FileStorageService';
+export type {
   FileStorageOptions,
   FileStorageServiceConfig,
   FileStorageResult,
