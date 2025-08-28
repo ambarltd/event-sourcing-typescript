@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
-const VALID_USERNAME = process.env.AMBAR_HTTP_USERNAME;
-const VALID_PASSWORD = process.env.AMBAR_HTTP_PASSWORD;
+const VALID_USERNAME = process.env['AMBAR_HTTP_USERNAME'];
+const VALID_PASSWORD = process.env['AMBAR_HTTP_PASSWORD'];
 
 if (!VALID_USERNAME || !VALID_PASSWORD) {
   throw new Error(

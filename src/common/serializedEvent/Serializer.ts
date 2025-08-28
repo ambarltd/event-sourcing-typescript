@@ -34,14 +34,14 @@ export class Serializer {
     const payload: Record<string, any> = {};
 
     if (event instanceof ApplicationSubmitted) {
-      payload.firstName = event.firstName;
-      payload.lastName = event.lastName;
-      payload.favoriteCuisine = event.favoriteCuisine;
-      payload.yearsOfProfessionalExperience =
+      payload['firstName'] = event.firstName;
+      payload['lastName'] = event.lastName;
+      payload['favoriteCuisine'] = event.favoriteCuisine;
+      payload['yearsOfProfessionalExperience'] =
         event.yearsOfProfessionalExperience;
-      payload.numberOfCookingBooksRead = event.numberOfCookingBooksRead;
+      payload['numberOfCookingBooksRead'] = event.numberOfCookingBooksRead;
     } else if (event instanceof ApplicationEvaluated) {
-      payload.evaluationOutcome = event.evaluationOutcome;
+      payload['evaluationOutcome'] = event.evaluationOutcome;
     }
 
     return JSON.stringify(payload);
