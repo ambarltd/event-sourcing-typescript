@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { container, Lifecycle } from 'tsyringe';
 import {
   Serializer,
