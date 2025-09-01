@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "nodenext",
+    // sources and paths
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
@@ -9,10 +8,20 @@
       "/tests/*": ["./tests/*"]
     },
 
+    // module options
+    "target": "ES2020",
+    "module": "ESNext",
+    "isolatedModules": true,                      // more predictable behaviour with edge-cases of module imports.
+    "moduleDetection": "force",                   // every non declaration file is a module.
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,                         // don't typecheck library files that weren't imported.
+    "checkJs": true,                              // type-check JS files.
+    "sourceMap": true,
+
+    // type checking configs
     "strict": true,                               // a bunch of stronger type guarantees.
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": true,                         // don't typecheck library files that weren't imported.
     "noUnusedLocals": true,                       // every local variable must be used.
     "noUnusedParameters": true,                   // every named parameter that doesn't start with '_' must be used.
     "exactOptionalPropertyTypes": true,           // optional values cannot be set to undefined. They are either missing or present.
@@ -21,12 +30,8 @@
     "noUncheckedIndexedAccess": true,             // the type of index access is always "T | undefined" and you much check for the undefined.
     "noImplicitOverride": true,                   // must use 'override' keyword for method overrides.
     "noPropertyAccessFromIndexSignature": true,   // if a property isn't declared in a type, you have to use square brackets to access it.
-    "isolatedModules": true,                      // more predictable behaviour with edge-cases of module imports.
-    "moduleDetection": "force",                   // every non declaration file is a module.
     "allowUnusedLabels": false,                   // declared labels must be used.
     "allowUnreachableCode": false,                // unreachable code is an error.
-    "checkJs": true,                              // type-check JS files.
-    "sourceMap": true,
   },
   "include": ["src", "tests"]
 }
