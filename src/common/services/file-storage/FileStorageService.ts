@@ -1,6 +1,7 @@
 import * as Minio from 'minio';
 import { Readable } from 'stream';
 import { log } from '@/common/util';
+import env from '@/app/environment';
 
 export interface FileStorageOptions {
   bucketName: string;
@@ -53,7 +54,7 @@ export class FileStorageService {
   }
 
   private getRequiredConfig(): FileStorageServiceConfig {
-    const endpointUrl = this.getEnvVar('S3_ENDPOINT_URL');
+    const endpointUrl = env.S3_ENDPOINT_URL;
     const url = new URL(endpointUrl);
 
     return {
@@ -64,18 +65,10 @@ export class FileStorageService {
           ? 443
           : 80,
       useSSL: url.protocol === 'https:',
-      accessKey: this.getEnvVar('S3_ACCESS_KEY'),
-      secretKey: this.getEnvVar('S3_SECRET_KEY'),
-      region: this.getEnvVar('S3_REGION'),
+      accessKey: env.S3_ACCESS_KEY,
+      secretKey: env.S3_SECRET_KEY,
+      region: env.S3_REGION,
     };
-  }
-
-  private getEnvVar(name: string): string {
-    const value = process.env[name];
-    if (!value) {
-      throw new Error(`Environment variable ${name} is not defined`);
-    }
-    return value;
   }
 
   async createBucket(bucketName: string, region?: string): Promise<void> {
