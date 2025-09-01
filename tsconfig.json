@@ -10,7 +10,7 @@
 
     // module options
     "target": "ES2020",
-    "module": "nodenext",
+    "module": "ESNext",
     "isolatedModules": true,                      // more predictable behaviour with edge-cases of module imports.
     "moduleDetection": "force",                   // every non declaration file is a module.
     "moduleResolution": "bundler",
