@@ -19,37 +19,38 @@ import { EvaluateApplicationReactionController } from '@/domain/cookingClub/memb
 import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
 import { MembershipApplicationRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
 import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
+import env from '@/app/environment';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
-    `postgresql://${getEnvVar('EVENT_STORE_USER')}:${getEnvVar('EVENT_STORE_PASSWORD')}@` +
-    `${getEnvVar('EVENT_STORE_HOST')}:${getEnvVar('EVENT_STORE_PORT')}/` +
-    `${getEnvVar('EVENT_STORE_DATABASE_NAME')}`;
+    `postgresql://${env.EVENT_STORE_USER}:${env.EVENT_STORE_PASSWORD}@` +
+    `${env.EVENT_STORE_HOST}:${env.EVENT_STORE_PORT}/` +
+    `${env.EVENT_STORE_DATABASE_NAME}`;
   container.register('postgresConnectionString', {
     useValue: postgresConnectionString,
   });
   container.register('eventStoreTable', {
-    useValue: getEnvVar('EVENT_STORE_CREATE_TABLE_WITH_NAME'),
+    useValue: env.EVENT_STORE_CREATE_TABLE_WITH_NAME,
   });
   container.register('eventStoreDatabaseName', {
-    useValue: getEnvVar('EVENT_STORE_DATABASE_NAME'),
+    useValue: env.EVENT_STORE_DATABASE_NAME,
   });
   container.register('eventStoreCreateReplicationUserWithUsername', {
-    useValue: getEnvVar('EVENT_STORE_CREATE_REPLICATION_USER_WITH_USERNAME'),
+    useValue: env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_USERNAME,
   });
   container.register('eventStoreCreateReplicationUserWithPassword', {
-    useValue: getEnvVar('EVENT_STORE_CREATE_REPLICATION_USER_WITH_PASSWORD'),
+    useValue: env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_PASSWORD,
   });
   container.register('eventStoreCreateReplicationPublication', {
-    useValue: getEnvVar('EVENT_STORE_CREATE_REPLICATION_PUBLICATION'),
+    useValue: env.EVENT_STORE_CREATE_REPLICATION_PUBLICATION,
   });
 
   const mongoConnectionString =
-    `mongodb://${getEnvVar('MONGODB_PROJECTION_DATABASE_USERNAME')}:${getEnvVar('MONGODB_PROJECTION_DATABASE_PASSWORD')}@` +
-    `${getEnvVar('MONGODB_PROJECTION_HOST')}:${getEnvVar('MONGODB_PROJECTION_PORT')}/` +
-    `${getEnvVar('MONGODB_PROJECTION_DATABASE_NAME')}` +
+    `mongodb://${env.MONGODB_PROJECTION_DATABASE_USERNAME}:${env.MONGODB_PROJECTION_DATABASE_PASSWORD}@` +
+    `${env.MONGODB_PROJECTION_HOST}:${env.MONGODB_PROJECTION_PORT}/` +
+    `${env.MONGODB_PROJECTION_DATABASE_NAME}` +
     '?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000&authSource=admin';
-  const mongoDatabaseName = getEnvVar('MONGODB_PROJECTION_DATABASE_NAME');
+  const mongoDatabaseName = env.MONGODB_PROJECTION_DATABASE_NAME;
   container.register('mongoConnectionString', {
     useValue: mongoConnectionString,
   });
@@ -103,10 +104,3 @@ export function configureDependencies() {
   registerScopedServices();
 }
 
-function getEnvVar(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Environment variable ${name} is not defined`);
-  }
-  return value;
-}

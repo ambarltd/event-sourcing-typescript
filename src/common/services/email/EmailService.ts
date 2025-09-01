@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { log } from '@/common/util/Logger';
+import env from '@/app/environment';
 
 export interface EmailOptions {
   to: string | string[];
@@ -42,23 +43,15 @@ export class EmailService {
 
   private getRequiredConfig(): EmailServiceConfig {
     return {
-      host: this.getEnvVar('SMTP_HOST'),
-      port: parseInt(this.getEnvVar('SMTP_PORT')),
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
       secure: true,
       auth: {
-        user: this.getEnvVar('SMTP_USERNAME'),
-        pass: this.getEnvVar('SMTP_PASSWORD'),
+        user: env.SMTP_USERNAME,
+        pass: env.SMTP_PASSWORD,
       },
-      defaultFrom: this.getEnvVar('SMTP_FROM_EMAIL'),
+      defaultFrom: env.SMTP_FROM_EMAIL,
     };
-  }
-
-  private getEnvVar(name: string): string {
-    const value = process.env[name];
-    if (!value) {
-      throw new Error(`Environment variable ${name} is not defined`);
-    }
-    return value;
   }
 
   async sendEmail(options: EmailOptions): Promise<void> {
