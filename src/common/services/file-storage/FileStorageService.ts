@@ -71,7 +71,6 @@ export class FileStorageService {
     };
   }
 
-
   async createBucket(bucketName: string, region?: string): Promise<void> {
     try {
       const exists = await this.client.bucketExists(bucketName);
