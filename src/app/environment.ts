@@ -18,8 +18,10 @@ const envDecoder = D.object({
   SMTP_PORT: number,
 });
 
-const environment: Environment = D.decode(process.env, envDecoder).unwrap(err => {
-  throw new Error(`Unable to parse environment variables:\n${err}`);
-});
+const environment: Environment = D.decode(process.env, envDecoder).unwrap(
+  (err) => {
+    throw new Error(`Unable to parse environment variables:\n${err}`);
+  },
+);
 
 export default environment;

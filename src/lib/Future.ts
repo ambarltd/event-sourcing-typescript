@@ -16,7 +16,9 @@ type Fut<E, C> = { [K in keyof C]: Future<E, C[K]> };
 class Future<E, T> {
   readonly inner: FutureInstance<E, T>;
 
-  static create<E, T>(f: (r: F.RejectFunction<E>, a: F.ResolveFunction<T>) => Cancel): Future<E, T> {
+  static create<E, T>(
+    f: (r: F.RejectFunction<E>, a: F.ResolveFunction<T>) => Cancel,
+  ): Future<E, T> {
     return new Future(
       F.Future((r, a) => {
         const cancel = f(r, a);
@@ -39,16 +41,27 @@ class Future<E, T> {
   }
 
   // Perform safe resource handling.
-  static bracket<E, A, B, C>(acquire: Future<E, A>, release: (_: A) => Future<E, C>, consume: (_: A) => Future<E, B>) {
-    return new Future(F.hook(acquire.inner)((x) => release(x).inner)((x) => consume(x).inner));
+  static bracket<E, A, B, C>(
+    acquire: Future<E, A>,
+    release: (_: A) => Future<E, C>,
+    consume: (_: A) => Future<E, B>,
+  ) {
+    return new Future(
+      F.hook(acquire.inner)((x) => release(x).inner)((x) => consume(x).inner),
+    );
   }
 
-  static parallel<E, T>(n: number, xs: Array<Future<E, T>>): Future<E, Array<T>> {
+  static parallel<E, T>(
+    n: number,
+    xs: Array<Future<E, T>>,
+  ): Future<E, Array<T>> {
     return new Future(F.parallel(n)(xs.map((f) => f.inner)));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static concurrently<E, C extends { [k: string]: any }>(obj: Fut<E, C>): Future<E, C> {
+  static concurrently<E, C extends { [k: string]: any }>(
+    obj: Fut<E, C>,
+  ): Future<E, C> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const futures: Future<E, any>[] = [];
 
@@ -57,11 +70,16 @@ class Future<E, T> {
       futures.push(fut.map((value) => ({ [key]: value })));
     });
 
-    return Future.parallel(Infinity, futures).map((results) => results.reduce((acc, x) => Object.assign(acc, x)));
+    return Future.parallel(Infinity, futures).map((results) =>
+      results.reduce((acc, x) => Object.assign(acc, x)),
+    );
   }
 
   // map all actions in parallel.
-  static mapConcurrently<A, E, T>(f: (_: A) => Future<E, T>, xs: Array<A>): Future<E, Array<T>> {
+  static mapConcurrently<A, E, T>(
+    f: (_: A) => Future<E, T>,
+    xs: Array<A>,
+  ): Future<E, Array<T>> {
     return Future.parallel(Infinity, xs.map(f));
   }
 
@@ -69,7 +87,10 @@ class Future<E, T> {
     return new Future(F.both(x.inner)(y.inner));
   }
 
-  static traverse<A, E, T>(f: (_: A) => Future<E, T>, xs: Array<A>): Future<E, Array<T>> {
+  static traverse<A, E, T>(
+    f: (_: A) => Future<E, T>,
+    xs: Array<A>,
+  ): Future<E, Array<T>> {
     return xs.reduce(
       (acc, x) =>
         acc.chain((ys) =>
@@ -108,7 +129,10 @@ class Future<E, T> {
     return new Future(F.chainRej(g)(this.inner));
   }
 
-  bichain<F, W>(f: (_: E) => Future<F, W>, g: (_: T) => Future<F, W>): Future<F, W> {
+  bichain<F, W>(
+    f: (_: E) => Future<F, W>,
+    g: (_: T) => Future<F, W>,
+  ): Future<F, W> {
     const h = (x: E): FutureInstance<F, W> => f(x).inner;
     const i = (x: T): FutureInstance<F, W> => g(x).inner;
     return new Future(F.bichain(h)(i)(this.inner));

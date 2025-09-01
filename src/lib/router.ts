@@ -108,7 +108,8 @@ const render = ({
 type Middleware<A, B> = (req: express.Request, env: A) => Future<Response, B>;
 
 function middleware<A, B>(fun: Middleware<A, B>, route: Route<B>): Route<A> {
-  return (req: express.Request, env: A) => fun(req, env).chain(res => route(req, res));
+  return (req: express.Request, env: A) =>
+    fun(req, env).chain((res) => route(req, res));
 }
 
 function send(response: Response, res: express.Response): void {
@@ -128,10 +129,14 @@ function send(response: Response, res: express.Response): void {
   }
 }
 
-async function sendResponse(routeHandler: Route<{}>, req: express.Request, res: express.Response): Promise<void> {
+async function sendResponse(
+  routeHandler: Route<{}>,
+  req: express.Request,
+  res: express.Response,
+): Promise<void> {
   routeHandler(req, {}).fork(
-    r => send(r, res),
-    r => send(r, res),
+    (r) => send(r, res),
+    (r) => send(r, res),
   );
 }
 
