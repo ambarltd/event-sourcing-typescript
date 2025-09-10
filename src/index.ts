@@ -13,9 +13,9 @@ import { MembersByCuisineQueryController } from '@/domain/cookingClub/membership
 import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionController } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
 
-function main() {
+async function main() {
   // Configure dependency injection
-  configureDependencies();
+  await configureDependencies();
 
   // Create express app
   const app = express();
@@ -91,4 +91,4 @@ function main() {
     });
 }
 
-main();
+await main();

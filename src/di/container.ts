@@ -20,6 +20,8 @@ import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membersh
 import { MembershipApplicationRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
 import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
 import env from '@/app/environment';
+import { Postgres, defaultPoolSettings } from '@/lib/postgres';
+import * as postgresEventStore from '@/app/postgresEventStore';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
@@ -98,8 +100,36 @@ function registerScopedServices() {
   registerScoped(EvaluateApplicationReactionHandler);
 }
 
-export function configureDependencies() {
+type Dependencies = {
+  postgres: Postgres;
+};
+
+export async function configureDependencies(): Promise<Dependencies> {
   registerEnvironmentVariables();
   registerSingletons();
   registerScopedServices();
+
+  const postgres = new Postgres({
+    user: env.EVENT_STORE_USER,
+    password: env.EVENT_STORE_PASSWORD,
+    host: env.EVENT_STORE_HOST,
+    port: env.EVENT_STORE_PORT,
+    database: env.EVENT_STORE_DATABASE_NAME,
+    poolSettings: defaultPoolSettings,
+  });
+
+  await postgres.withTransaction((transaction) =>
+    postgresEventStore.initialize({
+      transaction,
+      database: env.EVENT_STORE_DATABASE_NAME,
+      table: env.EVENT_STORE_CREATE_TABLE_WITH_NAME,
+      replicationUserName:
+        env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_USERNAME,
+      replicationUserPass:
+        env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_PASSWORD,
+      replicationPublication: env.EVENT_STORE_CREATE_REPLICATION_PUBLICATION,
+    }),
+  );
+
+  return { postgres };
 }
