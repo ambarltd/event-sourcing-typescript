@@ -6,6 +6,7 @@ export {
 };
 
 import { Pool, PoolConfig, PoolClient, QueryConfig, QueryResult } from 'pg';
+import { Future } from '@/lib/Future';
 
 class PostgresTransaction {
   public closed: boolean = false;
@@ -96,7 +97,7 @@ class Postgres {
   }
 
   // Execute an action with a transaction that will be automatically committed at the end.
-  async withTransaction<T>(
+  async withTransactionP<T>(
     f: (t: PostgresTransaction) => Promise<T>,
   ): Promise<T> {
     const connection = await this.pool.connect();
@@ -104,5 +105,25 @@ class Postgres {
     const result = await f(transaction);
     if (!transaction.closed) await transaction.commit();
     return result;
+  }
+
+  // Execute an action with a transaction that will be automatically committed at the end.
+  withTransaction<E, T>(
+    onConnectionError: (e: Error) => E,
+    f: (t: PostgresTransaction) => Future<E, T>,
+  ): Future<E, T> {
+    return Future.attemptP(() => this.pool.connect())
+      .mapRej(onConnectionError)
+      .chain((connection) => {
+        const transaction = new PostgresTransaction(connection);
+        return f(transaction).chain((res) => {
+          if (!transaction.closed) {
+            Future.attemptP(transaction.commit)
+              .mapRej(onConnectionError)
+              .map(() => res);
+          }
+          return Future.resolve(res);
+        });
+      });
   }
 }

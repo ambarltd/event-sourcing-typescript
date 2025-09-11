@@ -118,7 +118,7 @@ export async function configureDependencies(): Promise<Dependencies> {
     poolSettings: defaultPoolSettings,
   });
 
-  await postgres.withTransaction((transaction) =>
+  await postgres.withTransactionP((transaction) =>
     postgresEventStore.initialize({
       transaction,
       database: env.EVENT_STORE_DATABASE_NAME,
