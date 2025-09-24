@@ -3,7 +3,7 @@ export { DateOnly, TimeOfDay, POSIX };
 
 import { DateTime } from 'luxon';
 import * as s from '@/lib/json/schema';
-import { Failure, Success } from '@/lib/Result';
+import * as d from '@/lib/json/decoder';
 
 // POSIX time is the nominal time since 1970-01-01 00:00 UTC.
 // Like DateTime, but without timezone confusion.
@@ -101,20 +101,20 @@ class DateOnly {
   }
 
   static schema: s.Schema<DateOnly> = s.string.then(
-    (s) => {
-      const parts = s.split('-');
+    (str) => {
+      const parts = str.split('-');
       if (parts.length !== 3) {
-        return Failure('Invalid Date');
+        return d.fail('Invalid Date');
       }
       const year = parseInt(parts[0] as string, 10);
       const month = parseInt(parts[1] as string, 10);
       const day = parseInt(parts[2] as string, 10);
 
       if (isNaN(year) || isNaN(month) || isNaN(day)) {
-        return Failure('Invalid Date');
+        return d.fail('Invalid Date');
       }
 
-      return Success(new DateOnly(year, month, day));
+      return d.succeed(new DateOnly(year, month, day));
     },
     (date) => date.pretty(),
   );
