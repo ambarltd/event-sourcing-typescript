@@ -17,6 +17,7 @@ class PostgresTransaction {
     if (this.closed) {
       throw new Error('Committing a closed transaction');
     }
+
     try {
       await this.connection.query('COMMIT');
       this.closed = true;
@@ -24,6 +25,8 @@ class PostgresTransaction {
       this.closed = true;
       throw new Error(`Failed to commit transaction: ${error}`);
     }
+
+    await this.release();
   }
 
   async abort() {
@@ -37,6 +40,14 @@ class PostgresTransaction {
       console.error('Failed to rollback PG transaction', error as Error);
     }
     this.closed = true;
+
+    await this.release();
+  }
+
+  async release() {
+    if (!this.closed) {
+      throw new Error('Releasing an active transaction');
+    }
 
     try {
       this.connection.release();
