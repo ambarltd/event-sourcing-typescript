@@ -1,10 +1,11 @@
 export {
   Event,
-  Aggregate,
+  type Aggregate,
   TransformationEvent,
   CreationEvent,
   type EventInfo,
   EventInfo_schema,
+  Id,
 };
 
 import * as s from '@/lib/json/schema';
@@ -27,18 +28,21 @@ class Id<A> {
 }
 
 // Class which all events derive from. Used for type constraints.
-abstract class Aggregate {}
+interface Aggregate<T> {
+  readonly aggregateId: Id<Aggregate<T>>;
+  readonly aggregateVersion: number;
+}
 
 // Class which all events derive from. Used for type constraints.
-abstract class Event<_T extends Aggregate> {}
+abstract class Event<_T extends Aggregate<_T>> {}
 
 // The first event for an aggregate.
-abstract class CreationEvent<T extends Aggregate> extends Event<T> {
+abstract class CreationEvent<T extends Aggregate<T>> extends Event<T> {
   abstract createAggregate(): T;
 }
 
 // Any event that is not the first one for an aggregate.
-abstract class TransformationEvent<T extends Aggregate> extends Event<T> {
+abstract class TransformationEvent<T extends Aggregate<T>> extends Event<T> {
   abstract transformAggregate(aggregate: T): T;
 }
 
@@ -46,10 +50,10 @@ abstract class TransformationEvent<T extends Aggregate> extends Event<T> {
 type EventInfo = s.Infer<typeof EventInfo_schema>;
 
 const EventInfo_schema = s.object({
-  event_id: Id.schema<Event<Aggregate>>(),
-  aggregate_id: Id.schema<Aggregate>(),
+  event_id: Id.schema<Event<Aggregate<any>>>(),
+  aggregate_id: Id.schema<Aggregate<any>>(),
   aggregate_version: s.number,
-  correlation_id: Id.schema<Event<Aggregate>>(),
-  causation_id: Id.schema<Event<Aggregate>>(),
+  correlation_id: Id.schema<Event<Aggregate<any>>>(),
+  causation_id: Id.schema<Event<Aggregate<any>>>(),
   recorded_on: POSIX.schema,
 });

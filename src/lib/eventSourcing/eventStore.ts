@@ -1,5 +1,5 @@
 export { type EventStore };
-import { Event } from '@/common/event/Event';
+import { Event } from '@/lib/eventSourcing/event';
 import { Aggregate } from '@/common/aggregate/Aggregate';
 import { AggregateAndEventIdsInLastEvent } from '@/common/eventStore/AggregateAndEventIdsInLastEvent';
 
@@ -23,7 +23,7 @@ interface EventStore {
     aggregateId: string,
   ): Promise<AggregateAndEventIdsInLastEvent<T>>;
 
-  saveEvent(event: Event): Promise<void>;
+  saveEvent(event: Event<any>): Promise<void>;
 
   doesEventAlreadyExist(eventId: string): Promise<boolean>;
 }
