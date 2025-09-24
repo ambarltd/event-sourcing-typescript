@@ -17,6 +17,7 @@ Values can be extracted using `instsanceof` tests.
 export {
   type Maybe,
   type Nullable,
+  type Infer,
   CallableJust as Just,
   CallableNothing as Nothing,
   from,
@@ -28,6 +29,9 @@ import Callable from '@/lib/Callable';
 
 type Maybe<T> = Just<T> | Nothing<T>;
 type Nullable<T> = T | null;
+
+// Infer the type from a Maybe definition
+type Infer<A extends Maybe<unknown>> = A extends Maybe<infer B> ? B : never;
 
 // prettier-ignore
 export interface IMaybe<T> {
