@@ -3,17 +3,16 @@ export { handleReaction };
 import { Response } from '@/lib/router';
 import { EventStore } from '@/lib/eventSourcing/eventStore';
 import { Event } from '@/lib/eventSourcing/event';
-import { Decoder, decode } from '@/lib/json/decoder';
+import { Decoder } from '@/lib/json/decoder';
 import * as express from 'express';
 import * as router from '@/lib/router';
-import * as d from '@/lib/json/decoder';
 import { Future } from '@/lib/Future';
-import { Result, Failure } from '@/lib/Result';
-import { Maybe, Nothing } from '@/lib/Maybe';
+import { Maybe } from '@/lib/Maybe';
 import { Postgres } from '@/lib/postgres';
 import { PostgresEventStore } from '@/app/postgresEventStore';
 import { Serializer } from '@/common/serializedEvent/Serializer';
 import { Deserializer } from '@/common/serializedEvent/Deserializer';
+import { decodeEvent } from '@/app/projectionHandler';
 
 type Projections = {};
 type Services = {};
@@ -54,37 +53,6 @@ function handleReaction<E extends Event<any>>(
       ),
     ),
   );
-}
-
-function decodeEvent<E>(
-  decoder: Decoder<Maybe<E>>,
-  req: express.Request,
-): Future<Response, E> {
-  const bodyDecoder: Decoder<Maybe<E>> = d
-    .object({ payload: decoder })
-    .map((r) => r.payload);
-
-  const decoded: Result<string, Maybe<E>> = decode(bodyDecoder, req.body);
-
-  if (decoded instanceof Failure) {
-    return Future.reject(
-      router.json({
-        status: 400,
-        content: { message: `Unable to decode command: ${decoded.error}` },
-      }),
-    );
-  }
-
-  if (decoded.value instanceof Nothing) {
-    return Future.reject(
-      router.json({
-        status: 200,
-        content: { message: 'Ignored' },
-      }),
-    );
-  }
-
-  return Future.resolve(decoded.value.value);
 }
 
 function withEventStore(

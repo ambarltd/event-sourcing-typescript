@@ -1,3 +1,5 @@
+export { accept, type EventClass };
+
 import {
   Aggregate,
   Id,
@@ -62,44 +64,7 @@ class AddName implements TransformationEvent<User> {
   }
 }
 
-function decodeEvent<T>(
-  ts: Array<{ schemaS: Schema<T>; type: string }>,
-): Decoder<Maybe<T>> {
-  return d.object({ type: d.string }).then(({ type: ty }) => {
-    const found = ts.find((t) => t.type == ty);
-    if (found === undefined) {
-      return d.succeed(Nothing());
-    }
-
-    return found.schemaS.decoder.map(Just) as Decoder<Maybe<T>>;
-  });
-}
-
-type Accepted<T extends { [D in keyof T]: Decoder<any> }> = d.Infer<T[keyof T]>;
-
-type W = d.Infer<typeof dd>;
-
-const dd = accept({
-  [AddName.type]: AddName.schema.decoder,
-  [CreateUser.type]: CreateUser.schema.decoder,
-});
-
-function accept<T extends { [D in keyof T]: Decoder<any> }>(
-  ds: T,
-): Decoder<Maybe<Accepted<T>>> {
-  return d
-    .object({ type: d.string })
-    .then(({ type: ty }): Decoder<Maybe<Accepted<T>>> => {
-      const decoder: undefined | Decoder<Accepted<T>> = ds[ty as keyof T];
-      return (decoder ? decoder.map(Just) : d.succeed(Nothing())) as Decoder<
-        Maybe<Accepted<T>>
-      >;
-    });
-}
-
 // ----------
-
-type Accepted2<T extends [...unknown[]]> = T[number];
 
 const vv = accept([AddName, CreateUser]);
 
