@@ -17,10 +17,12 @@ import {
 } from '@/lib/eventSourcing/event';
 import { Json } from '@/lib/json/types';
 import { Schema } from '@/lib/json/schema';
+import { Decoder } from '@/lib/json/schema';
 import * as s from '@/lib/json/schema';
 import * as d from '@/lib/json/decoder';
 import { POSIX } from '@/lib/time';
 import { Result, Failure } from '@/lib/Result';
+import { DateTime } from 'luxon';
 
 /* Note [Event Store]
 
@@ -44,13 +46,20 @@ interface AggregateAndEventIdsInLastEvent<T extends Aggregate<T>> {
 }
 
 interface EventStore {
-  findAggregate<T extends Aggregate<T>>(
-    aggregateId: string,
-  ): Promise<AggregateAndEventIdsInLastEvent<T>>;
+  find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<{ aggregate: T; lastEvent: EventInfo }>;
 
-  saveEvent(event: Event<any>): Promise<void>;
+  save<E extends Event<T>, T extends Aggregate<T>>(args: {
+    aggregate: Constructor<T>;
+    event: CreationEvent<E, T> | TransformationEvent<E, T>;
+    event_id?: Id<Event<T>>;
+    correlation_id?: Id<Event<T>>;
+    causation_id?: Id<Event<T>>;
+  }): Promise<void>;
 
-  doesEventAlreadyExist(eventId: string): Promise<boolean>;
+  doesEventAlreadyExist(eventId: Id<Event<any>>): Promise<boolean>;
 }
 
 // -----------------------------------------------------------------------
@@ -65,9 +74,29 @@ const schema_Serialized = <Payload>(payload: Schema<Payload>) =>
     aggregate_version: s.number,
     correlation_id: Id.schema<Event<Aggregate<any>>>(),
     causation_id: Id.schema<Event<Aggregate<any>>>(),
-    recorded_on: POSIX.schema,
-    payload,
+    recorded_on: schema_UTC,
+    payload: schema_StringifiedJSON(payload),
   });
+
+const schema_UTC: s.Schema<POSIX> = s.string.then(
+  (s) => {
+    const date = DateTime.fromISO(s, { zone: 'UTC' });
+    return date.isValid
+      ? d.succeed(new POSIX(date.toMillis()))
+      : d.fail(`Invalid ISO date: ${s}`);
+  },
+  (s) => {
+    const { date, time } = s.toUTCDateAndTime();
+    return `${date.pretty()}T${time.pretty()}Z`;
+  },
+);
+
+const schema_StringifiedJSON = <T>(inner: s.Schema<T>): s.Schema<T> =>
+  s.string.then(
+    (str: string): Decoder<T> =>
+      new Decoder((_: unknown) => inner.decoder.run(JSON.parse(str))),
+    (t: T): string => JSON.stringify(inner.encoder.run(t)),
+  );
 
 // -----------------------------------------------------------------------
 
