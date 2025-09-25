@@ -1,4 +1,11 @@
-export { type EventStore, type AggregateAndEventIdsInLastEvent, Hydrator };
+export {
+  type EventStore,
+  type AggregateAndEventIdsInLastEvent,
+  Hydrator,
+  type Constructor,
+  type EventData,
+  schema_EventData,
+};
 
 import {
   CreationEvent,
@@ -65,24 +72,24 @@ const schema_Serialized = <Payload>(payload: Schema<Payload>) =>
 // -----------------------------------------------------------------------
 
 // Convenient runtime representation of data in a serialized event.
-type EventData<E> = { info: EventInfo; payload: E };
+type EventData<E> = { info: EventInfo; event: E };
 
 function toSerialized<P>({
   info,
-  payload,
+  event,
 }: {
   info: EventInfo;
-  payload: P;
+  event: P;
 }): Serialized<P> {
-  return { ...info, payload };
+  return { ...info, payload: event };
 }
 
 function fromSerialized<P>(serialized: Serialized<P>): {
   info: EventInfo;
-  payload: P;
+  event: P;
 } {
   const { payload, ...info } = serialized;
-  return { info, payload };
+  return { info, event: payload };
 }
 
 const schema_EventData = <E>(s: Schema<E>): Schema<EventData<E>> =>
@@ -129,12 +136,12 @@ class Hydrator {
 
   // Build an aggregate from all its serialized events.
   hydrate<A extends Aggregate<A>>(
-    aggregate: Constructor<A>,
+    cls: Constructor<A>,
     serialized: Json[],
   ): Result<string, { aggregate: A; lastEvent: EventInfo }> {
-    const schemas = this.tmap.get(aggregate) as undefined | Schemas<A>;
+    const schemas = this.tmap.get(cls) as undefined | Schemas<A>;
     if (schemas == undefined) {
-      throw new Error(`Unknown aggregate ${aggregate.name}`);
+      throw new Error(`Unknown aggregate ${cls.name}`);
     }
 
     if (serialized.length === 0) {

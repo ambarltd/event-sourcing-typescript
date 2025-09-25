@@ -1,6 +1,7 @@
 export {
-  Event,
+  type Event,
   type Aggregate,
+  EventClass,
   TransformationEvent,
   CreationEvent,
   type EventInfo,
@@ -10,7 +11,6 @@ export {
 
 import * as s from '@/lib/json/schema';
 import { Schema } from '@/lib/json/schema';
-import { Encoder } from '@/lib/json/encoder';
 import { POSIX } from '@/lib/time';
 
 // @ts-ignore
@@ -31,21 +31,31 @@ class Id<A> {
 // Class which all events derive from. Used for type constraints.
 interface Aggregate<T> {
   readonly aggregateId: Id<Aggregate<T>>;
-  readonly aggregateVersion: number;
+  aggregateVersion: number;
 }
 
+type Event<T extends Aggregate<T>> = EventClass<any, T>;
+
 // Class which all events derive from. Used for type constraints.
-abstract class Event<T extends Aggregate<T>> {
-  abstract encoder: Encoder<Event<T>>;
+abstract class EventClass<Self, T extends Aggregate<T>> {
+  abstract type: string;
+  abstract values: { aggregateId: Id<T> };
+  abstract schema: Schema<Self>;
 }
 
 // The first event for an aggregate.
-abstract class CreationEvent<T extends Aggregate<T>> extends Event<T> {
+abstract class CreationEvent<Self, T extends Aggregate<T>> extends EventClass<
+  Self,
+  T
+> {
   abstract createAggregate(): T;
 }
 
 // Any event that is not the first one for an aggregate.
-abstract class TransformationEvent<T extends Aggregate<T>> extends Event<T> {
+abstract class TransformationEvent<
+  Self,
+  T extends Aggregate<T>,
+> extends EventClass<Self, T> {
   abstract transformAggregate(aggregate: T): T;
 }
 

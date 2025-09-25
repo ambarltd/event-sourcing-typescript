@@ -1,66 +1,91 @@
 export { initialize, PostgresEventStore };
 
-import { Serializer } from '@/common/serializedEvent/Serializer';
-import { Deserializer } from '@/common/serializedEvent/Deserializer';
+import { Json } from '@/lib/json/types';
 import { SerializedEvent } from '@/common/serializedEvent/SerializedEvent';
-import { Event } from '@/common/event/Event';
-import { CreationEvent } from '@/common/event/CreationEvent';
-import { TransformationEvent } from '@/common/event/TransformationEvent';
-import { Aggregate } from '@/common/aggregate/Aggregate';
-import { AggregateAndEventIdsInLastEvent } from '@/common/eventStore/AggregateAndEventIdsInLastEvent';
-import { EventStore } from '@/lib/eventSourcing/eventStore';
+import {
+  Id,
+  Event,
+  EventClass,
+  Aggregate,
+  CreationEvent,
+  TransformationEvent,
+  EventInfo,
+} from '@/lib/eventSourcing/event';
+import {
+  EventStore,
+  Hydrator,
+  Constructor,
+  EventData,
+} from '@/lib/eventSourcing/eventStore';
 import { PostgresTransaction } from '@/lib/postgres';
 import { log } from '@/common/util/Logger';
+import { IdGenerator } from '@/common/util/IdGenerator';
+import { encode } from '@/lib/json/schema';
+import { POSIX } from '@/lib/time';
+import { DateTime } from 'luxon';
 
 class PostgresEventStore implements EventStore {
   constructor(
     private transaction: PostgresTransaction,
-    private readonly serializer: Serializer,
-    private readonly deserializer: Deserializer,
+    private readonly hydrator: Hydrator,
     private readonly eventStoreTable: string,
   ) {}
 
-  async findAggregate<T extends Aggregate>(
-    aggregateId: string,
-  ): Promise<AggregateAndEventIdsInLastEvent<T>> {
-    const serializedEvents =
-      await this.findAllSerializedEventsByAggregateId(aggregateId);
-    const events = serializedEvents.map((e) =>
-      this.deserializer.deserialize(e),
-    );
+  async find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<{ aggregate: T; lastEvent: EventInfo }> {
+    const events = await this.findAll(aggregateId);
+    const { lastEvent, aggregate } = this.hydrator
+      .hydrate(cls, events)
+      .unwrap((e) => e);
 
-    const firstEvent: Event | undefined = events[0];
-    if (firstEvent == undefined) {
-      throw new Error(`No events found for aggregateId: ${aggregateId}`);
-    }
-    const creationEvent: Event = firstEvent;
-    if (!this.isCreationEventForAggregate<T>(creationEvent)) {
-      throw new Error('First event is not a creation event');
-    }
-    const transformationEvents = events.slice(1);
-
-    let aggregate = creationEvent.createAggregate();
-    let eventIdOfLastEvent = creationEvent.eventId;
-    let correlationIdOfLastEvent = creationEvent.correlationId;
-
-    for (const transformationEvent of transformationEvents) {
-      if (!this.isTransformationEventForAggregate<T>(transformationEvent)) {
-        throw new Error('Event is not a transformation event');
-      }
-      aggregate = transformationEvent.transformAggregate(aggregate);
-      eventIdOfLastEvent = transformationEvent.eventId;
-      correlationIdOfLastEvent = transformationEvent.correlationId;
-    }
-
-    return {
-      aggregate,
-      eventIdOfLastEvent,
-      correlationIdOfLastEvent,
-    };
+    return { aggregate, lastEvent };
   }
 
-  async saveEvent(event: Event): Promise<void> {
-    await this.saveSerializedEvent(this.serializer.serialize(event));
+  async save<E extends EventClass<E, T>, T extends Aggregate<T>>(args: {
+    aggregate: Constructor<T>;
+    event: CreationEvent<E, T> | TransformationEvent<E, T>;
+    event_id?: Id<Event<T>>;
+    correlation_id?: Id<Event<T>>;
+    causation_id?: Id<Event<T>>;
+  }): Promise<void> {
+    const event = args.event;
+    const event_id = args.event_id || new Id(IdGenerator.generateRandomId());
+    let info: EventInfo;
+    switch (true) {
+      case event instanceof CreationEvent: {
+        const aggregate: T = event.createAggregate();
+        info = {
+          event_id,
+          aggregate_id: aggregate.aggregateId,
+          aggregate_version: 0,
+          correlation_id: args.correlation_id || event_id,
+          causation_id: args.causation_id || event_id,
+          recorded_on: POSIX.now(),
+        };
+        break;
+      }
+      case event instanceof TransformationEvent: {
+        const { aggregate, lastEvent } = await this.find(
+          args.aggregate,
+          event.values.aggregateId,
+        );
+        info = {
+          event_id,
+          aggregate_id: aggregate.aggregateId,
+          aggregate_version: aggregate.aggregateVersion + 1,
+          correlation_id: lastEvent.correlation_id,
+          causation_id: lastEvent.causation_id,
+          recorded_on: POSIX.now(),
+        };
+        break;
+      }
+      default:
+        return event satisfies never;
+    }
+
+    await this.insert({ info, event });
   }
 
   async doesEventAlreadyExist(eventId: string): Promise<boolean> {
@@ -68,9 +93,9 @@ class PostgresEventStore implements EventStore {
     return event !== null;
   }
 
-  private async findAllSerializedEventsByAggregateId(
-    aggregateId: string,
-  ): Promise<SerializedEvent[]> {
+  private async findAll<T extends Aggregate<T>>(
+    aggregateId: Id<T>,
+  ): Promise<Json[]> {
     const sql = `
             SELECT id, event_id, aggregate_id, causation_id, correlation_id,
                    aggregate_version, json_payload, json_metadata, recorded_on, event_name
@@ -80,8 +105,8 @@ class PostgresEventStore implements EventStore {
         `;
 
     try {
-      const result = await this.transaction.query(sql, [aggregateId]);
-      return result.rows.map(this.mapRowToSerializedEvent);
+      const result = await this.transaction.query(sql, [aggregateId.value]);
+      return result.rows;
     } catch (error) {
       throw new Error(
         `Failed to fetch events for aggregate: ${aggregateId}: ${error}`,
@@ -89,34 +114,31 @@ class PostgresEventStore implements EventStore {
     }
   }
 
-  private async saveSerializedEvent(
-    serializedEvent: SerializedEvent,
-  ): Promise<void> {
+  private async insert<E extends Event<any>>({ info, event }: EventData<E>) {
     const sql = `
-            INSERT INTO ${this.eventStoreTable} (
-                event_id, aggregate_id, causation_id, correlation_id,
-                aggregate_version, json_payload, json_metadata, recorded_on, event_name
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        `;
+      INSERT INTO ${this.eventStoreTable} (
+          event_id, aggregate_id, causation_id, correlation_id,
+          aggregate_version, json_payload, json_metadata, recorded_on, event_name
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `;
 
+    const payload = encode(event.schema, event);
     const values = [
-      serializedEvent.event_id,
-      serializedEvent.aggregate_id,
-      serializedEvent.causation_id,
-      serializedEvent.correlation_id,
-      serializedEvent.aggregate_version.toString(),
-      serializedEvent.json_payload,
-      serializedEvent.json_metadata,
-      serializedEvent.recorded_on,
-      serializedEvent.event_name,
+      info.event_id.value,
+      info.aggregate_id.value,
+      info.causation_id.value,
+      info.correlation_id.value,
+      info.aggregate_version.toString(),
+      JSON.stringify(payload),
+      '{}',
+      encodePOSIX(info.recorded_on),
+      event.type,
     ];
 
     try {
       await this.transaction.query(sql, values);
     } catch (error) {
-      throw new Error(
-        `Failed to save event: ${serializedEvent.event_id}: ${error}`,
-      );
+      throw new Error(`Failed to save event: ${info.event_id}: ${error}`);
     }
   }
 
@@ -168,6 +190,20 @@ class PostgresEventStore implements EventStore {
   }
 }
 
+function encodePOSIX(value: POSIX): string {
+  const { date, time } = value.toUTCDateAndTime();
+  return `${date.pretty()}T${time.pretty()}Z`;
+}
+
+function decodePOSIX(str: string): POSIX {
+  const date = DateTime.fromISO(str, { zone: 'UTC' });
+  if (!date.isValid) {
+    throw new Error(`Invalid ISO date: ${str}`);
+  }
+
+  return new POSIX(date.toMillis());
+}
+
 // Prepare the database to be used as an event store.
 async function initialize({
   transaction,
@@ -199,7 +235,7 @@ async function initialize({
          aggregate_version BIGINT NOT NULL,
          causation_id TEXT NOT NULL,
          correlation_id TEXT NOT NULL,
-         recorded_on TEXT NOT NULL,
+         recorded_on TIMESTAMPTZ NOT NULL,
          event_name TEXT NOT NULL,
          json_payload TEXT NOT NULL,
          json_metadata TEXT NOT NULL,
