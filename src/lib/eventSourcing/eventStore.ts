@@ -17,7 +17,7 @@ import {
 } from '@/lib/eventSourcing/event';
 import { Json } from '@/lib/json/types';
 import { Schema } from '@/lib/json/schema';
-import { Decoder } from '@/lib/json/schema';
+import { Decoder } from '@/lib/json/decoder';
 import * as s from '@/lib/json/schema';
 import * as d from '@/lib/json/decoder';
 import { POSIX } from '@/lib/time';
@@ -129,8 +129,8 @@ const schema_EventData = <E>(s: Schema<E>): Schema<EventData<E>> =>
 type Constructor<T> = new (...args: any[]) => T;
 
 type Schemas<T extends Aggregate<T>> = {
-  creation: Schema<EventData<CreationEvent<T>>>;
-  transformation: Schema<EventData<TransformationEvent<T>>>;
+  creation: Schema<EventData<CreationEvent<any, T>>>;
+  transformation: Schema<EventData<TransformationEvent<any, T>>>;
 };
 
 /* Note [Hydrator]
@@ -154,8 +154,8 @@ class Hydrator {
     transformation,
   }: {
     aggregate: Constructor<A>;
-    creation: Schema<CreationEvent<A>>;
-    transformation: Schema<TransformationEvent<A>>;
+    creation: Schema<CreationEvent<any, A>>;
+    transformation: Schema<TransformationEvent<any, A>>;
   }): void {
     this.tmap.set(aggregate, {
       creation: schema_EventData(creation),
@@ -179,7 +179,7 @@ class Hydrator {
 
     return d
       .decode(serialized[0], schemas.creation.decoder)
-      .then(({ payload: first, info }) =>
+      .then(({ event: first, info }) =>
         d
           .decode(serialized.slice(1), d.array(schemas.transformation.decoder))
           .map((es) => {
@@ -187,7 +187,7 @@ class Hydrator {
             let lastEvent = info;
 
             for (const t of es) {
-              aggregate = t.payload.transformAggregate(aggregate);
+              aggregate = t.event.transformAggregate(aggregate);
               lastEvent = t.info;
             }
 

@@ -26,7 +26,7 @@
 export {
   type FromJSON,
   type Infer,
-  type Decoder, // export only the abstract type, not constructors.
+  Decoder,
   type DecoderDef,
   type DecodeResult,
   decode,
