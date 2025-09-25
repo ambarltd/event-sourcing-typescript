@@ -10,6 +10,7 @@ export {
 
 import * as s from '@/lib/json/schema';
 import { Schema } from '@/lib/json/schema';
+import { Encoder } from '@/lib/json/encoder';
 import { POSIX } from '@/lib/time';
 
 // @ts-ignore
@@ -34,7 +35,9 @@ interface Aggregate<T> {
 }
 
 // Class which all events derive from. Used for type constraints.
-abstract class Event<_T extends Aggregate<_T>> {}
+abstract class Event<T extends Aggregate<T>> {
+  abstract encoder: Encoder<Event<T>>;
+}
 
 // The first event for an aggregate.
 abstract class CreationEvent<T extends Aggregate<T>> extends Event<T> {
