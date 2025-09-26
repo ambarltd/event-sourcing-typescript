@@ -16,13 +16,15 @@ type Projections = {};
 type ProjectionStore = {};
 type Mongo = {};
 
+type ProjectionHandler<E> = (v: {
+  event: E;
+  projections: Projections;
+  store: ProjectionStore;
+}) => Future<Response, Response>;
+
 type ProjectionController<E extends Event<any>> = {
   decoder: Decoder<Maybe<E>>;
-  handler: (v: {
-    event: E;
-    projections: Projections;
-    store: ProjectionStore;
-  }) => Future<Response, Response>;
+  handler: ProjectionHandler<E>;
 };
 
 function handleProjection<E extends Event<any>>(

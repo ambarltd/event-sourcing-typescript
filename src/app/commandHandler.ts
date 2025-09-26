@@ -1,4 +1,4 @@
-export { handleCommand };
+export { handleCommand, type CommandController, type CommandHandler };
 
 import { Response } from '@/lib/router';
 import { EventStore } from '@/lib/eventSourcing/eventStore';
@@ -7,18 +7,19 @@ import * as express from 'express';
 import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
+import { Projections } from '@/app/projections';
+import { Services } from '@/app/services';
 
-type Projections = {};
-type Services = {};
+type CommandHandler<Command> = (v: {
+  command: Command;
+  store: EventStore;
+  projections: Projections;
+  services: Services;
+}) => Future<Response, Response>;
 
 type CommandController<Command> = {
   decoder: Decoder<Command>;
-  handler: (v: {
-    command: Command;
-    store: EventStore;
-    projections: Projections;
-    services: Services;
-  }) => Future<Response, Response>;
+  handler: CommandHandler<Command>;
 };
 
 function handleCommand<Command>(
