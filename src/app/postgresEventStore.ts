@@ -173,10 +173,17 @@ async function initialize({
   replicationUserPass: string;
   replicationPublication: string;
 }): Promise<void> {
-  function run(description: string, query: string) {
-    log.info(description);
-    log.info(query);
-    return transaction.query(query);
+  async function run(description: string, query: string): Promise<void> {
+    try {
+      log.info(description);
+      log.info(query);
+      await transaction.query(query);
+    } catch (error) {
+      log.warn(
+        'Caught exception when executing SQL statement.',
+        error as Error,
+      );
+    }
   }
 
   await run(
