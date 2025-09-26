@@ -146,7 +146,7 @@ class PostgresEventStore implements EventStore {
       '{}',
       // @ts-ignore
       serialized.recorded_on,
-      edata.event.type,
+      edata.event.values.type,
     ];
 
     try {

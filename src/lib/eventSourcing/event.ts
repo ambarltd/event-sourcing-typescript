@@ -38,8 +38,10 @@ type Event<T extends Aggregate<T>> = EventClass<any, T>;
 
 // Class which all events derive from. Used for type constraints.
 abstract class EventClass<Self, T extends Aggregate<T>> {
-  abstract type: string;
-  abstract values: { aggregateId: Id<T> };
+  abstract values: {
+    type: string;
+    aggregateId: Id<T>;
+  };
   abstract schema: Schema<Self>;
 }
 

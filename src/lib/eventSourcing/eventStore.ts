@@ -5,6 +5,7 @@ export {
   type Constructor,
   type EventData,
   schema_EventData,
+  makeSchema,
 };
 
 import {
@@ -17,6 +18,7 @@ import {
 } from '@/lib/eventSourcing/event';
 import { Json } from '@/lib/json/types';
 import { Schema } from '@/lib/json/schema';
+import { Encoder } from '@/lib/json/encoder';
 import { Decoder } from '@/lib/json/decoder';
 import * as s from '@/lib/json/schema';
 import * as d from '@/lib/json/decoder';
@@ -195,4 +197,38 @@ class Hydrator {
           }),
       );
   }
+}
+
+// -----------------------------------------------------------------------
+
+type EventConstructor = { type: string; schema: Schema<any> };
+
+// Create an efficient schema given a list of event classes
+//
+// To be used when joining schemas for the Hydrator
+function makeSchema<T extends [...EventConstructor[]]>(
+  ts: T,
+): Schema<s.Infer<T[number]['schema']>> {
+  type Ty = s.Infer<T[number]['schema']>;
+
+  const decoder: Decoder<Ty> = d
+    .object({ type: d.string })
+    .then(({ type: ty }) => {
+      const c: undefined | EventConstructor = ts.find((t) => t.type === ty);
+
+      if (c === undefined) return d.fail(`Unknown event type: ${ty}`);
+
+      return c.schema.decoder as Decoder<Ty>;
+    });
+
+  const encoder: Encoder<Ty> = new Encoder((v: Ty) => {
+    const ty = ts.find((t) => t.type === v.type);
+    if (ty === undefined) {
+      throw new Error(`Unable to encode unknown event type: ${v.type}`);
+    }
+
+    return ty.schema.encoder.run(v);
+  });
+
+  return new Schema(decoder, encoder);
 }

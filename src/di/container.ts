@@ -21,7 +21,6 @@ import { MembershipApplicationRepository } from '@/domain/cookingClub/membership
 import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
-import { Hydrator } from '@/lib/eventSourcing/eventStore';
 import { Mongo } from '@/lib/mongo';
 import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
@@ -112,8 +111,6 @@ export async function configureDependencies(): Promise<Dependencies> {
   registerEnvironmentVariables();
   registerSingletons();
   registerScopedServices();
-
-  const hydrator = new Hydrator();
 
   const postgres = new Postgres({
     user: env.EVENT_STORE_USER,
