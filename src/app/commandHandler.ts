@@ -7,10 +7,6 @@ import * as express from 'express';
 import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
-import { Postgres } from '@/lib/postgres';
-import { PostgresEventStore } from '@/app/postgresEventStore';
-import { Serializer } from '@/common/serializedEvent/Serializer';
-import { Deserializer } from '@/common/serializedEvent/Deserializer';
 
 type Projections = {};
 type Services = {};
@@ -26,28 +22,20 @@ type CommandController<Command> = {
 };
 
 function handleCommand<Command>(
-  serializer: Serializer,
-  deserializer: Deserializer,
-  eventStoreTable: string,
-  postgres: Postgres,
+  withEventStore: <T>(f: (store: EventStore) => T) => T,
   services: Services,
   projections: Projections,
   { decoder, handler }: CommandController<Command>,
 ): express.Handler {
   return router.route((req) =>
     decodeCommand(decoder, req).chain((command) =>
-      withEventStore(
-        postgres,
-        serializer,
-        deserializer,
-        eventStoreTable,
-        (store) =>
-          handler({
-            command,
-            store,
-            projections,
-            services,
-          }),
+      withEventStore((store) =>
+        handler({
+          command,
+          store,
+          projections,
+          services,
+        }),
       ),
     ),
   );
@@ -68,22 +56,4 @@ function decodeCommand<C>(
   }
 
   return Future.resolve(decoded.value);
-}
-
-function withEventStore(
-  postgres: Postgres,
-  serializer: Serializer,
-  deserializer: Deserializer,
-  eventStoreTable: string,
-  f: (s: EventStore) => Future<Response, Response>,
-): Future<Response, Response> {
-  const onError = (_: Error) =>
-    router.json({
-      status: 500,
-      content: { message: 'Internal Server Error' },
-    });
-
-  return postgres.withTransaction(onError, (t) =>
-    f(new PostgresEventStore(t, serializer, deserializer, eventStoreTable)),
-  );
 }
