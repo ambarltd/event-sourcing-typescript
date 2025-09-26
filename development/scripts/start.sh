@@ -1,15 +1,13 @@
 #!/bin/bash
 set -e
 
-cd ../../
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+PROJECT_ROOT=$(cd "${SCRIPT_DIR}/../../" && pwd)
 
-echo "Going into root mode to delete some docker volumes"
-sudo echo "Root mode: OK"
+cd "${SCRIPT_DIR}/../"
+
 docker compose down
-sudo rm -Rf data/*
 docker compose up -d --build --force-recreate
-
-
 
 all_services_fully_healthy() {
     ! docker compose ps --format "table {{.ID}}\t{{.Name}}\t{{.Status}}" | grep -q -E "(unhealthy|starting)"
@@ -38,4 +36,8 @@ echo "======================================================================="
 echo "|| You can navigate to localhost:8081 to view your event store.      ||"
 echo "======================================================================="
 echo "|| You can navigate to localhost:8082 to view your projection store. ||"
+echo "======================================================================="
+echo "|| You can navigate to localhost:8083 to view the email server.      ||"
+echo "======================================================================="
+echo "|| You can navigate to localhost:8084 to view the storage server.    ||"
 echo "======================================================================="
