@@ -53,7 +53,7 @@ function registerEnvironmentVariables() {
     `mongodb://${env.MONGODB_PROJECTION_DATABASE_USERNAME}:${env.MONGODB_PROJECTION_DATABASE_PASSWORD}@` +
     `${env.MONGODB_PROJECTION_HOST}:${env.MONGODB_PROJECTION_PORT}/` +
     `${env.MONGODB_PROJECTION_DATABASE_NAME}` +
-    '?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000&authSource=admin&directConnection=true';
+    '?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000&authSource=admin';
   const mongoDatabaseName = env.MONGODB_PROJECTION_DATABASE_NAME;
   container.register('mongoConnectionString', {
     useValue: mongoConnectionString,
