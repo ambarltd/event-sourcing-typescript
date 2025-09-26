@@ -21,6 +21,8 @@ import { MembershipApplicationRepository } from '@/domain/cookingClub/membership
 import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
+import { Mongo } from '@/lib/mongo';
+import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
 
 function registerEnvironmentVariables() {
@@ -102,6 +104,7 @@ function registerScopedServices() {
 
 type Dependencies = {
   postgres: Postgres;
+  mongo: Mongo;
 };
 
 export async function configureDependencies(): Promise<Dependencies> {
@@ -118,7 +121,28 @@ export async function configureDependencies(): Promise<Dependencies> {
     poolSettings: defaultPoolSettings,
   });
 
-  await postgres.withTransaction((transaction) =>
+  const mongo = new Mongo({
+    user: env.MONGODB_PROJECTION_DATABASE_USERNAME,
+    password: env.MONGODB_PROJECTION_DATABASE_PASSWORD,
+    host: env.MONGODB_PROJECTION_HOST,
+    port: env.MONGODB_PROJECTION_PORT,
+    database: env.MONGODB_PROJECTION_DATABASE_NAME,
+    settings: {
+      maxPoolSize: 20,
+      minPoolSize: 5,
+      maxIdleTimeMS: 10 * 60 * 1000, // 10 minutes
+      maxConnecting: 30,
+      waitQueueTimeoutMS: 2000,
+      replicaSet: 'rs0',
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    },
+  });
+
+  await postgres.withTransactionP((transaction) =>
     postgresEventStore.initialize({
       transaction,
       database: env.EVENT_STORE_DATABASE_NAME,
@@ -131,5 +155,5 @@ export async function configureDependencies(): Promise<Dependencies> {
     }),
   );
 
-  return { postgres };
+  return { postgres, mongo };
 }

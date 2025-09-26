@@ -34,7 +34,6 @@ import * as D from '@/lib/json/decoder';
 import { Encoder, EncoderDef } from '@/lib/json/encoder';
 import { Json } from '@/lib/json/types';
 import * as E from '@/lib/json/encoder';
-import { List } from '@/lib/List';
 import { Maybe, Nullable } from '@/lib/Maybe';
 
 // Infer the type from a schema definition
@@ -54,11 +53,8 @@ class Schema<A> {
     return new Schema(this.decoder.map(p), this.encoder.rmap(s));
   }
 
-  then<W>(p: (v: A) => Result<string, W>, s: (v: W) => A): Schema<W> {
-    return new Schema(
-      this.decoder.then((v) => p(v).mapFailure((e) => [List.empty(), e])),
-      this.encoder.rmap(s),
-    );
+  then<W>(p: (v: A) => Decoder<W>, s: (v: W) => A): Schema<W> {
+    return new Schema(this.decoder.then(p), this.encoder.rmap(s));
   }
 }
 
