@@ -7,7 +7,6 @@ import {
   Aggregate,
   CreationEvent,
   TransformationEvent,
-  EventClass,
   EventInfo,
 } from '@/lib/eventSourcing/event';
 import {
@@ -15,12 +14,10 @@ import {
   Hydrator,
   Constructor,
   EventData,
-  schema_EventData,
 } from '@/lib/eventSourcing/eventStore';
 import { PostgresTransaction } from '@/lib/postgres';
 import { log } from '@/common/util/Logger';
 import { IdGenerator } from '@/common/util/IdGenerator';
-import { encode } from '@/lib/json/schema';
 import { POSIX } from '@/lib/time';
 
 class PostgresEventStore implements EventStore {
@@ -42,9 +39,9 @@ class PostgresEventStore implements EventStore {
     return { aggregate, lastEvent };
   }
 
-  async emit<E extends Event<T>, T extends Aggregate<T>>(args: {
+  async emit<T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
-    event: CreationEvent<E, T> | TransformationEvent<E, T>;
+    event: CreationEvent<T> | TransformationEvent<T>;
     event_id?: Id<Event<T>>;
     correlation_id?: Id<Event<T>>;
     causation_id?: Id<Event<T>>;
@@ -121,14 +118,14 @@ class PostgresEventStore implements EventStore {
     }
   }
 
-  private async insert<E extends EventClass<E, any>>(edata: EventData<E>) {
+  private async insert<E extends Event<any>>(edata: EventData<E>) {
     const sql = `
       INSERT INTO ${this.eventStoreTable} (
           event_id, aggregate_id, causation_id, correlation_id,
           aggregate_version, json_payload, json_metadata, recorded_on, event_name
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 
-    const serialized = encode(schema_EventData(edata.event.schema), edata);
+    const serialized = this.hydrator.encode(edata);
 
     const values = [
       // @ts-ignore

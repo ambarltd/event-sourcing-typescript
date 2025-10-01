@@ -1,7 +1,6 @@
 export {
   type Event,
   type Aggregate,
-  EventClass,
   TransformationEvent,
   CreationEvent,
   type EventInfo,
@@ -35,30 +34,21 @@ interface Aggregate<T> {
   aggregateVersion: number;
 }
 
-type Event<T extends Aggregate<T>> = EventClass<any, T>;
-
 // Class which all events derive from. Used for type constraints.
-abstract class EventClass<Self, T extends Aggregate<T>> {
+abstract class Event<T extends Aggregate<T>> {
   abstract values: {
     type: string;
     aggregateId: Id<T>;
   };
-  abstract schema: Schema<Self>;
 }
 
 // The first event for an aggregate.
-abstract class CreationEvent<Self, T extends Aggregate<T>> extends EventClass<
-  Self,
-  T
-> {
+abstract class CreationEvent<T extends Aggregate<T>> extends Event<T> {
   abstract createAggregate(): T;
 }
 
 // Any event that is not the first one for an aggregate.
-abstract class TransformationEvent<
-  Self,
-  T extends Aggregate<T>,
-> extends EventClass<Self, T> {
+abstract class TransformationEvent<T extends Aggregate<T>> extends Event<T> {
   abstract transformAggregate(aggregate: T): T;
 }
 

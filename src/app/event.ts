@@ -4,7 +4,6 @@ import {
   CreationEvent,
   TransformationEvent,
   toSchema,
-  EventClass,
 } from '@/lib/eventSourcing/event';
 
 import * as s from '@/lib/json/schema';
@@ -17,8 +16,8 @@ class User implements Aggregate<User> {
   ) {}
 }
 
-export class CreateUser implements CreationEvent<CreateUser, User> {
-  static type: 'CreateUserr' = 'CreateUserr';
+export class CreateUser implements CreationEvent<User> {
+  static type: 'CreateUser' = 'CreateUser';
   static schemaArgs = s.object({
     type: s.stringLiteral(CreateUser.type),
     aggregateId: Id.schema(),
@@ -28,6 +27,7 @@ export class CreateUser implements CreationEvent<CreateUser, User> {
     (v) => new CreateUser(v),
     (v) => v.values,
   );
+  static aggregate = User;
 
   schema = CreateUser.schema;
   constructor(readonly values: s.Infer<typeof CreateUser.schemaArgs>) {}
@@ -36,7 +36,7 @@ export class CreateUser implements CreationEvent<CreateUser, User> {
   }
 }
 
-export class AddName implements TransformationEvent<AddName, User> {
+export class AddName implements TransformationEvent<User> {
   static type: 'AddName' = 'AddName';
   constructor(readonly values: s.Infer<typeof AddName.schemaArgs>) {}
 
@@ -62,7 +62,7 @@ export class AddName implements TransformationEvent<AddName, User> {
   }
 }
 
-export class RemoveName implements TransformationEvent<RemoveName, User> {
+export class RemoveName implements TransformationEvent<User> {
   static type = 'RemoveName' as const;
   static args = s.object({
     type: s.stringLiteral(this.type),
@@ -83,50 +83,8 @@ export class RemoveName implements TransformationEvent<RemoveName, User> {
   }
 }
 
-import { Schema } from '@/lib/json/schema';
-import { Constructor } from '@/lib/eventSourcing/eventStore';
+import { Hydrator, EntryC } from '@/lib/eventSourcing/eventStore';
 
-class EntryC<
-  A extends Aggregate<A>,
-  E extends CreationEvent<E, A>,
-  T extends E['values']['type'],
-> {
-  constructor(
-    public c: Constructor<A>,
-    public e: Schema<E>,
-    public t: T,
-  ) {}
-}
-
-class EntryT<
-  A extends Aggregate<A>,
-  E extends TransformationEvent<E, A>,
-  T extends E['values']['type'],
-> {
-  constructor(
-    public c: Constructor<A>,
-    public e: Schema<E>,
-    public t: T,
-  ) {}
-}
-
-type Entry<
-  A extends Aggregate<A>,
-  E extends EventClass<E, A>,
-  T extends E['values']['type'],
-> =
-  E extends CreationEvent<E, A>
-    ? EntryC<A, E, T>
-    : E extends TransformationEvent<E, A>
-      ? EntryT<A, E, T>
-      : never;
-
-type Obj = Record<string, Entry<any, any, any>>;
-
-function take(_: Obj): number {
-  return 2;
-}
-
-take({
-  [CreateUser.type]: new EntryC(User, CreateUser.schema, CreateUser.type),
-});
+const hydrator = new Hydrator([
+  new EntryC(User, CreateUser.schema, CreateUser.type),
+]);

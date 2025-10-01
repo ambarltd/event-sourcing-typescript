@@ -56,9 +56,9 @@ interface EventStore {
     aggregateId: Id<T>,
   ): Promise<{ aggregate: T; lastEvent: EventInfo }>;
 
-  emit<E extends Event<T>, T extends Aggregate<T>>(args: {
+  emit<T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
-    event: CreationEvent<E, T> | TransformationEvent<E, T>;
+    event: CreationEvent<T> | TransformationEvent<T>;
     event_id?: Id<Event<T>>;
     correlation_id?: Id<Event<T>>;
     causation_id?: Id<Event<T>>;
@@ -135,7 +135,7 @@ type Constructor<T> = new (...args: any[]) => T;
 
 class EntryC<
   A extends Aggregate<A>,
-  E extends CreationEvent<E, A>,
+  E extends CreationEvent<A>,
   T extends E['values']['type'],
 > {
   constructor(
@@ -147,7 +147,7 @@ class EntryC<
 
 class EntryT<
   A extends Aggregate<A>,
-  E extends TransformationEvent<E, A>,
+  E extends TransformationEvent<A>,
   T extends E['values']['type'],
 > {
   constructor(
@@ -158,13 +158,13 @@ class EntryT<
 }
 
 type Entry<A extends Aggregate<A>> =
-  | EntryC<A, CreationEvent<any, A>, any>
-  | EntryT<A, TransformationEvent<any, A>, any>;
+  | EntryC<A, CreationEvent<A>, any>
+  | EntryT<A, TransformationEvent<A>, any>;
 
 // Efficient decoders for all creation and transformation events for an aggregate.
 type Decoders<T extends Aggregate<T>> = {
-  creation: Decoder<EventData<CreationEvent<any, T>>>;
-  transformation: Decoder<EventData<TransformationEvent<any, T>>>;
+  creation: Decoder<EventData<CreationEvent<T>>>;
+  transformation: Decoder<EventData<TransformationEvent<T>>>;
 };
 
 /* Note [Hydrator]
@@ -212,11 +212,11 @@ class Hydrator {
     type Events<T extends Aggregate<T>> = {
       creation: Array<{
         type: string;
-        schema: Schema<CreationEvent<any, T>>;
+        schema: Schema<CreationEvent<T>>;
       }>;
       transformation: Array<{
         type: string;
-        schema: Schema<TransformationEvent<any, T>>;
+        schema: Schema<TransformationEvent<T>>;
       }>;
     };
 
