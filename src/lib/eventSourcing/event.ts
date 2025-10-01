@@ -7,6 +7,7 @@ export {
   type EventInfo,
   EventInfo_schema,
   Id,
+  toSchema,
 };
 
 import * as s from '@/lib/json/schema';
@@ -72,3 +73,17 @@ const EventInfo_schema = s.object({
   causation_id: Id.schema<Event<Aggregate<any>>>(),
   recorded_on: POSIX.schema,
 });
+
+// Create an event's schema.
+// Enforces that the class' `type` property has
+// the same type as the instance's `value.type` property.
+function toSchema<
+  T extends string,
+  W extends { type: T },
+  E extends { values: W },
+>(ctr: (new (values: W) => E) & { type: T }, schemaArgs: Schema<W>): Schema<E> {
+  return schemaArgs.dimap(
+    (v) => new ctr(v),
+    (v) => v.values,
+  );
+}
