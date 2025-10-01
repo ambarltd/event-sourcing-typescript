@@ -53,7 +53,7 @@ interface EventStore {
     aggregateId: Id<T>,
   ): Promise<{ aggregate: T; lastEvent: EventInfo }>;
 
-  save<E extends Event<T>, T extends Aggregate<T>>(args: {
+  emit<E extends Event<T>, T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
     event: CreationEvent<E, T> | TransformationEvent<E, T>;
     event_id?: Id<Event<T>>;
@@ -145,7 +145,7 @@ type Schemas<T extends Aggregate<T>> = {
   an aggregate of the incorrect type.
 */
 class Hydrator {
-  private tmap = new Map<Constructor<any>, Schemas<any>>();
+  private cmap = new Map<Constructor<any>, Schemas<any>>();
 
   constructor() {}
 
@@ -159,7 +159,7 @@ class Hydrator {
     creation: Schema<CreationEvent<any, A>>;
     transformation: Schema<TransformationEvent<any, A>>;
   }): void {
-    this.tmap.set(aggregate, {
+    this.cmap.set(aggregate, {
       creation: schema_EventData(creation),
       transformation: schema_EventData(transformation),
     });
@@ -170,7 +170,7 @@ class Hydrator {
     cls: Constructor<A>,
     serialized: Json[],
   ): Result<string, { aggregate: A; lastEvent: EventInfo }> {
-    const schemas = this.tmap.get(cls) as undefined | Schemas<A>;
+    const schemas = this.cmap.get(cls) as undefined | Schemas<A>;
     if (schemas == undefined) {
       throw new Error(`Unknown aggregate ${cls.name}`);
     }

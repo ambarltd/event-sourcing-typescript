@@ -42,7 +42,7 @@ class PostgresEventStore implements EventStore {
     return { aggregate, lastEvent };
   }
 
-  async save<E extends Event<T>, T extends Aggregate<T>>(args: {
+  async emit<E extends Event<T>, T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
     event: CreationEvent<E, T> | TransformationEvent<E, T>;
     event_id?: Id<Event<T>>;
