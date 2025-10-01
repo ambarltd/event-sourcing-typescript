@@ -3,6 +3,8 @@ import {
   Id,
   CreationEvent,
   TransformationEvent,
+  toSchema,
+  EventClass,
 } from '@/lib/eventSourcing/event';
 
 import * as s from '@/lib/json/schema';
@@ -61,20 +63,15 @@ export class AddName implements TransformationEvent<AddName, User> {
 }
 
 export class RemoveName implements TransformationEvent<RemoveName, User> {
-  static type: 'RemoveName' = 'RemoveName';
-  constructor(readonly values: s.Infer<typeof RemoveName.schemaArgs>) {}
-
-  static schemaArgs = s.object({
-    type: s.stringLiteral(RemoveName.type),
+  static type = 'RemoveName' as const;
+  static args = s.object({
+    type: s.stringLiteral(this.type),
     aggregateId: Id.schema(),
     name: s.string,
   });
-
-  static schema = RemoveName.schemaArgs.dimap(
-    (v) => new RemoveName(v),
-    (v) => v.values,
-  );
+  static schema = toSchema(this, this.args);
   readonly schema = RemoveName.schema;
+  constructor(readonly values: s.Infer<typeof RemoveName.args>) {}
 
   transformAggregate(agg: User): User {
     const u = new User(
@@ -85,3 +82,51 @@ export class RemoveName implements TransformationEvent<RemoveName, User> {
     return u;
   }
 }
+
+import { Schema } from '@/lib/json/schema';
+import { Constructor } from '@/lib/eventSourcing/eventStore';
+
+class EntryC<
+  A extends Aggregate<A>,
+  E extends CreationEvent<E, A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public c: Constructor<A>,
+    public e: Schema<E>,
+    public t: T,
+  ) {}
+}
+
+class EntryT<
+  A extends Aggregate<A>,
+  E extends TransformationEvent<E, A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public c: Constructor<A>,
+    public e: Schema<E>,
+    public t: T,
+  ) {}
+}
+
+type Entry<
+  A extends Aggregate<A>,
+  E extends EventClass<E, A>,
+  T extends E['values']['type'],
+> =
+  E extends CreationEvent<E, A>
+    ? EntryC<A, E, T>
+    : E extends TransformationEvent<E, A>
+      ? EntryT<A, E, T>
+      : never;
+
+type Obj = Record<string, Entry<any, any, any>>;
+
+function take(_: Obj): number {
+  return 2;
+}
+
+take({
+  [CreateUser.type]: new EntryC(User, CreateUser.schema, CreateUser.type),
+});
