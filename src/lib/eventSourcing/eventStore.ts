@@ -1,14 +1,13 @@
 export {
   type EventStore,
   type AggregateAndEventIdsInLastEvent,
-  Hydrator,
+  Schemas,
   type Constructor,
   type EventData,
   schema_EventData,
   makeSchema,
-  EntryC,
-  EntryT,
-  type Entry,
+  CSchema,
+  TSchema,
 };
 
 import {
@@ -133,7 +132,7 @@ const schema_EventData = <E>(s: Schema<E>): Schema<EventData<E>> =>
 
 type Constructor<T> = new (...args: any[]) => T;
 
-class EntryC<
+class CSchema<
   A extends Aggregate<A>,
   E extends CreationEvent<A>,
   T extends E['values']['type'],
@@ -145,7 +144,7 @@ class EntryC<
   ) {}
 }
 
-class EntryT<
+class TSchema<
   A extends Aggregate<A>,
   E extends TransformationEvent<A>,
   T extends E['values']['type'],
@@ -157,9 +156,9 @@ class EntryT<
   ) {}
 }
 
-type Entry<A extends Aggregate<A>> =
-  | EntryC<A, CreationEvent<A>, any>
-  | EntryT<A, TransformationEvent<A>, any>;
+type SomeSchema<A extends Aggregate<A>> =
+  | CSchema<A, CreationEvent<A>, any>
+  | TSchema<A, TransformationEvent<A>, any>;
 
 // Efficient decoders for all creation and transformation events for an aggregate.
 type Decoders<T extends Aggregate<T>> = {
@@ -167,7 +166,7 @@ type Decoders<T extends Aggregate<T>> = {
   transformation: Decoder<EventData<TransformationEvent<T>>>;
 };
 
-/* Note [Hydrator]
+/* Note [Schemas]
 
   We need some type-safe way to decode events for an aggregate. That is, without casting.
   We perform type-directed decoding, where we specify the type of the aggregate,
@@ -176,7 +175,7 @@ type Decoders<T extends Aggregate<T>> = {
   This ensures that we will never apply an incorrect aggregate transformation or create
   an aggregate of the incorrect type.
 */
-class Hydrator {
+class Schemas {
   private cmap = new Map<Constructor<Aggregate<any>>, Decoders<any>>();
   private tmap = new Map<string, Encoder<EventData<any>>>();
 
@@ -187,11 +186,11 @@ class Hydrator {
       aggregate: Constructor<Aggregate<any>>;
     }>,
   ) {
-    const entries: Array<Entry<Aggregate<any>>> = arr.map((entry) => {
-      if (entry instanceof EntryC || entry instanceof EntryT) {
+    const entries: Array<SomeSchema<Aggregate<any>>> = arr.map((entry) => {
+      if (entry instanceof CSchema || entry instanceof TSchema) {
         return entry;
       }
-      throw new Error(`Value should be an instance of Entry`);
+      throw new Error(`Value should be an instance of SomeSchema`);
     });
 
     // Set encoders
@@ -200,9 +199,9 @@ class Hydrator {
         throw new Error(`Duplicate entry for ${entry.type}`);
       }
 
-      if (entry instanceof EntryC) {
+      if (entry instanceof CSchema) {
         this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
-      } else if (entry instanceof EntryT) {
+      } else if (entry instanceof TSchema) {
         this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
       } else {
         entry satisfies never;
@@ -229,9 +228,9 @@ class Hydrator {
         transformation: [],
       };
 
-      if (entry instanceof EntryC) {
+      if (entry instanceof CSchema) {
         found.creation.push({ schema: entry.schema, type: entry.type });
-      } else if (entry instanceof EntryT) {
+      } else if (entry instanceof TSchema) {
         found.transformation.push({ schema: entry.schema, type: entry.type });
       } else {
         entry satisfies never;
@@ -297,7 +296,7 @@ type EventConstructor = { type: string; schema: Schema<any> };
 
 // Create an efficient schema given a list of event classes
 //
-// To be used when joining schemas for the Hydrator
+// To be used when joining schemas for the Schemas
 function makeSchema<T extends [...EventConstructor[]]>(
   ts: T,
 ): Schema<s.Infer<T[number]['schema']>> {

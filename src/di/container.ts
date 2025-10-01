@@ -25,7 +25,7 @@ import { Mongo } from '@/lib/mongo';
 import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
 import { PostgresEventStore } from '@/app/postgresEventStore';
-import { Hydrator, EventStore, EntryC } from '@/lib/eventSourcing/eventStore';
+import { Schemas, EventStore, CSchema } from '@/lib/eventSourcing/eventStore';
 import { Future } from '@/lib/Future';
 import { Response } from '@/lib/router';
 import * as router from '@/lib/router';
@@ -164,8 +164,8 @@ export async function configureDependencies(): Promise<Dependencies> {
     }),
   );
 
-  const hydrator = new Hydrator([
-    new EntryC(
+  const schemas = new Schemas([
+    new CSchema(
       ApplicationSubmitted.aggregate,
       ApplicationSubmitted.schema,
       ApplicationSubmitted.type,
@@ -182,7 +182,7 @@ export async function configureDependencies(): Promise<Dependencies> {
       });
 
     return postgres.withTransaction(onError, (t) =>
-      f(new PostgresEventStore(t, hydrator, table)),
+      f(new PostgresEventStore(t, schemas, table)),
     );
   }
 

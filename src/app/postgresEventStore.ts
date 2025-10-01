@@ -11,7 +11,7 @@ import {
 } from '@/lib/eventSourcing/event';
 import {
   EventStore,
-  Hydrator,
+  Schemas,
   Constructor,
   EventData,
 } from '@/lib/eventSourcing/eventStore';
@@ -23,7 +23,7 @@ import { POSIX } from '@/lib/time';
 class PostgresEventStore implements EventStore {
   constructor(
     private transaction: PostgresTransaction,
-    private readonly hydrator: Hydrator,
+    private readonly schemas: Schemas,
     private readonly eventStoreTable: string,
   ) {}
 
@@ -32,7 +32,7 @@ class PostgresEventStore implements EventStore {
     aggregateId: Id<T>,
   ): Promise<{ aggregate: T; lastEvent: EventInfo }> {
     const events = await this.findAll(aggregateId);
-    const { lastEvent, aggregate } = this.hydrator
+    const { lastEvent, aggregate } = this.schemas
       .hydrate(cls, events)
       .unwrap((e) => e);
 
@@ -125,7 +125,7 @@ class PostgresEventStore implements EventStore {
           aggregate_version, json_payload, json_metadata, recorded_on, event_name
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 
-    const serialized = this.hydrator.encode(edata);
+    const serialized = this.schemas.encode(edata);
 
     const values = [
       // @ts-ignore
