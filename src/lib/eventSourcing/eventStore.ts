@@ -6,6 +6,9 @@ export {
   type EventData,
   schema_EventData,
   makeSchema,
+  EntryC,
+  EntryT,
+  type Entry,
 };
 
 import {
@@ -177,7 +180,20 @@ class Hydrator {
   private cmap = new Map<Constructor<Aggregate<any>>, Decoders<any>>();
   private tmap = new Map<string, Encoder<EventData<any>>>();
 
-  constructor(entries: Array<Entry<Aggregate<any>>>) {
+  constructor(
+    arr: Array<{
+      type: string;
+      schema: Schema<any>;
+      aggregate: Constructor<Aggregate<any>>;
+    }>,
+  ) {
+    const entries: Array<Entry<Aggregate<any>>> = arr.map((entry) => {
+      if (entry instanceof EntryC || entry instanceof EntryT) {
+        return entry;
+      }
+      throw new Error(`Value should be an instance of Entry`);
+    });
+
     // Set encoders
     for (const entry of entries) {
       if (this.tmap.has(entry.type)) {
