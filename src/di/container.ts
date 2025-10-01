@@ -24,6 +24,12 @@ import { Postgres, defaultPoolSettings } from '@/lib/postgres';
 import { Mongo } from '@/lib/mongo';
 import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
+import { PostgresEventStore } from '@/app/postgresEventStore';
+import { Hydrator, EventStore, EntryC } from '@/lib/eventSourcing/eventStore';
+import { Future } from '@/lib/Future';
+import { Response } from '@/lib/router';
+import * as router from '@/lib/router';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
@@ -103,7 +109,9 @@ function registerScopedServices() {
 }
 
 type Dependencies = {
-  postgres: Postgres;
+  withEventStore: (
+    f: (store: EventStore) => Future<Response, Response>,
+  ) => Future<Response, Response>;
   mongo: Mongo;
 };
 
@@ -142,11 +150,12 @@ export async function configureDependencies(): Promise<Dependencies> {
     },
   });
 
+  const table = env.EVENT_STORE_CREATE_TABLE_WITH_NAME;
   await postgres.withTransactionP((transaction) =>
     postgresEventStore.initialize({
       transaction,
       database: env.EVENT_STORE_DATABASE_NAME,
-      table: env.EVENT_STORE_CREATE_TABLE_WITH_NAME,
+      table,
       replicationUserName:
         env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_USERNAME,
       replicationUserPass:
@@ -155,5 +164,27 @@ export async function configureDependencies(): Promise<Dependencies> {
     }),
   );
 
-  return { postgres, mongo };
+  const hydrator = new Hydrator([
+    new EntryC(
+      ApplicationSubmitted.aggregate,
+      ApplicationSubmitted.schema,
+      ApplicationSubmitted.type,
+    ),
+  ]);
+
+  function withEventStore(
+    f: (s: EventStore) => Future<Response, Response>,
+  ): Future<Response, Response> {
+    const onError = (_: Error): Response =>
+      router.json({
+        status: 500,
+        content: { message: 'Internal Server Error' },
+      });
+
+    return postgres.withTransaction(onError, (t) =>
+      f(new PostgresEventStore(t, hydrator, table)),
+    );
+  }
+
+  return { withEventStore, mongo };
 }

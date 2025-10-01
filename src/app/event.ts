@@ -70,7 +70,6 @@ export class RemoveName implements TransformationEvent<User> {
     name: s.string,
   });
   static schema = toSchema(this, this.args);
-  readonly schema = RemoveName.schema;
   constructor(readonly values: s.Infer<typeof RemoveName.args>) {}
 
   transformAggregate(agg: User): User {
@@ -82,9 +81,3 @@ export class RemoveName implements TransformationEvent<User> {
     return u;
   }
 }
-
-import { Hydrator, EntryC } from '@/lib/eventSourcing/eventStore';
-
-const hydrator = new Hydrator([
-  new EntryC(User, CreateUser.schema, CreateUser.type),
-]);
