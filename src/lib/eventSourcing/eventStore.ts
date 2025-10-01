@@ -135,6 +135,41 @@ type Schemas<T extends Aggregate<T>> = {
   transformation: Schema<EventData<TransformationEvent<any, T>>>;
 };
 
+class EntryC<
+  A extends Aggregate<A>,
+  E extends CreationEvent<E, A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public aggregate: Constructor<A>,
+    public schema: Schema<E>,
+    public type: T,
+  ) {}
+}
+
+class EntryT<
+  A extends Aggregate<A>,
+  E extends TransformationEvent<E, A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public aggregate: Constructor<A>,
+    public schema: Schema<E>,
+    public type: T,
+  ) {}
+}
+
+type Entry<
+  A extends Aggregate<A>,
+  E extends Event<A>,
+  T extends E['values']['type'],
+> =
+  E extends CreationEvent<E, A>
+    ? EntryC<A, E, T>
+    : E extends TransformationEvent<E, A>
+      ? EntryT<A, E, T>
+      : never;
+
 /* Note [Hydrator]
 
   We need some type-safe way to decode events for an aggregate. That is, without casting.
@@ -147,22 +182,43 @@ type Schemas<T extends Aggregate<T>> = {
 class Hydrator {
   private cmap = new Map<Constructor<any>, Schemas<any>>();
 
-  constructor() {}
+  constructor(entries: Record<string, Entry<any, any, any>>) {
+    type Events<T extends Aggregate<T>> = {
+      creation: Array<{
+        type: string;
+        schema: Schema<CreationEvent<any, T>>;
+      }>;
+      transformation: Array<{
+        type: string;
+        schema: Schema<TransformationEvent<any, T>>;
+      }>;
+    };
 
-  // add support for deserializing an aggregate's events.
-  add<A extends Aggregate<A>>({
-    aggregate,
-    creation,
-    transformation,
-  }: {
-    aggregate: Constructor<A>;
-    creation: Schema<CreationEvent<any, A>>;
-    transformation: Schema<TransformationEvent<any, A>>;
-  }): void {
-    this.cmap.set(aggregate, {
-      creation: schema_EventData(creation),
-      transformation: schema_EventData(transformation),
-    });
+    const emap: Map<Constructor<any>, Events<any>> = new Map();
+
+    for (const ty in entries) {
+      const entry = entries[ty] as Entry<any, any, any>;
+      const aggregate = entry.aggregate;
+      const found: Events<any> = emap.get(aggregate) || {
+        creation: [],
+        transformation: [],
+      };
+
+      if (entry instanceof EntryC) {
+        found.creation.push({ schema: entry.schema, type: entry.type });
+      } else if (entry instanceof EntryT) {
+        found.transformation.push({ schema: entry.schema, type: entry.type });
+      } else {
+        entry satisfies never;
+      }
+    }
+
+    for (const [aggregate, events] of emap.entries()) {
+      this.cmap.set(aggregate, {
+        creation: schema_EventData(makeSchema(events.creation)),
+        transformation: schema_EventData(makeSchema(events.transformation)),
+      });
+    }
   }
 
   // Build an aggregate from all its serialized events.
