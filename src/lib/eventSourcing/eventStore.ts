@@ -130,11 +130,6 @@ const schema_EventData = <E>(s: Schema<E>): Schema<EventData<E>> =>
 
 type Constructor<T> = new (...args: any[]) => T;
 
-type Schemas<T extends Aggregate<T>> = {
-  creation: Schema<EventData<CreationEvent<any, T>>>;
-  transformation: Schema<EventData<TransformationEvent<any, T>>>;
-};
-
 class EntryC<
   A extends Aggregate<A>,
   E extends CreationEvent<E, A>,
@@ -159,16 +154,15 @@ class EntryT<
   ) {}
 }
 
-type Entry<
-  A extends Aggregate<A>,
-  E extends Event<A>,
-  T extends E['values']['type'],
-> =
-  E extends CreationEvent<E, A>
-    ? EntryC<A, E, T>
-    : E extends TransformationEvent<E, A>
-      ? EntryT<A, E, T>
-      : never;
+type Entry<A extends Aggregate<A>> =
+  | EntryC<A, CreationEvent<any, A>, any>
+  | EntryT<A, TransformationEvent<any, A>, any>;
+
+// Efficient decoders for all creation and transformation events for an aggregate.
+type Decoders<T extends Aggregate<T>> = {
+  creation: Decoder<EventData<CreationEvent<any, T>>>;
+  transformation: Decoder<EventData<TransformationEvent<any, T>>>;
+};
 
 /* Note [Hydrator]
 
@@ -180,9 +174,25 @@ type Entry<
   an aggregate of the incorrect type.
 */
 class Hydrator {
-  private cmap = new Map<Constructor<any>, Schemas<any>>();
+  private cmap = new Map<Constructor<Aggregate<any>>, Decoders<any>>();
+  private tmap = new Map<string, Encoder<EventData<any>>>();
 
-  constructor(entries: Record<string, Entry<any, any, any>>) {
+  constructor(entries: Array<Entry<Aggregate<any>>>) {
+    // Set encoders
+    for (const entry of entries) {
+      if (this.tmap.has(entry.type)) {
+        throw new Error(`Duplicate entry for ${entry.type}`);
+      }
+
+      if (entry instanceof EntryC) {
+        this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
+      } else if (entry instanceof EntryT) {
+        this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
+      } else {
+        entry satisfies never;
+      }
+    }
+
     type Events<T extends Aggregate<T>> = {
       creation: Array<{
         type: string;
@@ -194,10 +204,9 @@ class Hydrator {
       }>;
     };
 
-    const emap: Map<Constructor<any>, Events<any>> = new Map();
+    const emap: Map<Constructor<Aggregate<any>>, Events<any>> = new Map();
 
-    for (const ty in entries) {
-      const entry = entries[ty] as Entry<any, any, any>;
+    for (const entry of entries) {
       const aggregate = entry.aggregate;
       const found: Events<any> = emap.get(aggregate) || {
         creation: [],
@@ -215,10 +224,21 @@ class Hydrator {
 
     for (const [aggregate, events] of emap.entries()) {
       this.cmap.set(aggregate, {
-        creation: schema_EventData(makeSchema(events.creation)),
-        transformation: schema_EventData(makeSchema(events.transformation)),
+        creation: schema_EventData(makeSchema(events.creation)).decoder,
+        transformation: schema_EventData(makeSchema(events.transformation))
+          .decoder,
       });
     }
+  }
+
+  encode<E extends Event<any>>(edata: EventData<E>): Json {
+    const ty = edata.event.values.type;
+    const found = this.tmap.get(ty) as undefined | Encoder<EventData<E>>;
+    if (found == undefined) {
+      throw new Error(`Unknown event type ${ty}`);
+    }
+
+    return found.run(edata);
   }
 
   // Build an aggregate from all its serialized events.
@@ -226,7 +246,7 @@ class Hydrator {
     cls: Constructor<A>,
     serialized: Json[],
   ): Result<string, { aggregate: A; lastEvent: EventInfo }> {
-    const schemas = this.cmap.get(cls) as undefined | Schemas<A>;
+    const schemas = this.cmap.get(cls) as undefined | Decoders<A>;
     if (schemas == undefined) {
       throw new Error(`Unknown aggregate ${cls.name}`);
     }
@@ -236,10 +256,10 @@ class Hydrator {
     }
 
     return d
-      .decode(serialized[0], schemas.creation.decoder)
+      .decode(serialized[0], schemas.creation)
       .then(({ event: first, info }) =>
         d
-          .decode(serialized.slice(1), d.array(schemas.transformation.decoder))
+          .decode(serialized.slice(1), d.array(schemas.transformation))
           .map((es) => {
             let aggregate = first.createAggregate();
             let lastEvent = info;
