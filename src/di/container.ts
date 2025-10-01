@@ -25,11 +25,11 @@ import { Mongo } from '@/lib/mongo';
 import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
 import { PostgresEventStore } from '@/app/postgresEventStore';
-import { Schemas, EventStore, CSchema } from '@/lib/eventSourcing/eventStore';
+import { EventStore } from '@/lib/eventSourcing/eventStore';
 import { Future } from '@/lib/Future';
 import { Response } from '@/lib/router';
 import * as router from '@/lib/router';
-import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
+import { schemas } from '@/app/schemas';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
@@ -163,14 +163,6 @@ export async function configureDependencies(): Promise<Dependencies> {
       replicationPublication: env.EVENT_STORE_CREATE_REPLICATION_PUBLICATION,
     }),
   );
-
-  const schemas = new Schemas([
-    new CSchema(
-      ApplicationSubmitted.aggregate,
-      ApplicationSubmitted.schema,
-      ApplicationSubmitted.type,
-    ),
-  ]);
 
   function withEventStore(
     f: (s: EventStore) => Future<Response, Response>,

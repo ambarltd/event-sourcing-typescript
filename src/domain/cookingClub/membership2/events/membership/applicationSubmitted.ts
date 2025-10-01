@@ -2,10 +2,7 @@ export { ApplicationSubmitted };
 
 import { Id, CreationEvent, toSchema } from '@/lib/eventSourcing/event';
 import * as s from '@/lib/json/schema';
-import {
-  Membership,
-  MembershipStatus,
-} from '@/domain/cookingClub/membership2/aggregate/membership';
+import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
 
 const type = 'ApplicationSubmitted' as const;
 const args = s.object({
@@ -30,7 +27,7 @@ class ApplicationSubmitted implements CreationEvent<Membership> {
       0,
       this.values.firstName,
       this.values.lastName,
-      MembershipStatus.Requested,
+      'Requested',
     );
   }
 }
