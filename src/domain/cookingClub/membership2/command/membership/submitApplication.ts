@@ -4,8 +4,9 @@ import * as d from '@/lib/json/decoder';
 import { CommandController, CommandHandler } from '@/app/commandHandler';
 import { Future } from '@/lib/Future';
 import { Response, json } from '@/lib/router';
+import { Id } from '@/lib/eventSourcing/event';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
-import { IdGenerator } from '@/common/util/IdGenerator';
+import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
 
 type Command = d.Infer<typeof decoder>;
 const decoder = d.object({
@@ -20,17 +21,18 @@ const handler: CommandHandler<Command> = ({
   command,
   store,
 }): Future<Response, Response> => {
-  store.emit(
-    new ApplicationSubmitted({
-      type: 'ApplicationSubmitted',
-      aggregateId: IdGenerator.generateRandomId(),
+  store.emit({
+    aggregate: ApplicationSubmitted.aggregate,
+    event: new ApplicationSubmitted({
+      type: ApplicationSubmitted.type,
+      aggregateId: Id.random<Membership>(),
       firstName: command.firstName,
       lastName: command.lastName,
       favouriteCousine: command.favouriteCousine,
       yearsOfProfessionalExperience: command.yearsOfProfessionalExperience,
       numberOfCookingBooksRead: command.numberOfCookingBooksRead,
     }),
-  );
+  });
 
   return Future.resolve(
     json({

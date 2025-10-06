@@ -12,8 +12,6 @@ import {
   FileStorageService,
 } from '@/common';
 import { constructor } from 'tsyringe/dist/typings/types';
-import { SubmitApplicationCommandController } from '@/domain/cookingClub/membership/command/submitApplication';
-import { SubmitApplicationCommandHandler } from '@/domain/cookingClub/membership/command/submitApplication';
 import { EvaluateApplicationReactionHandler } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
 import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
@@ -30,6 +28,8 @@ import { Future } from '@/lib/Future';
 import { Response } from '@/lib/router';
 import * as router from '@/lib/router';
 import { schemas } from '@/app/schemas';
+import { Services } from '@/app/services';
+import { Projections } from '@/app/projections';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
@@ -94,10 +94,6 @@ function registerScopedServices() {
   // common/projection
   registerScoped(MongoTransactionalProjectionOperator);
 
-  // domain/cookingClub/command/submitApplication
-  registerScoped(SubmitApplicationCommandController);
-  registerScoped(SubmitApplicationCommandHandler);
-
   // domain/cookingClub/projection/membersByCuisine
   registerScoped(CuisineRepository);
   registerScoped(MembersByCuisineProjectionHandler);
@@ -113,6 +109,8 @@ type Dependencies = {
     f: (store: EventStore) => Future<Response, Response>,
   ) => Future<Response, Response>;
   mongo: Mongo;
+  services: Services;
+  projections: Projections;
 };
 
 export async function configureDependencies(): Promise<Dependencies> {
@@ -178,5 +176,10 @@ export async function configureDependencies(): Promise<Dependencies> {
     );
   }
 
-  return { withEventStore, mongo };
+  return {
+    withEventStore,
+    mongo,
+    services: {},
+    projections: {},
+  };
 }

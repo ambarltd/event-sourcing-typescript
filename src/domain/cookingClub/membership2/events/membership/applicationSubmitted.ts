@@ -7,7 +7,7 @@ import { Membership } from '@/domain/cookingClub/membership2/aggregate/membershi
 const type = 'ApplicationSubmitted' as const;
 const args = s.object({
   type: s.stringLiteral(type),
-  aggregateId: Id.schema(),
+  aggregateId: Id.schema<Membership>(),
   firstName: s.string,
   lastName: s.string,
   favouriteCousine: s.string,

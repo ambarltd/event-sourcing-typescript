@@ -23,7 +23,9 @@ type CommandController<Command> = {
 };
 
 function handleCommand<Command>(
-  withEventStore: <T>(f: (store: EventStore) => T) => T,
+  withEventStore: (
+    f: (store: EventStore) => Future<Response, Response>,
+  ) => Future<Response, Response>,
   services: Services,
   projections: Projections,
   { decoder, handler }: CommandController<Command>,

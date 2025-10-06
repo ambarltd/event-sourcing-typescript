@@ -8,14 +8,16 @@ import { MongoInitializer } from '@/common/util/MongoInitializer';
 import { PostgresInitializer } from '@/common/util/PostgresInitializer';
 import { log } from '@/common/util/Logger';
 import { AmbarAuthMiddleware } from '@/common/ambar/AmbarAuthMiddleware';
-import { SubmitApplicationCommandController } from '@/domain/cookingClub/membership/command/submitApplication/SubmitApplicationCommandController';
 import { MembersByCuisineQueryController } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryController';
 import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionController } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
+import { handleCommand } from '@/app/commandHandler';
+import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/membership/submitApplication';
 
 async function main() {
   // Configure dependency injection
-  await configureDependencies();
+  const { withEventStore, services, projections } =
+    await configureDependencies();
 
   // Create express app
   const app = express();
@@ -24,13 +26,21 @@ async function main() {
   // Add scoped container middleware
   app.use(scopedContainer);
 
+  //////////////////////////////////////////////////////////////////////
+
+  app.use(
+    '/api/v1/cooking-club/membership/command/submit-application',
+    handleCommand(
+      withEventStore,
+      services,
+      projections,
+      membership_command_submitApplication.controller,
+    ),
+  );
+
+  //////////////////////////////////////////////////////////////////////
+
   // Add routes
-  app.use('/api/v1/cooking-club/membership/command', (req, res, next) => {
-    const controller = req.container.resolve(
-      SubmitApplicationCommandController,
-    );
-    return controller.router(req, res, next);
-  });
   app.use(
     '/api/v1/cooking-club/membership/projection',
     AmbarAuthMiddleware,
