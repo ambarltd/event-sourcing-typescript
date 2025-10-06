@@ -12,6 +12,11 @@ export {
 import * as s from '@/lib/json/schema';
 import { Schema } from '@/lib/json/schema';
 import { POSIX } from '@/lib/time';
+import { createHash, randomBytes } from 'crypto';
+
+const ALPHANUMERIC_CHARACTERS =
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const ID_LENGTH = 56;
 
 // @ts-ignore
 class Id<A> {
@@ -25,6 +30,26 @@ class Id<A> {
       (v) => new Id(v),
       (id) => id.value,
     );
+  }
+
+  static random<T>(): Id<T> {
+    const toChar = (byte: number) =>
+      ALPHANUMERIC_CHARACTERS.charAt(byte % ALPHANUMERIC_CHARACTERS.length);
+    const str = Array.from(randomBytes(ID_LENGTH)).map(toChar).join('');
+    return new Id(str);
+  }
+
+  static deterministic(seed: string): string {
+    if (seed.trim() == '') {
+      throw new Error('Input string cannot be null or empty');
+    }
+
+    const first = createHash('sha256').update(seed).digest();
+    const second = createHash('sha256').update(first).digest();
+    const combined = Buffer.concat([first, second]);
+    const base64Encoded = combined.toString('base64');
+    const cleanId = base64Encoded.replace(/[^A-Za-z0-9]/g, '');
+    return cleanId.substring(0, ID_LENGTH);
   }
 }
 
