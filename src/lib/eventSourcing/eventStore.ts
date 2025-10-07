@@ -6,8 +6,10 @@ export {
   type EventData,
   schema_EventData,
   makeSchema,
+  makeDecoder,
   CSchema,
   TSchema,
+  type Serialized,
 };
 
 import {
@@ -322,4 +324,10 @@ function makeSchema<T extends [...EventConstructor[]]>(
   });
 
   return new Schema(decoder, encoder);
+}
+
+function makeDecoder<T extends [...EventConstructor[]]>(
+  ts: T,
+): Decoder<s.Infer<T[number]['schema']>> {
+  return makeSchema(ts).decoder;
 }
