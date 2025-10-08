@@ -34,26 +34,24 @@ type ReactionHandler<E> = (v: {
 
 const onEventStoreError = (err: Error) => new Ambar.ErrorMustRetry(err.message);
 
-type WithGenericStore = <E, T>(
+type WithStoreGeneric = <E, T>(
   onError: (e: Error) => E,
   f: (store: EventStore) => Future<E, T>,
 ) => Future<E, T>;
 
-type WithConcreteStore = (
+type WithStoreConcrete = (
   f: (store: EventStore) => Future<ErrorMustRetry, void>,
 ) => Future<ErrorMustRetry, void>;
 
 const wrapWithEventStore = (
-  withEventStore: WithGenericStore,
-): WithConcreteStore =>
+  withEventStore: WithStoreGeneric,
+): WithStoreConcrete =>
   function (f) {
     return withEventStore(onEventStoreError, (store) => f(store));
   };
 
 function handleReaction<E extends Event<any>>(
-  withEventStore: (
-    f: (store: EventStore) => Future<ErrorMustRetry, void>,
-  ) => Future<ErrorMustRetry, void>,
+  withEventStore: WithStoreConcrete,
   projections: Projections,
   services: Services,
   { decoder, handler }: ReactionController<E>,

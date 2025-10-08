@@ -11,8 +11,13 @@ import { AmbarAuthMiddleware } from '@/common/ambar/AmbarAuthMiddleware';
 import { MembersByCuisineQueryController } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryController';
 import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionController } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
-import { handleCommand } from '@/app/commandHandler';
-import { handleReaction, wrapWithEventStore } from '@/app/reactionHandler';
+import { handleCommand, CommandController } from '@/app/commandHandler';
+import { Event } from '@/lib/eventSourcing/event';
+import {
+  handleReaction,
+  wrapWithEventStore,
+  ReactionController,
+} from '@/app/reactionHandler';
 import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/membership/submitApplication';
 import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/membership/evaluateApplication';
 
@@ -28,26 +33,36 @@ async function main() {
   // Add scoped container middleware
   app.use(scopedContainer);
 
+  const command = <T>(endpoint: string, controller: CommandController<T>) =>
+    app.use(
+      endpoint,
+      handleCommand(withEventStore, services, projections, controller),
+    );
+
+  const reaction = <T extends Event<any>>(
+    endpoint: string,
+    controller: ReactionController<T>,
+  ) =>
+    app.use(
+      endpoint,
+      handleReaction(
+        wrapWithEventStore(withEventStore),
+        services,
+        projections,
+        controller,
+      ),
+    );
+
   //////////////////////////////////////////////////////////////////////
 
-  app.use(
+  command(
     '/api/v1/cooking-club/membership/command/submit-application',
-    handleCommand(
-      withEventStore,
-      services,
-      projections,
-      membership_command_submitApplication.controller,
-    ),
+    membership_command_submitApplication.controller,
   );
 
-  app.use(
+  reaction(
     '/api/v1/cooking-club/membership/reaction/evaluateApplication',
-    handleReaction(
-      wrapWithEventStore(withEventStore),
-      services,
-      projections,
-      membership_reaction_evaluateApplication.controller,
-    ),
+    membership_reaction_evaluateApplication.controller,
   );
 
   //////////////////////////////////////////////////////////////////////
