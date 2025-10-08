@@ -52,6 +52,7 @@ export {
   failure,
   optional,
   succeed,
+  both,
 };
 
 import { Result, Success, Failure, traverse } from '@/lib/Result';
@@ -104,6 +105,22 @@ const always = <T>(v: T): Decoder<T> => new Decoder((_) => Success(v));
 const succeed = always;
 
 const any: Decoder<unknown> = new Decoder((v) => Success(v));
+
+// Use two decoders on the same input
+const both = <T, U>(left: Decoder<T>, right: Decoder<U>): Decoder<[T, U]> =>
+  new Decoder((u) => {
+    const l = left.run(u);
+    if (l instanceof Failure) {
+      return new Failure(l.error);
+    }
+
+    const r = right.run(u);
+    if (r instanceof Failure) {
+      return new Failure(r.error);
+    }
+
+    return Success([l.value, r.value]);
+  });
 
 const string: Decoder<string> = new Decoder((v) =>
   typeof v === 'string'

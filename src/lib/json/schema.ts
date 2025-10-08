@@ -14,6 +14,7 @@ export {
   string,
   array,
   json,
+  both,
   maybe,
   nullable,
   optional,
@@ -82,6 +83,12 @@ const string: Schema<string> = new Schema(D.string, E.string);
 
 const array = <A>(schema: Schema<A>): Schema<Array<A>> =>
   new Schema(D.array(schema.decoder), E.array(schema.encoder));
+
+const both = <T, U>(left: Schema<T>, right: Schema<U>): Schema<[T, U]> =>
+  new Schema(
+    D.both(left.decoder, right.decoder),
+    E.both(left.encoder, right.encoder),
+  );
 
 function object<A>(def: SchemaDef<A>): Schema<A> {
   const pdef = {} as DecoderDef<A>;
