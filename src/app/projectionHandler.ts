@@ -1,11 +1,12 @@
 export { handleProjection, decodeEvent };
 
 import { Response } from '@/lib/router';
-import { Event } from '@/lib/eventSourcing/event';
+import { Event, EventInfo } from '@/lib/eventSourcing/event';
+import { EventData } from '@/lib/eventSourcing/eventStore';
 import { Decoder, decode } from '@/lib/json/decoder';
 import * as express from 'express';
 import * as router from '@/lib/router';
-import * as d from '@/lib/json/decoder';
+import * as Ambar from '@/app/ambar';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Maybe, Nothing } from '@/lib/Maybe';
@@ -16,6 +17,7 @@ type Mongo = {};
 
 type ProjectionHandler<E> = (v: {
   event: E;
+  info: EventInfo;
   projections: Projections;
   store: ProjectionStore;
 }) => Future<Response, Response>;
@@ -31,10 +33,11 @@ function handleProjection<E extends Event<any>>(
   { decoder, handler }: ProjectionController<E>,
 ): express.Handler {
   return router.route((req) =>
-    decodeEvent(decoder, req).chain((event) =>
+    decodeEvent(decoder, req).chain(({ event, info }) =>
       withProjectionStore(mongo, (store) =>
         handler({
           event,
+          info,
           projections,
           store,
         }),
@@ -46,12 +49,14 @@ function handleProjection<E extends Event<any>>(
 function decodeEvent<E>(
   decoder: Decoder<Maybe<E>>,
   req: express.Request,
-): Future<Response, E> {
-  const bodyDecoder: Decoder<Maybe<E>> = d
-    .object({ payload: decoder })
-    .map((r) => r.payload);
+): Future<Response, EventData<E>> {
+  const bodyDecoder: Decoder<EventData<Maybe<E>>> =
+    Ambar.payloadDecoder(decoder);
 
-  const decoded: Result<string, Maybe<E>> = decode(bodyDecoder, req.body);
+  const decoded: Result<string, EventData<Maybe<E>>> = decode(
+    bodyDecoder,
+    req.body,
+  );
 
   if (decoded instanceof Failure) {
     return Future.reject(
@@ -62,7 +67,7 @@ function decodeEvent<E>(
     );
   }
 
-  if (decoded.value instanceof Nothing) {
+  if (decoded.value.event instanceof Nothing) {
     return Future.reject(
       router.json({
         status: 200,
@@ -71,7 +76,10 @@ function decodeEvent<E>(
     );
   }
 
-  return Future.resolve(decoded.value.value);
+  return Future.resolve({
+    info: decoded.value.info,
+    event: decoded.value.event.value,
+  });
 }
 
 function withProjectionStore(
