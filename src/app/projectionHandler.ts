@@ -1,12 +1,12 @@
 export { handleProjection, decodeEvent };
 
-import { Response } from '@/lib/router';
 import { Event, EventInfo } from '@/lib/eventSourcing/event';
 import { EventData } from '@/lib/eventSourcing/eventStore';
 import { Decoder, decode } from '@/lib/json/decoder';
 import * as express from 'express';
 import * as router from '@/lib/router';
 import * as Ambar from '@/app/ambar';
+import { AmbarResponse } from '@/app/ambar';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Maybe, Nothing } from '@/lib/Maybe';
@@ -20,7 +20,7 @@ type ProjectionHandler<E> = (v: {
   info: EventInfo;
   projections: Projections;
   store: ProjectionStore;
-}) => Future<Response, Response>;
+}) => Future<AmbarResponse, void>;
 
 type ProjectionController<E extends Event<any>> = {
   decoder: Decoder<Maybe<E>>;
@@ -33,23 +33,26 @@ function handleProjection<E extends Event<any>>(
   { decoder, handler }: ProjectionController<E>,
 ): express.Handler {
   return router.route((req) =>
-    decodeEvent(decoder, req).chain(({ event, info }) =>
-      withProjectionStore(mongo, (store) =>
-        handler({
-          event,
-          info,
-          projections,
-          store,
-        }),
-      ),
-    ),
+    decodeEvent(decoder, req)
+      .chain(({ event, info }) =>
+        withProjectionStore(mongo, (store) =>
+          handler({
+            event,
+            info,
+            projections,
+            store,
+          }),
+        ),
+      )
+      .map((_) => new Ambar.Success())
+      .bimap(Ambar.toResponse, Ambar.toResponse),
   );
 }
 
 function decodeEvent<E>(
   decoder: Decoder<Maybe<E>>,
   req: express.Request,
-): Future<Response, EventData<E>> {
+): Future<AmbarResponse, EventData<E>> {
   const bodyDecoder: Decoder<EventData<Maybe<E>>> =
     Ambar.payloadDecoder(decoder);
 
@@ -60,20 +63,13 @@ function decodeEvent<E>(
 
   if (decoded instanceof Failure) {
     return Future.reject(
-      router.json({
-        status: 400,
-        content: { message: `Unable to decode command: ${decoded.error}` },
-      }),
+      new Ambar.ErrorMustRetry(`Unable to decode command: ${decoded.error}`),
     );
   }
 
   if (decoded.value.event instanceof Nothing) {
-    return Future.reject(
-      router.json({
-        status: 200,
-        content: { message: 'Ignored' },
-      }),
-    );
+    // ignored
+    return Future.reject(new Ambar.Success());
   }
 
   return Future.resolve({
@@ -82,9 +78,9 @@ function decodeEvent<E>(
   });
 }
 
-function withProjectionStore(
+function withProjectionStore<T>(
   _mongo: Mongo,
-  _f: (s: ProjectionStore) => Future<Response, Response>,
-): Future<Response, Response> {
+  _f: (s: ProjectionStore) => Future<AmbarResponse, T>,
+): Future<AmbarResponse, T> {
   throw new Error('TODO');
 }

@@ -1,5 +1,11 @@
 // Interacting with Ambar's infra
-export { success, errorMustRetry, payloadDecoder };
+export {
+  type AmbarResponse,
+  toResponse,
+  Success,
+  ErrorMustRetry,
+  payloadDecoder,
+};
 
 import * as router from '@/lib/router';
 import * as e from '@/lib/json/encoder';
@@ -10,24 +16,44 @@ import { Encoder } from '@/lib/json/encoder';
 import { Schema } from '@/lib/json/schema';
 
 // Success response from data destination
-const success = router.json({
-  status: 200,
-  content: { result: { success: {} } },
-});
+class Success {
+  // @ts-expect-error _tag's existence prevents structural comparison
+  private readonly _tag: null = null;
+  constructor() {}
+}
 
 // Error response from data destination
-const errorMustRetry = (description: string) =>
-  router.json({
-    status: 200,
-    content: {
-      result: {
-        error: {
-          policy: 'must_retry',
-          description,
+class ErrorMustRetry {
+  // @ts-expect-error _tag's existence prevents structural comparison
+  private readonly _tag: null = null;
+  constructor(public readonly description: string) {}
+}
+
+type AmbarResponse = Success | ErrorMustRetry;
+
+function toResponse(r: AmbarResponse): router.Response {
+  switch (true) {
+    case r instanceof Success:
+      return router.json({
+        status: 200,
+        content: { result: { success: {} } },
+      });
+    case r instanceof ErrorMustRetry:
+      return router.json({
+        status: 200,
+        content: {
+          result: {
+            error: {
+              policy: 'must_retry',
+              description: r.description,
+            },
+          },
         },
-      },
-    },
-  });
+      });
+    default:
+      return r satisfies never;
+  }
+}
 
 type AmbarHttpRequest<T> = {
   data_source_id: string;
