@@ -105,9 +105,10 @@ function registerScopedServices() {
 }
 
 type Dependencies = {
-  withEventStore: (
-    f: (store: EventStore) => Future<Response, Response>,
-  ) => Future<Response, Response>;
+  withEventStore: <E, T>(
+    onError: (e: Error) => E,
+    f: (store: EventStore) => Future<E, T>,
+  ) => Future<E, T>;
   mongo: Mongo;
   services: Services;
   projections: Projections;
@@ -162,15 +163,10 @@ export async function configureDependencies(): Promise<Dependencies> {
     }),
   );
 
-  function withEventStore(
-    f: (s: EventStore) => Future<Response, Response>,
-  ): Future<Response, Response> {
-    const onError = (_: Error): Response =>
-      router.json({
-        status: 500,
-        content: { message: 'Internal Server Error' },
-      });
-
+  function withEventStore<E, T>(
+    onError: (e: Error) => E,
+    f: (s: EventStore) => Future<E, T>,
+  ): Future<E, T> {
     return postgres.withTransaction(onError, (t) =>
       f(new PostgresEventStore(t, schemas, table)),
     );

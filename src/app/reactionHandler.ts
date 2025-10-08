@@ -1,4 +1,9 @@
-export { handleReaction, type ReactionHandler, type ReactionController };
+export {
+  wrapWithEventStore,
+  handleReaction,
+  type ReactionHandler,
+  type ReactionController,
+};
 
 import { EventStore } from '@/lib/eventSourcing/eventStore';
 import { Event, EventInfo } from '@/lib/eventSourcing/event';
@@ -6,7 +11,7 @@ import { Decoder } from '@/lib/json/decoder';
 import * as express from 'express';
 import * as router from '@/lib/router';
 import * as Ambar from '@/app/ambar';
-import { AmbarResponse } from '@/app/ambar';
+import { AmbarResponse, ErrorMustRetry } from '@/app/ambar';
 import { Future } from '@/lib/Future';
 import { Maybe } from '@/lib/Maybe';
 import { decodeEvent } from '@/app/projectionHandler';
@@ -27,8 +32,28 @@ type ReactionHandler<E> = (v: {
   store: EventStore;
 }) => Future<AmbarResponse, void>;
 
+const onEventStoreError = (err: Error) => new Ambar.ErrorMustRetry(err.message);
+
+type WithGenericStore = <E, T>(
+  onError: (e: Error) => E,
+  f: (store: EventStore) => Future<E, T>,
+) => Future<E, T>;
+
+type WithConcreteStore = (
+  f: (store: EventStore) => Future<ErrorMustRetry, void>,
+) => Future<ErrorMustRetry, void>;
+
+const wrapWithEventStore = (
+  withEventStore: WithGenericStore,
+): WithConcreteStore =>
+  function (f) {
+    return withEventStore(onEventStoreError, (store) => f(store));
+  };
+
 function handleReaction<E extends Event<any>>(
-  withEventStore: <T>(f: (s: EventStore) => T) => T,
+  withEventStore: (
+    f: (store: EventStore) => Future<ErrorMustRetry, void>,
+  ) => Future<ErrorMustRetry, void>,
   projections: Projections,
   services: Services,
   { decoder, handler }: ReactionController<E>,
@@ -43,10 +68,15 @@ function handleReaction<E extends Event<any>>(
             projections,
             services,
             store,
-          }),
+          }).chainRej((r) =>
+            r instanceof Ambar.Success
+              ? Future.resolve(undefined)
+              : r instanceof Ambar.ErrorMustRetry
+                ? Future.reject(r)
+                : (r satisfies never),
+          ),
         ),
       )
-      .map((_) => new Ambar.Success())
-      .bimap(Ambar.toResponse, Ambar.toResponse),
+      .bimap(Ambar.toResponse, (_) => Ambar.toResponse(new Ambar.Success())),
   );
 }

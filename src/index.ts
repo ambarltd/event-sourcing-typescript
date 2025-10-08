@@ -12,7 +12,9 @@ import { MembersByCuisineQueryController } from '@/domain/cookingClub/membership
 import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
 import { MembersByCuisineProjectionController } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionController';
 import { handleCommand } from '@/app/commandHandler';
+import { handleReaction, wrapWithEventStore } from '@/app/reactionHandler';
 import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/membership/submitApplication';
+import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/membership/evaluateApplication';
 
 async function main() {
   // Configure dependency injection
@@ -35,6 +37,16 @@ async function main() {
       services,
       projections,
       membership_command_submitApplication.controller,
+    ),
+  );
+
+  app.use(
+    '/api/v1/cooking-club/membership/reaction/evaluateApplication',
+    handleReaction(
+      wrapWithEventStore(withEventStore),
+      services,
+      projections,
+      membership_reaction_evaluateApplication.controller,
     ),
   );
 

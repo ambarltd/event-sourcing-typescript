@@ -22,17 +22,24 @@ type CommandController<Command> = {
   handler: CommandHandler<Command>;
 };
 
+const onEventStoreError = (_: Error): Response =>
+  router.json({
+    status: 500,
+    content: { message: 'Internal Server Error' },
+  });
+
 function handleCommand<Command>(
-  withEventStore: (
-    f: (store: EventStore) => Future<Response, Response>,
-  ) => Future<Response, Response>,
+  withEventStore: <E, T>(
+    onError: (e: Error) => E,
+    f: (store: EventStore) => Future<E, T>,
+  ) => Future<E, T>,
   services: Services,
   projections: Projections,
   { decoder, handler }: CommandController<Command>,
 ): express.Handler {
   return router.route((req) =>
     decodeCommand(decoder, req).chain((command) =>
-      withEventStore((store) =>
+      withEventStore(onEventStoreError, (store) =>
         handler({
           command,
           store,
