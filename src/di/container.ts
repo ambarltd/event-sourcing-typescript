@@ -25,8 +25,6 @@ import * as postgresEventStore from '@/app/postgresEventStore';
 import { PostgresEventStore } from '@/app/postgresEventStore';
 import { EventStore } from '@/lib/eventSourcing/eventStore';
 import { Future } from '@/lib/Future';
-import { Response } from '@/lib/router';
-import * as router from '@/lib/router';
 import { schemas } from '@/app/schemas';
 import { Services } from '@/app/services';
 import { Projections } from '@/app/projections';

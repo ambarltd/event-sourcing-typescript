@@ -18,8 +18,8 @@ import {
   wrapWithEventStore,
   ReactionController,
 } from '@/app/reactionHandler';
-import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/membership/submitApplication';
-import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/membership/evaluateApplication';
+import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/submitApplication';
+import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/evaluateApplication';
 
 async function main() {
   // Configure dependency injection
