@@ -23,7 +23,7 @@ import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/m
 
 async function main() {
   // Configure dependency injection
-  const { withEventStore, services, projections } =
+  const { withEventStore, withProjectionStore, services, repositories } =
     await configureDependencies();
 
   // Create express app
@@ -36,7 +36,13 @@ async function main() {
   const command = <T>(endpoint: string, controller: CommandController<T>) =>
     app.use(
       endpoint,
-      handleCommand(withEventStore, services, projections, controller),
+      handleCommand(
+        withEventStore,
+        withProjectionStore,
+        services,
+        repositories,
+        controller,
+      ),
     );
 
   const reaction = <T extends Event<any>>(
@@ -48,7 +54,7 @@ async function main() {
       handleReaction(
         wrapWithEventStore(withEventStore),
         services,
-        projections,
+        repositories,
         controller,
       ),
     );

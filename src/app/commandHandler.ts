@@ -7,8 +7,10 @@ import * as express from 'express';
 import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
-import { Projections } from '@/app/projections';
+import { Repositories, Projections, allProjections } from '@/app/projections';
 import { Services } from '@/app/services';
+import { WithProjectionStore } from '@/app/mongoProjectionStore';
+import { WithEventStore } from '@/app/postgresEventStore';
 
 type CommandHandler<Command> = (v: {
   command: Command;
@@ -22,30 +24,30 @@ type CommandController<Command> = {
   handler: CommandHandler<Command>;
 };
 
-const onEventStoreError = (_: Error): Response =>
+const onStoreError = (_: Error): Response =>
   router.json({
     status: 500,
     content: { message: 'Internal Server Error' },
   });
 
 function handleCommand<Command>(
-  withEventStore: <E, T>(
-    onError: (e: Error) => E,
-    f: (store: EventStore) => Future<E, T>,
-  ) => Future<E, T>,
+  withEventStore: WithEventStore,
+  withProjectionStore: WithProjectionStore,
   services: Services,
-  projections: Projections,
+  repositories: Repositories,
   { decoder, handler }: CommandController<Command>,
 ): express.Handler {
   return router.route((req) =>
     decodeCommand(decoder, req).chain((command) =>
-      withEventStore(onEventStoreError, (store) =>
-        handler({
-          command,
-          store,
-          projections,
-          services,
-        }),
+      withProjectionStore(onStoreError, (projectionStore) =>
+        withEventStore(onStoreError, (store) =>
+          handler({
+            command,
+            store,
+            projections: allProjections(repositories, projectionStore),
+            services,
+          }),
+        ),
       ),
     ),
   );

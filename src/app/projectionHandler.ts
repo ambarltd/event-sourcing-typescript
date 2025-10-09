@@ -10,15 +10,16 @@ import { AmbarResponse } from '@/app/ambar';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Maybe, Nothing } from '@/lib/Maybe';
-import { Projections } from '@/app/projections';
+import { Projections, Repositories, allProjections } from '@/app/projections';
+import { WithProjectionStore } from '@/app/mongoProjectionStore';
 
 type ProjectionStore = {};
-type Mongo = {};
 
 type ProjectionHandler<E> = (v: {
   event: E;
   info: EventInfo;
   projections: Projections;
+  repositories: Repositories;
   store: ProjectionStore;
 }) => Future<AmbarResponse, void>;
 
@@ -27,19 +28,23 @@ type ProjectionController<E extends Event<any>> = {
   handler: ProjectionHandler<E>;
 };
 
+const onProjectionStoreError = (err: Error) =>
+  new Ambar.ErrorMustRetry(err.message);
+
 function handleProjection<E extends Event<any>>(
-  projections: Projections,
-  mongo: Mongo,
+  withProjectionStore: WithProjectionStore,
+  repositories: Repositories,
   { decoder, handler }: ProjectionController<E>,
 ): express.Handler {
   return router.route((req) =>
     decodeEvent(decoder, req)
       .chain(({ event, info }) =>
-        withProjectionStore(mongo, (store) =>
+        withProjectionStore(onProjectionStoreError, (store) =>
           handler({
             event,
             info,
-            projections,
+            projections: allProjections(repositories, store),
+            repositories,
             store,
           }),
         ),
@@ -76,11 +81,4 @@ function decodeEvent<E>(
     info: decoded.value.info,
     event: decoded.value.event.value,
   });
-}
-
-function withProjectionStore<T>(
-  _mongo: Mongo,
-  _f: (s: ProjectionStore) => Future<AmbarResponse, T>,
-): Future<AmbarResponse, T> {
-  throw new Error('TODO');
 }

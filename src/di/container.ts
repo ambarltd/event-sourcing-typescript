@@ -20,14 +20,16 @@ import { CuisineRepository } from '@/domain/cookingClub/membership/projection/me
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
 import { Mongo } from '@/lib/mongo';
+import {
+  MongoProjectionStore,
+  WithProjectionStore,
+} from '@/app/mongoProjectionStore';
 import { ServerApiVersion } from 'mongodb';
 import * as postgresEventStore from '@/app/postgresEventStore';
-import { PostgresEventStore } from '@/app/postgresEventStore';
-import { EventStore } from '@/lib/eventSourcing/eventStore';
-import { Future } from '@/lib/Future';
+import { PostgresEventStore, WithEventStore } from '@/app/postgresEventStore';
 import { schemas } from '@/app/schemas';
 import { Services } from '@/app/services';
-import { Projections } from '@/app/projections';
+import { Repositories, initializeRepositories } from '@/app/projections';
 
 function registerEnvironmentVariables() {
   const postgresConnectionString =
@@ -103,13 +105,10 @@ function registerScopedServices() {
 }
 
 type Dependencies = {
-  withEventStore: <E, T>(
-    onError: (e: Error) => E,
-    f: (store: EventStore) => Future<E, T>,
-  ) => Future<E, T>;
-  mongo: Mongo;
+  withEventStore: WithEventStore;
+  withProjectionStore: WithProjectionStore;
   services: Services;
-  projections: Projections;
+  repositories: Repositories;
 };
 
 export async function configureDependencies(): Promise<Dependencies> {
@@ -161,19 +160,22 @@ export async function configureDependencies(): Promise<Dependencies> {
     }),
   );
 
-  function withEventStore<E, T>(
-    onError: (e: Error) => E,
-    f: (s: EventStore) => Future<E, T>,
-  ): Future<E, T> {
-    return postgres.withTransaction(onError, (t) =>
+  const withEventStore: WithEventStore = (onError, f) =>
+    postgres.withTransaction(onError, (t) =>
       f(new PostgresEventStore(t, schemas, table)),
     );
-  }
+
+  const withProjectionStore: WithProjectionStore = (onError, f) =>
+    mongo.withTransaction(onError, (t) => f(new MongoProjectionStore(t)));
+
+  const repositories = await mongo.withTransactionP(async (t) =>
+    initializeRepositories(new MongoProjectionStore(t)),
+  );
 
   return {
     withEventStore,
-    mongo,
+    withProjectionStore,
     services: {},
-    projections: {},
+    repositories,
   };
 }

@@ -1,4 +1,4 @@
-export { initialize, PostgresEventStore };
+export { initialize, PostgresEventStore, type WithEventStore };
 
 import { Json } from '@/lib/json/types';
 import {
@@ -19,6 +19,12 @@ import { PostgresTransaction } from '@/lib/postgres';
 import { log } from '@/common/util/Logger';
 import { IdGenerator } from '@/common/util/IdGenerator';
 import { POSIX } from '@/lib/time';
+import { Future } from '@/lib/Future';
+
+type WithEventStore = <E, T>(
+  onError: (e: Error) => E,
+  f: (s: EventStore) => Future<E, T>,
+) => Future<E, T>;
 
 class PostgresEventStore implements EventStore {
   constructor(

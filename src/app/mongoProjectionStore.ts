@@ -4,6 +4,7 @@ export {
   Collection as Collection,
   type JsonDoc,
   type RepositoryArgs,
+  type WithProjectionStore,
 };
 
 import { Collection } from 'mongodb';
@@ -19,6 +20,7 @@ import {
   WithId,
 } from 'mongodb';
 import { Success, Failure } from '@/lib/Result';
+import { Future } from '@/lib/Future';
 
 type JsonDoc = Exclude<null, Json>;
 
@@ -48,6 +50,11 @@ const schemaIdAndValue = <T>(schema: Schema<T>): Schema<IdAndDoc<T>> => {
     ({ _id, document }) => [_id, document],
   );
 };
+
+type WithProjectionStore = <E, T>(
+  onError: (e: Error) => E,
+  f: (s: MongoProjectionStore) => Future<E, T>,
+) => Future<E, T>;
 
 class MongoProjectionStore implements ProjectionStore {
   constructor(private transaction: MongoTransaction) {}

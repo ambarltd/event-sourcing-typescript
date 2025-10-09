@@ -136,8 +136,18 @@ class Mongo {
     this.client = new MongoClient(connectionString, values.settings);
   }
 
+  async withTransactionP<T>(
+    f: (t: MongoTransaction) => Promise<T>,
+  ): Promise<T> {
+    return this.withTransaction(
+      (err) => err,
+      (t) => Future.attemptP(() => f(t)),
+    ).promise((err) => err);
+  }
+
   // Execute an action with a transaction that will be automatically committed at the end.
   withTransaction<E, T>(
+    onError: (e: Error) => E,
     f: (t: MongoTransaction) => Future<E, T>,
   ): Future<E, T> {
     const session = this.client.startSession();
@@ -146,11 +156,10 @@ class Mongo {
     const database = this.client.db(this.values.database);
     const transaction = new MongoTransaction(session, database);
     return f(transaction).finally(
-      Future.create((_, res) => {
-        if (!transaction.closed) transaction.abort();
-        session.endSession();
-        return res();
-      }),
+      Future.attemptP(async () => {
+        if (!transaction.closed) await transaction.abort();
+        await session.endSession();
+      }).mapRej(onError),
     );
   }
 }

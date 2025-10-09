@@ -1,7 +1,8 @@
-export { controller, RepoCuisine, type Cuisine };
+export { controller, RepoCuisine, type Cuisine, MembersByCuisine };
 
 import * as d from '@/lib/json/decoder';
 import * as s from '@/lib/json/schema';
+import { Id } from '@/lib/eventSourcing/event';
 import { accept } from '@/lib/eventSourcing/projection';
 import { ReactionHandler, ReactionController } from '@/app/reactionHandler';
 import { Future } from '@/lib/Future';
@@ -19,14 +20,19 @@ import {
 type Cuisine = s.Infer<typeof schema_Cuisine>;
 
 const schema_Cuisine = s.object({
+  id: Id.schema(),
   memberNames: s.array(s.string),
 });
 
 class RepoCuisine {
-  static collectionName = 'CookingClub_MembersByCuisine_Cuisine';
-  static encoder = schema_Cuisine.encoder;
+  static document: Cuisine;
+  static collectionName = 'CookingClub_MembersByCuisine_Cuisine' as const;
+  static schema = schema_Cuisine;
   static async createIndexes(_collection: Collection<never>) {
     return;
+  }
+  static toId(c: Cuisine): string {
+    return c.id.value;
   }
 
   constructor(
@@ -45,6 +51,14 @@ class RepoCuisine {
 
   async findAll(): Promise<Cuisine[]> {
     return this.store.find<Cuisine>(this.repo, {});
+  }
+}
+
+class MembersByCuisine {
+  constructor(private readonly repo: RepoCuisine) {}
+
+  async findAll(): Promise<Cuisine[]> {
+    return this.repo.findAll();
   }
 }
 
