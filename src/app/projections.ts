@@ -28,7 +28,6 @@ async function initializeRepositories(mongo: MongoProjectionStore) {
 }
 
 // An object containing all initialized projections.
-// Projections are used for reading from collections.
 type Projections = ReturnType<typeof allProjections>;
 
 function allProjections(repos: Repositories, mongo: MongoProjectionStore) {

@@ -1,6 +1,6 @@
 import * as Minio from 'minio';
 import { Readable } from 'stream';
-import { log } from '@/common/util';
+import { log } from '@/common/util/Logger';
 import env from '@/app/environment';
 
 export interface FileStorageOptions {

@@ -17,7 +17,6 @@ import {
 } from '@/lib/eventSourcing/eventStore';
 import { PostgresTransaction } from '@/lib/postgres';
 import { log } from '@/common/util/Logger';
-import { IdGenerator } from '@/common/util/IdGenerator';
 import { POSIX } from '@/lib/time';
 import { Future } from '@/lib/Future';
 
@@ -53,7 +52,7 @@ class PostgresEventStore implements EventStore {
     causation_id?: Id<Event<T>>;
   }): Promise<void> {
     const event = args.event;
-    const event_id = args.event_id || new Id(IdGenerator.generateRandomId());
+    const event_id = args.event_id || Id.random();
     let info: EventInfo;
     switch (true) {
       case event instanceof CreationEvent: {

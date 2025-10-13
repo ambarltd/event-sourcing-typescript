@@ -1,22 +1,6 @@
-import { container, Lifecycle } from 'tsyringe';
-import {
-  Serializer,
-  Deserializer,
-  PostgresConnectionPool,
-  MongoSessionPool,
-  PostgresTransactionalEventStore,
-  MongoTransactionalProjectionOperator,
-  MongoInitializer,
-  PostgresInitializer,
-  EmailService,
-  FileStorageService,
-} from '@/common';
-import { constructor } from 'tsyringe/dist/typings/types';
-import { EvaluateApplicationReactionHandler } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionHandler';
-import { EvaluateApplicationReactionController } from '@/domain/cookingClub/membership/reaction/evaluateApplication/EvaluateApplicationReactionController';
-import { MembersByCuisineProjectionHandler } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembersByCuisineProjectionHandler';
-import { MembershipApplicationRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/MembershipApplicationRepository';
-import { CuisineRepository } from '@/domain/cookingClub/membership/projection/membersByCuisine/CuisineRepository';
+import { container } from 'tsyringe';
+import { EmailService } from '@/common/services/email';
+import { FileStorageService } from '@/common/services/file-storage';
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
 import { Mongo } from '@/lib/mongo';
@@ -68,41 +52,12 @@ function registerEnvironmentVariables() {
 }
 
 function registerSingletons() {
-  // common/serializedEvent
-  container.registerSingleton(Serializer);
-  container.registerSingleton(Deserializer);
-
-  // common/util
-  container.registerSingleton(PostgresConnectionPool);
-  container.registerSingleton(MongoSessionPool);
-  container.registerSingleton(MongoInitializer);
-  container.registerSingleton(PostgresInitializer);
-
   // common/services
   container.registerSingleton(EmailService);
   container.registerSingleton(FileStorageService);
 }
 
-function registerScoped<T>(token: constructor<T>) {
-  container.register(token, token, { lifecycle: Lifecycle.ContainerScoped });
-}
-
-function registerScopedServices() {
-  // common/eventStore
-  registerScoped(PostgresTransactionalEventStore);
-
-  // common/projection
-  registerScoped(MongoTransactionalProjectionOperator);
-
-  // domain/cookingClub/projection/membersByCuisine
-  registerScoped(CuisineRepository);
-  registerScoped(MembersByCuisineProjectionHandler);
-  registerScoped(MembershipApplicationRepository);
-
-  // domain/cookingClub/reaction/evaluateApplication
-  registerScoped(EvaluateApplicationReactionController);
-  registerScoped(EvaluateApplicationReactionHandler);
-}
+function registerScopedServices() {}
 
 type Dependencies = {
   withEventStore: WithEventStore;
