@@ -1,11 +1,15 @@
 export {
   type EventStore,
   type AggregateAndEventIdsInLastEvent,
-  Hydrator,
+  Schemas,
   type Constructor,
   type EventData,
   schema_EventData,
   makeSchema,
+  makeDecoder,
+  CSchema,
+  TSchema,
+  type Serialized,
 };
 
 import {
@@ -53,9 +57,9 @@ interface EventStore {
     aggregateId: Id<T>,
   ): Promise<{ aggregate: T; lastEvent: EventInfo }>;
 
-  save<E extends Event<T>, T extends Aggregate<T>>(args: {
+  emit<T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
-    event: CreationEvent<E, T> | TransformationEvent<E, T>;
+    event: CreationEvent<T> | TransformationEvent<T>;
     event_id?: Id<Event<T>>;
     correlation_id?: Id<Event<T>>;
     causation_id?: Id<Event<T>>;
@@ -130,12 +134,41 @@ const schema_EventData = <E>(s: Schema<E>): Schema<EventData<E>> =>
 
 type Constructor<T> = new (...args: any[]) => T;
 
-type Schemas<T extends Aggregate<T>> = {
-  creation: Schema<EventData<CreationEvent<any, T>>>;
-  transformation: Schema<EventData<TransformationEvent<any, T>>>;
+class CSchema<
+  A extends Aggregate<A>,
+  E extends CreationEvent<A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public aggregate: Constructor<A>,
+    public schema: Schema<E>,
+    public type: T,
+  ) {}
+}
+
+class TSchema<
+  A extends Aggregate<A>,
+  E extends TransformationEvent<A>,
+  T extends E['values']['type'],
+> {
+  constructor(
+    public aggregate: Constructor<A>,
+    public schema: Schema<E>,
+    public type: T,
+  ) {}
+}
+
+type SomeSchema<A extends Aggregate<A>> =
+  | CSchema<A, CreationEvent<A>, any>
+  | TSchema<A, TransformationEvent<A>, any>;
+
+// Efficient decoders for all creation and transformation events for an aggregate.
+type Decoders<T extends Aggregate<T>> = {
+  creation: Decoder<EventData<CreationEvent<T>>>;
+  transformation: Decoder<EventData<TransformationEvent<T>>>;
 };
 
-/* Note [Hydrator]
+/* Note [Schemas]
 
   We need some type-safe way to decode events for an aggregate. That is, without casting.
   We perform type-directed decoding, where we specify the type of the aggregate,
@@ -144,25 +177,85 @@ type Schemas<T extends Aggregate<T>> = {
   This ensures that we will never apply an incorrect aggregate transformation or create
   an aggregate of the incorrect type.
 */
-class Hydrator {
-  private tmap = new Map<Constructor<any>, Schemas<any>>();
+class Schemas {
+  private cmap = new Map<Constructor<Aggregate<any>>, Decoders<any>>();
+  private tmap = new Map<string, Encoder<EventData<any>>>();
 
-  constructor() {}
-
-  // add support for deserializing an aggregate's events.
-  add<A extends Aggregate<A>>({
-    aggregate,
-    creation,
-    transformation,
-  }: {
-    aggregate: Constructor<A>;
-    creation: Schema<CreationEvent<any, A>>;
-    transformation: Schema<TransformationEvent<any, A>>;
-  }): void {
-    this.tmap.set(aggregate, {
-      creation: schema_EventData(creation),
-      transformation: schema_EventData(transformation),
+  constructor(
+    arr: Array<{
+      type: string;
+      schema: Schema<any>;
+      aggregate: Constructor<Aggregate<any>>;
+    }>,
+  ) {
+    const entries: Array<SomeSchema<Aggregate<any>>> = arr.map((entry) => {
+      if (entry instanceof CSchema || entry instanceof TSchema) {
+        return entry;
+      }
+      throw new Error(`Value should be an instance of SomeSchema`);
     });
+
+    // Set encoders
+    for (const entry of entries) {
+      if (this.tmap.has(entry.type)) {
+        throw new Error(`Duplicate entry for ${entry.type}`);
+      }
+
+      if (entry instanceof CSchema) {
+        this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
+      } else if (entry instanceof TSchema) {
+        this.tmap.set(entry.type, schema_EventData(entry.schema).encoder);
+      } else {
+        entry satisfies never;
+      }
+    }
+
+    type Events<T extends Aggregate<T>> = {
+      creation: Array<{
+        type: string;
+        schema: Schema<CreationEvent<T>>;
+      }>;
+      transformation: Array<{
+        type: string;
+        schema: Schema<TransformationEvent<T>>;
+      }>;
+    };
+
+    const emap: Map<Constructor<Aggregate<any>>, Events<any>> = new Map();
+
+    for (const entry of entries) {
+      const aggregate = entry.aggregate;
+      const found: Events<any> = emap.get(aggregate) || {
+        creation: [],
+        transformation: [],
+      };
+
+      if (entry instanceof CSchema) {
+        found.creation.push({ schema: entry.schema, type: entry.type });
+      } else if (entry instanceof TSchema) {
+        found.transformation.push({ schema: entry.schema, type: entry.type });
+      } else {
+        entry satisfies never;
+      }
+    }
+
+    for (const [aggregate, events] of emap.entries()) {
+      this.cmap.set(aggregate, {
+        creation: schema_EventData(makeSchema(events.creation)).decoder,
+        transformation: schema_EventData(makeSchema(events.transformation))
+          .decoder,
+      });
+    }
+  }
+
+  encode<E extends Event<any>>(edata: EventData<E>): Json {
+    const ty = edata.event.values.type;
+    const found = this.tmap.get(ty) as undefined | Encoder<EventData<E>>;
+    if (found == undefined) {
+      throw new Error(`Unknown event type ${ty}`);
+    }
+
+    return found.run(edata);
   }
 
   // Build an aggregate from all its serialized events.
@@ -170,7 +263,7 @@ class Hydrator {
     cls: Constructor<A>,
     serialized: Json[],
   ): Result<string, { aggregate: A; lastEvent: EventInfo }> {
-    const schemas = this.tmap.get(cls) as undefined | Schemas<A>;
+    const schemas = this.cmap.get(cls) as undefined | Decoders<A>;
     if (schemas == undefined) {
       throw new Error(`Unknown aggregate ${cls.name}`);
     }
@@ -180,10 +273,10 @@ class Hydrator {
     }
 
     return d
-      .decode(serialized[0], schemas.creation.decoder)
+      .decode(serialized[0], schemas.creation)
       .then(({ event: first, info }) =>
         d
-          .decode(serialized.slice(1), d.array(schemas.transformation.decoder))
+          .decode(serialized.slice(1), d.array(schemas.transformation))
           .map((es) => {
             let aggregate = first.createAggregate();
             let lastEvent = info;
@@ -205,7 +298,7 @@ type EventConstructor = { type: string; schema: Schema<any> };
 
 // Create an efficient schema given a list of event classes
 //
-// To be used when joining schemas for the Hydrator
+// To be used when joining schemas for the Schemas
 function makeSchema<T extends [...EventConstructor[]]>(
   ts: T,
 ): Schema<s.Infer<T[number]['schema']>> {
@@ -231,4 +324,10 @@ function makeSchema<T extends [...EventConstructor[]]>(
   });
 
   return new Schema(decoder, encoder);
+}
+
+function makeDecoder<T extends [...EventConstructor[]]>(
+  ts: T,
+): Decoder<s.Infer<T[number]['schema']>> {
+  return makeSchema(ts).decoder;
 }

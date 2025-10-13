@@ -127,14 +127,20 @@ class Postgres {
       .mapRej(onConnectionError)
       .chain((connection) => {
         const transaction = new PostgresTransaction(connection);
-        return f(transaction).chain((res) => {
-          if (!transaction.closed) {
-            Future.attemptP(transaction.commit)
-              .mapRej(onConnectionError)
-              .map(() => res);
-          }
-          return Future.resolve(res);
-        });
+        return f(transaction).bichain(
+          (err) =>
+            transaction.closed
+              ? Future.reject(err)
+              : Future.attemptP(transaction.abort)
+                  .mapRej(onConnectionError)
+                  .chain((_) => Future.reject(err)),
+          (res) =>
+            transaction.closed
+              ? Future.resolve(res)
+              : Future.attemptP(transaction.commit)
+                  .mapRej(onConnectionError)
+                  .map(() => res),
+        );
       });
   }
 }

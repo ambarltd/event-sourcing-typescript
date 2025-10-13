@@ -18,6 +18,7 @@ export {
   triple,
   optional,
   oneOf,
+  both,
 };
 
 import { Maybe, Nothing, Just, Nullable } from '@/lib/Maybe';
@@ -43,6 +44,14 @@ type EncoderDef<A> = {
 };
 
 const toAny = <T extends Json>(): Encoder<T> => new Encoder((v) => v);
+
+// Encode two values into a single one.
+// Conflicts result in properties being ovewritten.
+const both = <T, U>(left: Encoder<T>, right: Encoder<U>): Encoder<[T, U]> =>
+  new Encoder(([l, r]) => {
+    return Object.assign({}, left.run(l), right.run(r));
+  });
+
 const json: Encoder<Json> = toAny();
 const boolean: Encoder<boolean> = toAny();
 const number: Encoder<number> = toAny();
