@@ -1,37 +1,40 @@
-export { handleQuery };
+export { handleQuery, type QueryController, type QueryHandler };
 
 import { Response } from '@/lib/router';
-import { Event } from '@/lib/eventSourcing/event';
 import { Decoder, decode } from '@/lib/json/decoder';
 import * as express from 'express';
 import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
+import { Projections, Repositories, allProjections } from '@/app/projections';
+import { WithProjectionStore } from '@/app/mongoProjectionStore';
+import { internalServerError } from '@/app/responses';
 
-type Projections = {};
-type Services = {};
+type QueryHandler<Query> = (v: {
+  query: Query;
+  projections: Projections;
+}) => Future<Response, Response>;
 
 type QueryController<Query> = {
   decoder: Decoder<Query>;
-  handler: (v: {
-    query: Query;
-    projections: Projections;
-    services: Services;
-  }) => Future<Response, Response>;
+  handler: QueryHandler<Query>;
 };
 
-function handleQuery<E extends Event<any>>(
-  projections: Projections,
-  services: Services,
-  { decoder, handler }: QueryController<E>,
+const onProjectionStoreError = (_: Error) => internalServerError;
+
+function handleQuery<Query>(
+  withProjectionStore: WithProjectionStore,
+  repositories: Repositories,
+  { decoder, handler }: QueryController<Query>,
 ): express.Handler {
   return router.route((req) =>
     decodeQuery(decoder, req).chain((query) =>
-      handler({
-        query,
-        projections,
-        services,
-      }),
+      withProjectionStore(onProjectionStoreError, (store) =>
+        handler({
+          query,
+          projections: allProjections(repositories, store),
+        }),
+      ),
     ),
   );
 }

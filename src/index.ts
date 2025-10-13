@@ -18,8 +18,15 @@ import {
   wrapWithEventStore,
   ReactionController,
 } from '@/app/reactionHandler';
+import {
+  handleProjection,
+  ProjectionController,
+} from '@/app/projectionHandler';
+import { handleQuery, QueryController } from '@/app/queryHandler';
 import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/submitApplication';
 import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/evaluateApplication';
+import * as membership_projection_membersByCuisine from '@/domain/cookingClub/membership2/projection/membersByCuisine';
+import * as membership_query_membersByCuisine from '@/domain/cookingClub/membership2/query/membersByCuisine';
 
 async function main() {
   // Configure dependency injection
@@ -59,6 +66,21 @@ async function main() {
       ),
     );
 
+  const projection = <T extends Event<any>>(
+    endpoint: string,
+    controller: ProjectionController<T>,
+  ) =>
+    app.use(
+      endpoint,
+      handleProjection(withProjectionStore, repositories, controller),
+    );
+
+  const query = <Query>(endpoint: string, controller: QueryController<Query>) =>
+    app.use(
+      endpoint,
+      handleQuery(withProjectionStore, repositories, controller),
+    );
+
   //////////////////////////////////////////////////////////////////////
 
   command(
@@ -69,6 +91,16 @@ async function main() {
   reaction(
     '/api/v1/cooking-club/membership/reaction/evaluateApplication',
     membership_reaction_evaluateApplication.controller,
+  );
+
+  projection(
+    '/api/v1/cooking-club/membership/projection/membersByCuisine',
+    membership_projection_membersByCuisine.controller,
+  );
+
+  query(
+    '/api/v1/cooking-club/membership/projection/membersByCuisine',
+    membership_query_membersByCuisine.controller,
   );
 
   //////////////////////////////////////////////////////////////////////

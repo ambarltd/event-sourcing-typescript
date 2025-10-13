@@ -3,7 +3,6 @@ import {
   QueryController,
   MongoTransactionalProjectionOperator,
 } from '@/common';
-import { inject, injectable } from 'tsyringe';
 import { MembersByCuisineQueryHandler } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQueryHandler';
 import { MembersByCuisineQuery } from '@/domain/cookingClub/membership/query/membersByCuisine/MembersByCuisineQuery';
 
