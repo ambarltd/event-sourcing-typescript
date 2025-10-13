@@ -13,6 +13,8 @@ import { MongoProjectionStore } from '@/app/mongoProjectionStore';
 
 // An object containing all initialized repositories.
 // Repository instances are used for writing into collections.
+// An instance of this type can live for the lifetime of the application
+// as it does not hold an active transaction.
 type Repositories = Unwrap<ReturnType<typeof initializeRepositories>>;
 
 type Unwrap<A extends Promise<unknown>> =

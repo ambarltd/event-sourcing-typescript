@@ -13,7 +13,7 @@ import { accept } from '@/lib/eventSourcing/projection';
 import {
   ProjectionHandler,
   ProjectionController,
-} from '@/app/projectionHandler';
+} from '@/app/handleProjection';
 import { Future } from '@/lib/Future';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';

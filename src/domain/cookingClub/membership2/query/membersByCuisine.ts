@@ -1,7 +1,7 @@
 export { controller };
 
 import * as d from '@/lib/json/decoder';
-import { QueryHandler, QueryController } from '@/app/queryHandler';
+import { QueryHandler, QueryController } from '@/app/handleQuery';
 import { Future } from '@/lib/Future';
 import { internalServerError } from '@/app/responses';
 import { RepoCuisine } from '@/domain/cookingClub/membership2/projection/membersByCuisine';

@@ -1,7 +1,7 @@
 export { controller };
 
 import * as d from '@/lib/json/decoder';
-import { CommandController, CommandHandler } from '@/app/commandHandler';
+import { CommandController, CommandHandler } from '@/app/handleCommand';
 import { Future } from '@/lib/Future';
 import { Response, json } from '@/lib/router';
 import { Id } from '@/lib/eventSourcing/event';

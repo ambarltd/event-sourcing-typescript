@@ -14,7 +14,7 @@ import * as Ambar from '@/lib/ambar';
 import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import { Future } from '@/lib/Future';
 import { Maybe } from '@/lib/Maybe';
-import { decodeEvent } from '@/app/projectionHandler';
+import { decodeEvent } from '@/app/handleProjection';
 
 type Projections = {};
 type Services = {};

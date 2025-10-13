@@ -4,18 +4,15 @@ import express from 'express';
 import { configureDependencies } from '@/di/container';
 import { scopedContainer } from '@/di/scopedContainer';
 import { log } from '@/common/util/Logger';
-import { handleCommand, CommandController } from '@/app/commandHandler';
+import { handleCommand, CommandController } from '@/app/handleCommand';
 import { Event } from '@/lib/eventSourcing/event';
 import {
   handleReaction,
   wrapWithEventStore,
   ReactionController,
-} from '@/app/reactionHandler';
-import {
-  handleProjection,
-  ProjectionController,
-} from '@/app/projectionHandler';
-import { handleQuery, QueryController } from '@/app/queryHandler';
+} from '@/app/handleReaction';
+import { handleProjection, ProjectionController } from '@/app/handleProjection';
+import { handleQuery, QueryController } from '@/app/handleQuery';
 import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/submitApplication';
 import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/evaluateApplication';
 import * as membership_projection_membersByCuisine from '@/domain/cookingClub/membership2/projection/membersByCuisine';

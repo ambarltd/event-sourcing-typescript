@@ -2,7 +2,7 @@ export { controller };
 
 import * as d from '@/lib/json/decoder';
 import { accept } from '@/lib/eventSourcing/projection';
-import { ReactionHandler, ReactionController } from '@/app/reactionHandler';
+import { ReactionHandler, ReactionController } from '@/app/handleReaction';
 import { Future } from '@/lib/Future';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';

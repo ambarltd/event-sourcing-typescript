@@ -31,11 +31,11 @@ type RepositoryArgs<T> = {
   toId: (v: T) => string;
 };
 
+// Represents an initialized collection. You can only get an
+// instance of this class if the collection has been initialized.
 class Repository<T> {
   constructor(public values: RepositoryArgs<T>) {}
 }
-
-interface ProjectionStore {}
 
 type IdAndDoc<T> = { _id: string; document: T };
 
@@ -56,7 +56,7 @@ type WithProjectionStore = <E, T>(
   f: (s: MongoProjectionStore) => Future<E, T>,
 ) => Future<E, T>;
 
-class MongoProjectionStore implements ProjectionStore {
+class MongoProjectionStore {
   constructor(private transaction: MongoTransaction) {}
 
   // Initialize a repository, creating the collection and indexes if needed.
