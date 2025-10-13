@@ -17,7 +17,7 @@ import {
 import { Future } from '@/lib/Future';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
-import { AmbarResponse, ErrorMustRetry } from '@/app/ambar';
+import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import * as m from '@/lib/Maybe';
 import {
   Repository,

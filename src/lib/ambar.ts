@@ -29,6 +29,7 @@ class ErrorMustRetry {
   constructor(public readonly description: string) {}
 }
 
+// Response to an Ambar request sent to a Reaction or a Projection.
 type AmbarResponse = Success | ErrorMustRetry;
 
 function toResponse(r: AmbarResponse): router.Response {
@@ -55,6 +56,7 @@ function toResponse(r: AmbarResponse): router.Response {
   }
 }
 
+// The request that Ambar sends to Reactions and Projections
 type AmbarHttpRequest<T> = {
   data_source_id: string;
   data_source_description: string;
@@ -63,7 +65,7 @@ type AmbarHttpRequest<T> = {
   payload: T;
 };
 
-// Create a decoded that operates on an AmbarHttpRequest
+// Create a decoder that operates on an AmbarHttpRequest
 function payloadDecoder<E>(decoder: Decoder<E>): Decoder<EventData<E>> {
   const dummy: Encoder<E> = new e.Encoder((_) => null);
   const eschema: Schema<EventData<E>> = schema_EventData(

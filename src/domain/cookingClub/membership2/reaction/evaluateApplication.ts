@@ -7,7 +7,7 @@ import { Future } from '@/lib/Future';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
 import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
-import { AmbarResponse, ErrorMustRetry } from '@/app/ambar';
+import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import * as m from '@/lib/Maybe';
 
 type Events = m.Infer<d.Infer<typeof decoder>>;
