@@ -19,7 +19,7 @@ import { Projections, Repositories, allProjections } from '@/app/projections';
 import {
   MongoProjectionStore,
   WithProjectionStore,
-} from '@/app/mongoProjectionStore';
+} from '@/app/projectionStore';
 
 type ProjectionHandler<E> = (v: {
   event: E;

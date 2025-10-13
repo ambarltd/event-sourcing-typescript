@@ -1,3 +1,6 @@
+/*
+  Schemas for all application events
+*/
 export { schemas };
 
 import { Schemas, CSchema, TSchema } from '@/lib/eventSourcing/eventStore';

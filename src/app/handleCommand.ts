@@ -9,8 +9,8 @@ import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Repositories, Projections, allProjections } from '@/app/projections';
 import { Services } from '@/app/services';
-import { WithProjectionStore } from '@/app/mongoProjectionStore';
-import { WithEventStore } from '@/app/postgresEventStore';
+import { WithProjectionStore } from '@/app/projectionStore';
+import { WithEventStore } from '@/app/eventStore';
 
 type CommandHandler<Command> = (v: {
   command: Command;

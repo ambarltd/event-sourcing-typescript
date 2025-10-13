@@ -7,11 +7,11 @@ import { Mongo } from '@/lib/mongo';
 import {
   MongoProjectionStore,
   WithProjectionStore,
-} from '@/app/mongoProjectionStore';
+} from '@/app/projectionStore';
 import { ServerApiVersion } from 'mongodb';
-import * as postgresEventStore from '@/app/postgresEventStore';
-import { PostgresEventStore, WithEventStore } from '@/app/postgresEventStore';
-import { schemas } from '@/app/schemas';
+import * as eventStore from '@/app/eventStore';
+import { PostgresEventStore, WithEventStore } from '@/app/eventStore';
+import { schemas } from '@/app/events';
 import { Services } from '@/app/services';
 import { Repositories, initializeRepositories } from '@/app/projections';
 
@@ -103,7 +103,7 @@ export async function configureDependencies(): Promise<Dependencies> {
 
   const table = env.EVENT_STORE_CREATE_TABLE_WITH_NAME;
   await postgres.withTransactionP((transaction) =>
-    postgresEventStore.initialize({
+    eventStore.initialize({
       transaction,
       database: env.EVENT_STORE_DATABASE_NAME,
       table,

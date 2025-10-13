@@ -1,3 +1,6 @@
+/*
+  List of all projections and repositories in the application.
+*/
 export {
   type Repositories,
   type Projections,
@@ -9,7 +12,7 @@ import {
   RepoCuisine,
   RepoMembershipApplication,
 } from '@/domain/cookingClub/membership2/projection/membersByCuisine';
-import { MongoProjectionStore } from '@/app/mongoProjectionStore';
+import { MongoProjectionStore } from '@/app/projectionStore';
 
 // An object containing all initialized repositories.
 // Repository instances are used for writing into collections.

@@ -23,7 +23,7 @@ import {
   Repository,
   Collection,
   MongoProjectionStore,
-} from '@/app/mongoProjectionStore';
+} from '@/app/projectionStore';
 
 // ------------------------------------------------
 // Cuisine
