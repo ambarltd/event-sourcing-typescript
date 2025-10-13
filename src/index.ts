@@ -41,7 +41,7 @@ async function main() {
   app.use(scopedContainer);
 
   const command = <T>(endpoint: string, controller: CommandController<T>) =>
-    app.use(
+    app.post(
       endpoint,
       handleCommand(
         withEventStore,
@@ -56,7 +56,7 @@ async function main() {
     endpoint: string,
     controller: ReactionController<T>,
   ) =>
-    app.use(
+    app.post(
       endpoint,
       handleReaction(
         wrapWithEventStore(withEventStore),
@@ -70,13 +70,13 @@ async function main() {
     endpoint: string,
     controller: ProjectionController<T>,
   ) =>
-    app.use(
+    app.post(
       endpoint,
       handleProjection(withProjectionStore, repositories, controller),
     );
 
   const query = <Query>(endpoint: string, controller: QueryController<Query>) =>
-    app.use(
+    app.get(
       endpoint,
       handleQuery(withProjectionStore, repositories, controller),
     );
