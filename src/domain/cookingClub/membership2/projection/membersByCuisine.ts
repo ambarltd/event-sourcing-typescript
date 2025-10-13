@@ -1,14 +1,22 @@
-export { controller, RepoCuisine, type Cuisine, MembersByCuisine };
+export {
+  controller,
+  RepoCuisine,
+  type Cuisine,
+  RepoMembershipApplication,
+  type MembershipApplication,
+};
 
 import * as d from '@/lib/json/decoder';
 import * as s from '@/lib/json/schema';
 import { Id } from '@/lib/eventSourcing/event';
 import { accept } from '@/lib/eventSourcing/projection';
-import { ReactionHandler, ReactionController } from '@/app/reactionHandler';
+import {
+  ProjectionHandler,
+  ProjectionController,
+} from '@/app/projectionHandler';
 import { Future } from '@/lib/Future';
 import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
 import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
-import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
 import { AmbarResponse, ErrorMustRetry } from '@/app/ambar';
 import * as m from '@/lib/Maybe';
 import {
@@ -17,22 +25,25 @@ import {
   MongoProjectionStore,
 } from '@/app/mongoProjectionStore';
 
+// ------------------------------------------------
+// Cuisine
+// ------------------------------------------------
+
 type Cuisine = s.Infer<typeof schema_Cuisine>;
 
 const schema_Cuisine = s.object({
-  id: Id.schema(),
+  name: s.string, // unique
   memberNames: s.array(s.string),
 });
 
 class RepoCuisine {
-  static document: Cuisine;
   static collectionName = 'CookingClub_MembersByCuisine_Cuisine' as const;
   static schema = schema_Cuisine;
   static async createIndexes(_collection: Collection<never>) {
     return;
   }
   static toId(c: Cuisine): string {
-    return c.id.value;
+    return c.name;
   }
 
   constructor(
@@ -54,46 +65,102 @@ class RepoCuisine {
   }
 }
 
-class MembersByCuisine {
-  constructor(private readonly repo: RepoCuisine) {}
+// ------------------------------------------------
+// Membership Application
+// ------------------------------------------------
 
-  async findAll(): Promise<Cuisine[]> {
-    return this.repo.findAll();
+type MembershipApplication = s.Infer<typeof schema_MembershipApplication>;
+
+const schema_MembershipApplication = s.object({
+  id: Id.schema(),
+  firstName: s.string,
+  lastName: s.string,
+  favouriteCuisine: s.string,
+});
+
+class RepoMembershipApplication {
+  static collectionName =
+    'CookingClub_MembersByCuisine_MembershipApplication' as const;
+  static schema = schema_MembershipApplication;
+  static async createIndexes(_collection: Collection<never>) {
+    return;
+  }
+  static toId(c: MembershipApplication): string {
+    return c.id.value;
+  }
+
+  constructor(
+    private repo: Repository<MembershipApplication>,
+    private store: MongoProjectionStore,
+  ) {}
+
+  async save(cuisine: MembershipApplication): Promise<void> {
+    await this.store.upsert(this.repo, cuisine);
+  }
+
+  async getById(_id: Id<any>): Promise<MembershipApplication> {
+    const results = await this.store.find<MembershipApplication>(this.repo, {
+      _id,
+    });
+    const found = results[0] || null;
+    if (found === null) {
+      throw new Error(`Unknown membership application ID: ${_id.value}`);
+    }
+    return found;
   }
 }
 
-// --------------------
+// ------------------------------------------------
+// Projection
+// ------------------------------------------------
 
 type Events = m.Infer<d.Infer<typeof decoder>>;
 
-const decoder = accept([ApplicationSubmitted]);
+const decoder = accept([ApplicationSubmitted, ApplicationEvaluated]);
 
-const handler: ReactionHandler<Events> = ({
+const handler: ProjectionHandler<Events> = ({
   event,
-  store,
+  projections,
 }): Future<AmbarResponse, void> =>
   Future.attemptP<void>(async () => {
-    const { aggregate: membership } = await store.find(
-      Membership,
-      event.values.aggregateId,
-    );
+    const repoCuisine = projections[RepoCuisine.collectionName];
+    const repoMembershipApplication =
+      projections[RepoMembershipApplication.collectionName];
 
-    if (membership.status !== 'Requested') {
-      return;
+    switch (true) {
+      case event instanceof ApplicationSubmitted: {
+        await repoMembershipApplication.save({
+          id: event.values.aggregateId,
+          firstName: event.values.firstName,
+          lastName: event.values.lastName,
+          favouriteCuisine: event.values.favouriteCousine,
+        });
+        return;
+      }
+      case event instanceof ApplicationEvaluated: {
+        if (event.values.evaluationOutcome != 'Approved') return;
+        const application = await repoMembershipApplication.getById(
+          event.values.aggregateId,
+        );
+
+        const newCuisine = {
+          name: application.favouriteCuisine,
+          memberNames: [],
+        };
+        const cuisine =
+          (await repoCuisine.findOneById(application.favouriteCuisine)) ||
+          newCuisine;
+
+        cuisine.memberNames.push(
+          `${application.firstName} ${application.lastName}`,
+        );
+        await repoCuisine.save(cuisine);
+        return;
+      }
+      default: {
+        return event satisfies never;
+      }
     }
-
-    const shouldApprove =
-      event.values.yearsOfProfessionalExperience == 0 &&
-      event.values.numberOfCookingBooksRead > 0;
-
-    await store.emit({
-      aggregate: Membership,
-      event: new ApplicationEvaluated({
-        type: 'ApplicationEvaluated',
-        aggregateId: membership.aggregateId,
-        evaluationOutcome: shouldApprove ? 'Approved' : 'Rejected',
-      }),
-    });
   }).mapRej((err) => new ErrorMustRetry(err.message));
 
-const controller: ReactionController<Events> = { decoder, handler };
+const controller: ProjectionController<Events> = { decoder, handler };

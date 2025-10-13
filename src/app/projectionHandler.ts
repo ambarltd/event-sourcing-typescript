@@ -1,4 +1,9 @@
-export { handleProjection, decodeEvent };
+export {
+  type ProjectionHandler,
+  type ProjectionController,
+  handleProjection,
+  decodeEvent,
+};
 
 import { Event, EventInfo } from '@/lib/eventSourcing/event';
 import { EventData } from '@/lib/eventSourcing/eventStore';
@@ -11,16 +16,16 @@ import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Maybe, Nothing } from '@/lib/Maybe';
 import { Projections, Repositories, allProjections } from '@/app/projections';
-import { WithProjectionStore } from '@/app/mongoProjectionStore';
-
-type ProjectionStore = {};
+import {
+  MongoProjectionStore,
+  WithProjectionStore,
+} from '@/app/mongoProjectionStore';
 
 type ProjectionHandler<E> = (v: {
   event: E;
   info: EventInfo;
   projections: Projections;
-  repositories: Repositories;
-  store: ProjectionStore;
+  store: MongoProjectionStore;
 }) => Future<AmbarResponse, void>;
 
 type ProjectionController<E extends Event<any>> = {
@@ -44,7 +49,6 @@ function handleProjection<E extends Event<any>>(
             event,
             info,
             projections: allProjections(repositories, store),
-            repositories,
             store,
           }),
         ),

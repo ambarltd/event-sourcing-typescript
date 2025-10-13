@@ -7,7 +7,7 @@ export {
 
 import {
   RepoCuisine,
-  MembersByCuisine,
+  RepoMembershipApplication,
 } from '@/domain/cookingClub/membership2/projection/membersByCuisine';
 import { MongoProjectionStore } from '@/app/mongoProjectionStore';
 
@@ -21,6 +21,9 @@ type Unwrap<A extends Promise<unknown>> =
 async function initializeRepositories(mongo: MongoProjectionStore) {
   return {
     [RepoCuisine.collectionName]: await mongo.createRepository(RepoCuisine),
+    [RepoMembershipApplication.collectionName]: await mongo.createRepository(
+      RepoMembershipApplication,
+    ),
   };
 }
 
@@ -30,8 +33,13 @@ type Projections = ReturnType<typeof allProjections>;
 
 function allProjections(repos: Repositories, mongo: MongoProjectionStore) {
   return {
-    membersByCuisine: new MembersByCuisine(
-      new RepoCuisine(repos[RepoCuisine.collectionName], mongo),
+    [RepoCuisine.collectionName]: new RepoCuisine(
+      repos[RepoCuisine.collectionName],
+      mongo,
+    ),
+    [RepoMembershipApplication.collectionName]: new RepoMembershipApplication(
+      repos[RepoMembershipApplication.collectionName],
+      mongo,
     ),
   };
 }
