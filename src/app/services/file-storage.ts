@@ -1,9 +1,10 @@
+export { FileStorageService, type FileStorageServiceConfig };
+
 import * as Minio from 'minio';
 import { Readable } from 'stream';
 import { log } from '@/common/util/Logger';
-import env from '@/app/environment';
 
-export interface FileStorageOptions {
+interface FileStorageOptions {
   bucketName: string;
   objectName: string;
   stream: string | Buffer | Readable;
@@ -11,7 +12,7 @@ export interface FileStorageOptions {
   metaData?: Minio.ItemBucketMetadata;
 }
 
-export interface FileStorageServiceConfig {
+interface FileStorageServiceConfig {
   endPoint: string;
   port: number;
   useSSL: boolean;
@@ -20,23 +21,21 @@ export interface FileStorageServiceConfig {
   region?: string;
 }
 
-export interface FileStorageResult {
+interface FileStorageResult {
   etag?: string;
   objectName: string;
   bucketName: string;
 }
 
-export interface FileDownloadResult {
+interface FileDownloadResult {
   stream: Readable;
   stat: Minio.BucketItemStat;
 }
 
-export class FileStorageService {
+class FileStorageService {
   private client: Minio.Client;
-  private config: FileStorageServiceConfig;
 
-  constructor(config?: FileStorageServiceConfig) {
-    this.config = config || this.getRequiredConfig();
+  constructor(private config: FileStorageServiceConfig) {
     this.client = new Minio.Client({
       endPoint: this.config.endPoint,
       port: this.config.port,
@@ -51,24 +50,6 @@ export class FileStorageService {
       port: this.config.port,
       useSSL: this.config.useSSL,
     });
-  }
-
-  private getRequiredConfig(): FileStorageServiceConfig {
-    const endpointUrl = env.S3_ENDPOINT_URL;
-    const url = new URL(endpointUrl);
-
-    return {
-      endPoint: url.hostname,
-      port: url.port
-        ? parseInt(url.port)
-        : url.protocol === 'https:'
-          ? 443
-          : 80,
-      useSSL: url.protocol === 'https:',
-      accessKey: env.S3_ACCESS_KEY,
-      secretKey: env.S3_SECRET_KEY,
-      region: env.S3_REGION,
-    };
   }
 
   async createBucket(bucketName: string, region?: string): Promise<void> {

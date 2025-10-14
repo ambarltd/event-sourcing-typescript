@@ -1,8 +1,7 @@
 import 'tsconfig-paths/register'; // enable absolute paths
 import 'reflect-metadata';
 import express from 'express';
-import { configureDependencies } from '@/di/container';
-import { scopedContainer } from '@/di/scopedContainer';
+import { configureDependencies } from '@/app/integrations';
 import { log } from '@/common/util/Logger';
 import { handleCommand, CommandController } from '@/app/handleCommand';
 import { Event } from '@/lib/eventSourcing/event';
@@ -26,9 +25,6 @@ async function main() {
   // Create express app
   const app = express();
   app.use(express.json());
-
-  // Add scoped container middleware
-  app.use(scopedContainer);
 
   const command = <T>(endpoint: string, controller: CommandController<T>) =>
     app.post(

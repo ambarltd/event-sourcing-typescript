@@ -1,8 +1,9 @@
+export { EmailService, type EmailServiceConfig };
+
 import nodemailer from 'nodemailer';
 import { log } from '@/common/util/Logger';
-import env from '@/app/environment';
 
-export interface EmailOptions {
+interface EmailOptions {
   to: string | string[];
   subject: string;
   text?: string;
@@ -10,7 +11,7 @@ export interface EmailOptions {
   from?: string;
 }
 
-export interface EmailServiceConfig {
+interface EmailServiceConfig {
   host: string;
   port: number;
   secure: boolean;
@@ -21,12 +22,10 @@ export interface EmailServiceConfig {
   defaultFrom?: string;
 }
 
-export class EmailService {
+class EmailService {
   private transporter: nodemailer.Transporter;
-  private config: EmailServiceConfig;
 
-  constructor(config?: EmailServiceConfig) {
-    this.config = config || this.getRequiredConfig();
+  constructor(private config: EmailServiceConfig) {
     this.transporter = nodemailer.createTransport({
       host: this.config.host,
       port: this.config.port,
@@ -39,19 +38,6 @@ export class EmailService {
       host: this.config.host,
       port: this.config.port,
     });
-  }
-
-  private getRequiredConfig(): EmailServiceConfig {
-    return {
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: true,
-      auth: {
-        user: env.SMTP_USERNAME,
-        pass: env.SMTP_PASSWORD,
-      },
-      defaultFrom: env.SMTP_FROM_EMAIL,
-    };
   }
 
   async sendEmail(options: EmailOptions): Promise<void> {
