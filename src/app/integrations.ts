@@ -1,4 +1,4 @@
-export { type Dependencies, configureDependencies };
+export { type Dependencies, configureDependencies, type Services };
 
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
@@ -7,11 +7,12 @@ import {
   MongoProjectionStore,
   WithProjectionStore,
 } from '@/app/projectionStore';
+import { EmailService } from '@/app/services/email';
+import { FileStorageService } from '@/app/services/file-storage';
 import { ServerApiVersion } from 'mongodb';
 import * as eventStore from '@/app/eventStore';
 import { PostgresEventStore, WithEventStore } from '@/app/eventStore';
 import { schemas } from '@/app/events';
-import { Services, initializeServices } from '@/app/services';
 import { Repositories, initializeRepositories } from '@/app/projections';
 
 type Dependencies = {
@@ -19,6 +20,11 @@ type Dependencies = {
   withProjectionStore: WithProjectionStore;
   services: Services;
   repositories: Repositories;
+};
+
+type Services = {
+  fileStorage: FileStorageService;
+  email: EmailService;
 };
 
 async function configureDependencies(): Promise<Dependencies> {
@@ -85,5 +91,33 @@ async function configureDependencies(): Promise<Dependencies> {
     withProjectionStore,
     services,
     repositories,
+  };
+}
+
+function initializeServices(): Services {
+  const url = new URL(env.S3_ENDPOINT_URL);
+  return {
+    fileStorage: new FileStorageService({
+      endPoint: url.hostname,
+      port: url.port
+        ? parseInt(url.port)
+        : url.protocol === 'https:'
+          ? 443
+          : 80,
+      useSSL: url.protocol === 'https:',
+      accessKey: env.S3_ACCESS_KEY,
+      secretKey: env.S3_SECRET_KEY,
+      region: env.S3_REGION,
+    }),
+    email: new EmailService({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: env.SMTP_USERNAME,
+        pass: env.SMTP_PASSWORD,
+      },
+      defaultFrom: env.SMTP_FROM_EMAIL,
+    }),
   };
 }
