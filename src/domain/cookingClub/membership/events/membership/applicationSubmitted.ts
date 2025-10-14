@@ -2,7 +2,7 @@ export { ApplicationSubmitted };
 
 import { Id, CreationEvent, toSchema } from '@/lib/eventSourcing/event';
 import * as s from '@/lib/json/schema';
-import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
+import { Membership } from '@/domain/cookingClub/membership/aggregate/membership';
 
 const type = 'ApplicationSubmitted' as const;
 const args = s.object({

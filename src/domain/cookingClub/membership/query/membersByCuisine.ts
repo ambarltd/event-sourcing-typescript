@@ -4,7 +4,7 @@ import * as d from '@/lib/json/decoder';
 import { QueryHandler, QueryController } from '@/app/handleQuery';
 import { Future } from '@/lib/Future';
 import { internalServerError } from '@/app/responses';
-import { RepoCuisine } from '@/domain/cookingClub/membership2/projection/membersByCuisine';
+import { RepoCuisine } from '@/domain/cookingClub/membership/projection/membersByCuisine';
 import * as router from '@/lib/router';
 
 type Query = d.Infer<typeof decoder>;
