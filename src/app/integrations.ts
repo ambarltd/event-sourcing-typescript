@@ -1,6 +1,5 @@
-import { container } from 'tsyringe';
-import { EmailService } from '@/common/services/email';
-import { FileStorageService } from '@/common/services/file-storage';
+export { type Dependencies, configureDependencies };
+
 import env from '@/app/environment';
 import { Postgres, defaultPoolSettings } from '@/lib/postgres';
 import { Mongo } from '@/lib/mongo';
@@ -12,52 +11,8 @@ import { ServerApiVersion } from 'mongodb';
 import * as eventStore from '@/app/eventStore';
 import { PostgresEventStore, WithEventStore } from '@/app/eventStore';
 import { schemas } from '@/app/events';
-import { Services } from '@/app/services';
+import { Services, initializeServices } from '@/app/services';
 import { Repositories, initializeRepositories } from '@/app/projections';
-
-function registerEnvironmentVariables() {
-  const postgresConnectionString =
-    `postgresql://${env.EVENT_STORE_USER}:${env.EVENT_STORE_PASSWORD}@` +
-    `${env.EVENT_STORE_HOST}:${env.EVENT_STORE_PORT}/` +
-    `${env.EVENT_STORE_DATABASE_NAME}`;
-  container.register('postgresConnectionString', {
-    useValue: postgresConnectionString,
-  });
-  container.register('eventStoreTable', {
-    useValue: env.EVENT_STORE_CREATE_TABLE_WITH_NAME,
-  });
-  container.register('eventStoreDatabaseName', {
-    useValue: env.EVENT_STORE_DATABASE_NAME,
-  });
-  container.register('eventStoreCreateReplicationUserWithUsername', {
-    useValue: env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_USERNAME,
-  });
-  container.register('eventStoreCreateReplicationUserWithPassword', {
-    useValue: env.EVENT_STORE_CREATE_REPLICATION_USER_WITH_PASSWORD,
-  });
-  container.register('eventStoreCreateReplicationPublication', {
-    useValue: env.EVENT_STORE_CREATE_REPLICATION_PUBLICATION,
-  });
-
-  const mongoConnectionString =
-    `mongodb://${env.MONGODB_PROJECTION_DATABASE_USERNAME}:${env.MONGODB_PROJECTION_DATABASE_PASSWORD}@` +
-    `${env.MONGODB_PROJECTION_HOST}:${env.MONGODB_PROJECTION_PORT}/` +
-    `${env.MONGODB_PROJECTION_DATABASE_NAME}` +
-    '?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000&authSource=admin';
-  const mongoDatabaseName = env.MONGODB_PROJECTION_DATABASE_NAME;
-  container.register('mongoConnectionString', {
-    useValue: mongoConnectionString,
-  });
-  container.register('mongoDatabaseName', { useValue: mongoDatabaseName });
-}
-
-function registerSingletons() {
-  // common/services
-  container.registerSingleton(EmailService);
-  container.registerSingleton(FileStorageService);
-}
-
-function registerScopedServices() {}
 
 type Dependencies = {
   withEventStore: WithEventStore;
@@ -66,11 +21,7 @@ type Dependencies = {
   repositories: Repositories;
 };
 
-export async function configureDependencies(): Promise<Dependencies> {
-  registerEnvironmentVariables();
-  registerSingletons();
-  registerScopedServices();
-
+async function configureDependencies(): Promise<Dependencies> {
   const postgres = new Postgres({
     user: env.EVENT_STORE_USER,
     password: env.EVENT_STORE_PASSWORD,
@@ -127,10 +78,12 @@ export async function configureDependencies(): Promise<Dependencies> {
     initializeRepositories(new MongoProjectionStore(t)),
   );
 
+  const services = initializeServices();
+
   return {
     withEventStore,
     withProjectionStore,
-    services: {},
+    services,
     repositories,
   };
 }
