@@ -15,8 +15,8 @@ import {
   ProjectionController,
 } from '@/app/handleProjection';
 import { Future } from '@/lib/Future';
-import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
-import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/events/membership/applicationSubmitted';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/events/membership/applicationEvaluated';
 import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import * as m from '@/lib/Maybe';
 import {

@@ -5,7 +5,7 @@ import * as s from '@/lib/json/schema';
 import {
   Membership,
   schema_MembershipStatus,
-} from '@/domain/cookingClub/membership2/aggregate/membership';
+} from '@/domain/cookingClub/membership/aggregate/membership';
 
 const type = 'ApplicationEvaluated' as const;
 const args = s.object({

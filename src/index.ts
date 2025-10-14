@@ -12,10 +12,10 @@ import {
 } from '@/app/handleReaction';
 import { handleProjection, ProjectionController } from '@/app/handleProjection';
 import { handleQuery, QueryController } from '@/app/handleQuery';
-import * as membership_command_submitApplication from '@/domain/cookingClub/membership2/command/submitApplication';
-import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership2/reaction/evaluateApplication';
-import * as membership_projection_membersByCuisine from '@/domain/cookingClub/membership2/projection/membersByCuisine';
-import * as membership_query_membersByCuisine from '@/domain/cookingClub/membership2/query/membersByCuisine';
+import * as membership_command_submitApplication from '@/domain/cookingClub/membership/command/submitApplication';
+import * as membership_reaction_evaluateApplication from '@/domain/cookingClub/membership/reaction/evaluateApplication';
+import * as membership_projection_membersByCuisine from '@/domain/cookingClub/membership/projection/membersByCuisine';
+import * as membership_query_membersByCuisine from '@/domain/cookingClub/membership/query/membersByCuisine';
 
 async function main() {
   // Configure dependency injection

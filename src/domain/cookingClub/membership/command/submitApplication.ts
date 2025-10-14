@@ -5,8 +5,8 @@ import { CommandController, CommandHandler } from '@/app/handleCommand';
 import { Future } from '@/lib/Future';
 import { Response, json } from '@/lib/router';
 import { Id } from '@/lib/eventSourcing/event';
-import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
-import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/events/membership/applicationSubmitted';
+import { Membership } from '@/domain/cookingClub/membership/aggregate/membership';
 
 type Command = d.Infer<typeof decoder>;
 const decoder = d.object({

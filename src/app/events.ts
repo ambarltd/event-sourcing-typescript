@@ -4,8 +4,8 @@
 export { schemas };
 
 import { Schemas, CSchema, TSchema } from '@/lib/eventSourcing/eventStore';
-import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
-import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/events/membership/applicationSubmitted';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/events/membership/applicationEvaluated';
 
 const schemas = new Schemas([
   new CSchema(

@@ -4,9 +4,9 @@ import * as d from '@/lib/json/decoder';
 import { accept } from '@/lib/eventSourcing/projection';
 import { ReactionHandler, ReactionController } from '@/app/handleReaction';
 import { Future } from '@/lib/Future';
-import { ApplicationSubmitted } from '@/domain/cookingClub/membership2/events/membership/applicationSubmitted';
-import { ApplicationEvaluated } from '@/domain/cookingClub/membership2/events/membership/applicationEvaluated';
-import { Membership } from '@/domain/cookingClub/membership2/aggregate/membership';
+import { ApplicationSubmitted } from '@/domain/cookingClub/membership/events/membership/applicationSubmitted';
+import { ApplicationEvaluated } from '@/domain/cookingClub/membership/events/membership/applicationEvaluated';
+import { Membership } from '@/domain/cookingClub/membership/aggregate/membership';
 import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import * as m from '@/lib/Maybe';
 

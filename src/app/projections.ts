@@ -11,7 +11,7 @@ export {
 import {
   RepoCuisine,
   RepoMembershipApplication,
-} from '@/domain/cookingClub/membership2/projection/membersByCuisine';
+} from '@/domain/cookingClub/membership/projection/membersByCuisine';
 import { MongoProjectionStore } from '@/app/projectionStore';
 
 // An object containing all initialized repositories.
