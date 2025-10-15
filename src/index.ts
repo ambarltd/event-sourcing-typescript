@@ -46,6 +46,7 @@ async function main() {
       endpoint,
       handleReaction(
         wrapWithEventStore(withEventStore),
+        withProjectionStore,
         services,
         repositories,
         controller,
