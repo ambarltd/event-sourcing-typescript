@@ -6,6 +6,7 @@ import { Mongo } from '@/lib/mongo';
 import {
   MongoProjectionStore,
   WithProjectionStore,
+  Mode,
 } from '@/app/projectionStore';
 import { EmailService } from '@/app/services/email';
 import { FileStorageService } from '@/app/services/file-storage';
@@ -77,11 +78,11 @@ async function configureDependencies(): Promise<Dependencies> {
       f(new PostgresEventStore(t, schemas, table)),
     );
 
-  const withProjectionStore: WithProjectionStore = (onError, f) =>
-    mongo.withTransaction(onError, (t) => f(new MongoProjectionStore(t)));
+  const withProjectionStore: WithProjectionStore = (onError, mode, f) =>
+    mongo.withTransaction(onError, (t) => f(new MongoProjectionStore(t, mode)));
 
   const repositories = await mongo.withTransactionP(async (t) =>
-    initializeRepositories(new MongoProjectionStore(t)),
+    initializeRepositories(new MongoProjectionStore(t, Mode.ReadOnly)),
   );
 
   const services = initializeServices();

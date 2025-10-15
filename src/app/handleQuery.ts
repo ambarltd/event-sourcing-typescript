@@ -7,7 +7,7 @@ import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Projections, Repositories, allProjections } from '@/app/projections';
-import { WithProjectionStore } from '@/app/projectionStore';
+import { WithProjectionStore, Mode } from '@/app/projectionStore';
 import { internalServerError } from '@/app/responses';
 
 type QueryHandler<Query> = (v: {
@@ -29,7 +29,7 @@ function handleQuery<Query>(
 ): express.Handler {
   return router.route((req) =>
     decodeQuery(decoder, req).chain((query) =>
-      withProjectionStore(onProjectionStoreError, (store) =>
+      withProjectionStore(onProjectionStoreError, Mode.ReadOnly, (store) =>
         handler({
           query,
           projections: allProjections(repositories, store),

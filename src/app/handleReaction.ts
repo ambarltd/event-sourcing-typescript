@@ -15,9 +15,9 @@ import { AmbarResponse, ErrorMustRetry } from '@/lib/ambar';
 import { Future } from '@/lib/Future';
 import { Maybe } from '@/lib/Maybe';
 import { decodeEvent } from '@/app/handleProjection';
-
-type Projections = {};
-type Services = {};
+import { Services } from '@/app/integrations';
+import { Repositories, Projections, allProjections } from '@/app/projections';
+import { WithProjectionStore, Mode } from '@/app/projectionStore';
 
 type ReactionController<E extends Event<any>> = {
   decoder: Decoder<Maybe<E>>;
@@ -32,7 +32,7 @@ type ReactionHandler<E> = (v: {
   store: EventStore;
 }) => Future<AmbarResponse, void>;
 
-const onEventStoreError = (err: Error) => new Ambar.ErrorMustRetry(err.message);
+const onStoreError = (err: Error) => new Ambar.ErrorMustRetry(err.message);
 
 type WithStoreGeneric = <E, T>(
   onError: (e: Error) => E,
@@ -47,31 +47,34 @@ const wrapWithEventStore = (
   withEventStore: WithStoreGeneric,
 ): WithStoreConcrete =>
   function (f) {
-    return withEventStore(onEventStoreError, (store) => f(store));
+    return withEventStore(onStoreError, (store) => f(store));
   };
 
 function handleReaction<E extends Event<any>>(
   withEventStore: WithStoreConcrete,
-  projections: Projections,
+  withProjectionStore: WithProjectionStore,
   services: Services,
+  repositories: Repositories,
   { decoder, handler }: ReactionController<E>,
 ): express.Handler {
   return router.route((req) =>
     decodeEvent(decoder, req)
       .chain(({ event, info }) =>
-        withEventStore((store) =>
-          handler({
-            event,
-            info,
-            projections,
-            services,
-            store,
-          }).chainRej((r) =>
-            r instanceof Ambar.Success
-              ? Future.resolve(undefined)
-              : r instanceof Ambar.ErrorMustRetry
-                ? Future.reject(r)
-                : (r satisfies never),
+        withProjectionStore(onStoreError, Mode.ReadOnly, (projectionStore) =>
+          withEventStore((store) =>
+            handler({
+              event,
+              info,
+              projections: allProjections(repositories, projectionStore),
+              services,
+              store,
+            }).chainRej((r) =>
+              r instanceof Ambar.Success
+                ? Future.resolve(undefined)
+                : r instanceof Ambar.ErrorMustRetry
+                  ? Future.reject(r)
+                  : (r satisfies never),
+            ),
           ),
         ),
       )

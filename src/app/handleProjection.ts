@@ -19,6 +19,7 @@ import { Projections, Repositories, allProjections } from '@/app/projections';
 import {
   MongoProjectionStore,
   WithProjectionStore,
+  Mode,
 } from '@/app/projectionStore';
 
 type ProjectionHandler<E> = (v: {
@@ -44,7 +45,7 @@ function handleProjection<E extends Event<any>>(
   return router.route((req) =>
     decodeEvent(decoder, req)
       .chain(({ event, info }) =>
-        withProjectionStore(onProjectionStoreError, (store) =>
+        withProjectionStore(onProjectionStoreError, Mode.ReadWrite, (store) =>
           handler({
             event,
             info,
