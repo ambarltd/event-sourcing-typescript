@@ -8,7 +8,7 @@ import * as router from '@/lib/router';
 import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Repositories, Projections, allProjections } from '@/app/projections';
-import { Services } from '@/app/services';
+import { Services } from '@/app/integrations';
 import { WithProjectionStore } from '@/app/projectionStore';
 import { WithEventStore } from '@/app/eventStore';
 
