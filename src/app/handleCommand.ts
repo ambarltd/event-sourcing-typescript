@@ -9,7 +9,7 @@ import { Future } from '@/lib/Future';
 import { Result, Failure } from '@/lib/Result';
 import { Repositories, Projections, allProjections } from '@/app/projections';
 import { Services } from '@/app/integrations';
-import { WithProjectionStore } from '@/app/projectionStore';
+import { WithProjectionStore, Mode } from '@/app/projectionStore';
 import { WithEventStore } from '@/app/eventStore';
 
 type CommandHandler<Command> = (v: {
@@ -39,7 +39,7 @@ function handleCommand<Command>(
 ): express.Handler {
   return router.route((req) =>
     decodeCommand(decoder, req).chain((command) =>
-      withProjectionStore(onStoreError, (projectionStore) =>
+      withProjectionStore(onStoreError, Mode.ReadOnly, (projectionStore) =>
         withEventStore(onStoreError, (store) =>
           handler({
             command,

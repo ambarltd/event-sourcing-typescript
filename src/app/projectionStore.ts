@@ -5,6 +5,7 @@ export {
   type JsonDoc,
   type RepositoryArgs,
   type WithProjectionStore,
+  Mode,
 };
 
 import { Collection } from 'mongodb';
@@ -53,11 +54,20 @@ const schemaIdAndValue = <T>(schema: Schema<T>): Schema<IdAndDoc<T>> => {
 
 type WithProjectionStore = <E, T>(
   onError: (e: Error) => E,
+  mode: Mode,
   f: (s: MongoProjectionStore) => Future<E, T>,
 ) => Future<E, T>;
 
+enum Mode {
+  ReadOnly = 'ReadOnly',
+  ReadWrite = 'ReadWrite',
+}
+
 class MongoProjectionStore {
-  constructor(private transaction: MongoTransaction) {}
+  constructor(
+    private transaction: MongoTransaction,
+    private readonly readOnly: Mode,
+  ) {}
 
   // Initialize a repository, creating the collection and indexes if needed.
   async createRepository<T>(args: RepositoryArgs<T>): Promise<Repository<T>> {
@@ -122,6 +132,9 @@ class MongoProjectionStore {
     document: T,
     options?: InsertOneOptions,
   ): Promise<void> {
+    if (this.readOnly == Mode.ReadOnly) {
+      throw new Error('Trying to write to read-only projection store');
+    }
     const schema = schemaIdAndValue(repository.values.schema);
     const _id = repository.values.toId(document);
     await this.transaction.insertOne(
@@ -137,6 +150,9 @@ class MongoProjectionStore {
     document: T,
     options: InsertOneOptions = {},
   ): Promise<void> {
+    if (this.readOnly == Mode.ReadOnly) {
+      throw new Error('Trying to write to read-only projection store');
+    }
     const schema = schemaIdAndValue(repository.values.schema);
     const _id = repository.values.toId(document);
     await this.transaction.replaceOne(
