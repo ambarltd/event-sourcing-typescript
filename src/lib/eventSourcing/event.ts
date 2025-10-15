@@ -51,6 +51,10 @@ class Id<A> {
     const cleanId = base64Encoded.replace(/[^A-Za-z0-9]/g, '');
     return cleanId.substring(0, ID_LENGTH);
   }
+
+  compare(other: Id<A>) {
+    return this.value > other.value ? 1 : this.value === other.value ? 0 : -1;
+  }
 }
 
 // Class which all events derive from. Used for type constraints.

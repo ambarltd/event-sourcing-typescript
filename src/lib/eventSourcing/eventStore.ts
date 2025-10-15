@@ -55,7 +55,12 @@ interface EventStore {
   find<T extends Aggregate<T>>(
     cls: Constructor<T>,
     aggregateId: Id<T>,
-  ): Promise<{ aggregate: T; lastEvent: EventInfo }>;
+  ): Promise<T>;
+
+  try_find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<T | null>;
 
   emit<T extends Aggregate<T>>(args: {
     aggregate: Constructor<T>;
@@ -63,7 +68,7 @@ interface EventStore {
     event_id?: Id<Event<T>>;
     correlation_id?: Id<Event<T>>;
     causation_id?: Id<Event<T>>;
-  }): Promise<void>;
+  }): Promise<{ event: Event<T>; info: EventInfo }>;
 
   doesEventAlreadyExist(eventId: Id<Event<any>>): Promise<boolean>;
 }
