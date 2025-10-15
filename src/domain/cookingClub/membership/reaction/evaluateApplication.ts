@@ -19,10 +19,7 @@ const handler: ReactionHandler<Events> = ({
   store,
 }): Future<AmbarResponse, void> =>
   Future.attemptP<void>(async () => {
-    const { aggregate: membership } = await store.find(
-      Membership,
-      event.values.aggregateId,
-    );
+    const membership = await store.find(Membership, event.values.aggregateId);
 
     if (membership.status !== 'Requested') {
       return;

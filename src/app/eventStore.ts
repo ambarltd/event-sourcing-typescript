@@ -19,29 +19,83 @@ import { PostgresTransaction } from '@/lib/postgres';
 import { log } from '@/common/util/Logger';
 import { POSIX } from '@/lib/time';
 import { Future } from '@/lib/Future';
+import { TreeMap } from '@/lib/TreeMap';
+import { Nullable } from '@/lib/Maybe';
 
 type WithEventStore = <E, T>(
   onError: (e: Error) => E,
   f: (s: EventStore) => Future<E, T>,
 ) => Future<E, T>;
 
+type LoadedAggregate<T extends Aggregate<T>> = {
+  aggregate: T;
+  lastEvent: EventInfo;
+};
+
 class PostgresEventStore implements EventStore {
+  // This cache allows us to efficiently call `find` and `try_find` multiple
+  // times within a transaction. This makes reactions and commands simpler as
+  // there is no need to manually apply to the aggregate the transformations
+  // performed by newly emitted events in those functions. Instead we can just
+  // call `find` again and load the latest version of the aggregate for free.
+  private cache: TreeMap<Id<Aggregate<unknown>>, LoadedAggregate<any>>;
+
+  // An instance of this class never lives loger than the transaction
+  // it is associated with.
   constructor(
     private transaction: PostgresTransaction,
     private readonly schemas: Schemas,
     private readonly eventStoreTable: string,
-  ) {}
+  ) {
+    this.cache = TreeMap.new_();
+  }
 
   async find<T extends Aggregate<T>>(
     cls: Constructor<T>,
     aggregateId: Id<T>,
-  ): Promise<{ aggregate: T; lastEvent: EventInfo }> {
-    const events = await this.findAll(aggregateId);
-    const { lastEvent, aggregate } = this.schemas
-      .hydrate(cls, events)
-      .unwrap((e) => e);
+  ): Promise<T> {
+    return (await this._find(cls, aggregateId)).aggregate;
+  }
 
-    return { aggregate, lastEvent };
+  async try_find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<T | null> {
+    const found = await this._try_find(cls, aggregateId);
+    return found ? found.aggregate : null;
+  }
+
+  private async _find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<LoadedAggregate<T>> {
+    const found = await this._try_find(cls, aggregateId);
+
+    if (found == null) {
+      throw new Error(`Unknown aggregate ID ${aggregateId.value}`);
+    }
+
+    return found;
+  }
+
+  private async _try_find<T extends Aggregate<T>>(
+    cls: Constructor<T>,
+    aggregateId: Id<T>,
+  ): Promise<Nullable<LoadedAggregate<T>>> {
+    const found = this.cache_load(aggregateId);
+    if (found !== null) {
+      return found;
+    }
+
+    const events = await this.findAll(aggregateId);
+
+    if (events.length === 0) {
+      return null;
+    }
+
+    const loaded = this.schemas.hydrate(cls, events).unwrap((e) => e);
+    this.cache_save(loaded);
+    return loaded;
   }
 
   async emit<T extends Aggregate<T>>(args: {
@@ -50,13 +104,14 @@ class PostgresEventStore implements EventStore {
     event_id?: Id<Event<T>>;
     correlation_id?: Id<Event<T>>;
     causation_id?: Id<Event<T>>;
-  }): Promise<void> {
+  }): Promise<{ event: Event<T>; info: EventInfo }> {
     const event = args.event;
     const event_id = args.event_id || Id.random();
     let info: EventInfo;
+    let aggregate: T;
     switch (true) {
       case event instanceof CreationEvent: {
-        const aggregate: T = event.createAggregate();
+        aggregate = event.createAggregate();
         info = {
           event_id,
           aggregate_id: aggregate.aggregateId,
@@ -68,16 +123,17 @@ class PostgresEventStore implements EventStore {
         break;
       }
       case event instanceof TransformationEvent: {
-        const { aggregate, lastEvent } = await this.find(
+        const found = await this._find(
           args.aggregate,
           event.values.aggregateId,
         );
+        aggregate = found.aggregate;
         info = {
           event_id,
           aggregate_id: aggregate.aggregateId,
           aggregate_version: aggregate.aggregateVersion + 1,
-          correlation_id: lastEvent.correlation_id,
-          causation_id: lastEvent.causation_id,
+          correlation_id: found.lastEvent.correlation_id,
+          causation_id: found.lastEvent.causation_id,
           recorded_on: POSIX.now(),
         };
         break;
@@ -87,6 +143,8 @@ class PostgresEventStore implements EventStore {
     }
 
     await this.insert<Event<T>>({ info, event });
+    this.cache_save({ aggregate, lastEvent: info });
+    return { event, info };
   }
 
   async doesEventAlreadyExist(eventId: Id<Event<any>>): Promise<boolean> {
@@ -156,6 +214,16 @@ class PostgresEventStore implements EventStore {
     } catch (error) {
       throw new Error(`Failed to save event: ${edata.info.event_id}: ${error}`);
     }
+  }
+
+  private cache_save<T extends Aggregate<T>>(loaded: LoadedAggregate<T>): void {
+    this.cache.set(loaded.aggregate.aggregateId, loaded);
+  }
+
+  private cache_load<T extends Aggregate<T>>(
+    id: Id<T>,
+  ): Nullable<LoadedAggregate<T>> {
+    return this.cache.get(id).asNullable();
   }
 }
 
