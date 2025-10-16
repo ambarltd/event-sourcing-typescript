@@ -165,12 +165,18 @@ class PostgresEventStore implements EventStore {
     aggregateId: Id<T>,
   ): Promise<Json[]> {
     const sql = `
-      SELECT id, event_id, aggregate_id, causation_id, correlation_id,
-             aggregate_version, json_payload, json_metadata, recorded_on, event_name
+      SELECT
+          event_id,
+          aggregate_id,
+          aggregate_version,
+          correlation_id,
+          causation_id,
+          recorded_on,
+          payload,
+          event_name
       FROM ${this.eventStoreTable}
       WHERE aggregate_id = $1
       ORDER BY aggregate_version ASC`;
-
     try {
       const result = await this.transaction.query(sql, [aggregateId.value]);
       return result.rows;
@@ -184,9 +190,15 @@ class PostgresEventStore implements EventStore {
   private async insert<E extends Event<any>>(edata: EventData<E>) {
     const sql = `
       INSERT INTO ${this.eventStoreTable} (
-          event_id, aggregate_id, causation_id, correlation_id,
-          aggregate_version, json_payload, json_metadata, recorded_on, event_name
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+          event_id,
+          aggregate_id,
+          aggregate_version,
+          correlation_id,
+          causation_id,
+          recorded_on,
+          payload,
+          event_name
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
 
     const serialized = this.schemas.encode(edata);
 
@@ -203,7 +215,6 @@ class PostgresEventStore implements EventStore {
       serialized.aggregate_version,
       // @ts-ignore
       serialized.payload,
-      '{}',
       // @ts-ignore
       serialized.recorded_on,
       edata.event.values.type,
@@ -256,12 +267,11 @@ async function initialize({
          event_id TEXT NOT NULL UNIQUE,
          aggregate_id TEXT NOT NULL,
          aggregate_version BIGINT NOT NULL,
-         causation_id TEXT NOT NULL,
          correlation_id TEXT NOT NULL,
+         causation_id TEXT NOT NULL,
          recorded_on TIMESTAMPTZ NOT NULL,
+         payload TEXT NOT NULL,
          event_name TEXT NOT NULL,
-         json_payload TEXT NOT NULL,
-         json_metadata TEXT NOT NULL,
          PRIMARY KEY (id)
      );`,
   );
