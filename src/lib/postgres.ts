@@ -10,6 +10,7 @@ import { Future } from '@/lib/Future';
 
 class PostgresTransaction {
   public closed: boolean = false;
+  private started: boolean = false;
 
   constructor(private connection: PoolClient) {}
 
@@ -60,6 +61,11 @@ class PostgresTransaction {
     query: string | QueryConfig<string[]>,
     values?: string[] | undefined,
   ): Promise<QueryResult<any>> {
+    if (!this.started) {
+      await this.connection.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
+      this.started = true;
+    }
+
     if (this.closed) {
       throw new Error('Querying a closed connection');
     }
