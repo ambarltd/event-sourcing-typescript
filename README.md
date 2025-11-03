@@ -17,13 +17,7 @@ your operating system and containerization tool.
 ```
 git clone git@github.com:ambarltd/event-sourcing-typescript.git
 
-cd event-sourcing-typescript/local-development/docker-scripts/linux # linux + docker
-cd event-sourcing-typescript/local-development/docker-scripts/mac # mac + docker
-cd event-sourcing-typescript\local-development\docker-scripts\windows  # windows + docker
-
-cd event-sourcing-typescript/local-development/podman-scripts/linux # linux + podman
-cd event-sourcing-typescript/local-development/podman-scripts/mac # mac + podman
-cd event-sourcing-typescript\local-development\podman-scripts\windows  # windows + podman
+cd event-sourcing-typescript/development/scripts
 
 # If you're using docker, make sure docker is up and running.
 # If you're using podman, make sure podman is up and running. Also make sure there's an active podman machine.
@@ -34,16 +28,15 @@ echo [automount] >> wsl.conf
 echo 'options = "metadata"' >> wsl.conf
 ```
 
-Then start the application and run the demo.
+Then start the application and run the demo (make sure nothing is running on ports 8080, 8081, and 8082;
+the React Native dev server is a common culprit).
 
 ```
 # linux or mac
-./dev_start.sh
-./dev_demo.sh
+./start.sh
 
 # windows
-.\dev_start.ps1
-.\dev_demo.ps1
+.\start.ps1
 ```
 
 You can then open your browser to:
